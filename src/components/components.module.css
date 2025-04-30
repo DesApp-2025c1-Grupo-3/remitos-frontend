@@ -7,13 +7,8 @@
   flex-direction: column;
   align-items: center;
   position: relative;
-  transition: width 0.3s ease-in-out;
-  width: 180px; /* Default width */
+  width: 240px; /* Incrementado de 180px a 240px */
   overflow-x: hidden; /* Prevent horizontal scroll */
-}
-
-.sidebarCollapsed {
-  width: 60px;
 }
 
 .logoLink {
@@ -25,18 +20,12 @@
 .logoContainer {
   padding: 1rem; /* 16px */
   background-color: white;
-  margin: 1rem; /* 16px */
+  margin: 1rem auto; /* Centrado horizontalmente */
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: width 0.3s ease-in-out, height 0.3s ease-in-out;
   width: 120px; /* Default width */
   height: 120px; /* Default height */
-}
-
-.logoCollapsed {
-  width: 40px;
-  height: 40px;
 }
 
 .logoWrapper {
@@ -68,16 +57,17 @@
 }
 
 .navButton {
-  width: 100%;
+  width: 80%; /* Reducido de 100% a 80% */
   background-color: black;
   color: white;
   padding-top: 0.5rem; /* 8px */
   padding-bottom: 0.5rem; /* 8px */
+  margin-left: 1rem; /* 16px */
+  margin-right: 1rem; /* 16px */
   border-radius: 0.5rem; /* 8px */
   font-size: 0.875rem; /* 14px */
   text-transform: uppercase;
   font-weight: 500;
-  transition: padding 0.3s ease-in-out;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -87,31 +77,6 @@
   box-sizing: border-box; /* Important */
 }
 
-.navButtonCollapsed {
-  padding-left: 0;
-  padding-right: 0;
-}
-
 .navIcon {
   margin: 0 auto;
-}
-
-.collapseButton {
-  position: absolute;
-  right: -0.75rem; /* -12px */
-  top: 5rem; /* 80px */
-  background-color: white;
-  border-radius: 9999px; /* Full rounded */
-  border: 1px solid hsl(0, 0%, 80%); /* Approximate gray-200 */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.2s ease-in-out;
-  cursor: pointer;
-  padding: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.collapseButton:hover {
-  background-color: hsl(0, 0%, 95%); /* Approximate gray-100 */
 }

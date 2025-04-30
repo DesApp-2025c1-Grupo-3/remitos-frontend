@@ -1,0 +1,250 @@
+.container {
+  padding: 2rem;
+}
+
+.titulo {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
+
+.wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.crearBtnContainer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.crearBtn {
+  background: #1F7A3D;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px 0 #0001;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  margin: 0;
+  display: inline-block;
+  letter-spacing: 0.5px;
+}
+
+.crearBtn:hover {
+  background: #17602e;
+  box-shadow: 0 4px 10px 0 #0002;
+  transform: translateY(-1px) scale(1.02);
+}
+
+.formBtn {
+  background: #1F7A3D;
+  color: #fff;
+  border: none;
+  border-radius: 1.5rem;
+  padding: 0.7rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px 0 #0002;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  margin: 0 auto;
+  display: block;
+  letter-spacing: 0.5px;
+}
+
+.formBtn:hover {
+  background: #17602e;
+  box-shadow: 0 6px 16px 0 #0003;
+  transform: translateY(-2px) scale(1.03);
+}
+
+.lista {
+  background: #d1d5db;
+  border-radius: 0.5rem;
+  padding: 2rem 1rem 1rem 1rem;
+}
+
+.item {
+  background: white;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.accionesBtn {
+  background: #1F7A3D;
+  color: #fff;
+  border: none;
+  border-radius: 1.2rem;
+  padding: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 6px 0 #0001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.accionesBtn:hover {
+  background: #17602e;
+}
+
+.accionesBtn svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.accionesBtn.delete {
+  background: #dc2626;
+}
+
+.accionesBtn.delete:hover {
+  background: #b91c1c;
+}
+
+.volverBtn {
+  background: none;
+  border: none;
+  color: #1F7A3D;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 0.25rem;
+  transition: background 0.2s;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.volverBtn:hover {
+  background: #e5e7eb;
+}
+
+.volverBtn svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.inputCenter {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.input {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  display: block;
+  background: #e5e7eb;
+  border: none;
+  border-radius: 0.35rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  color: #222;
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-shadow: none;
+  max-width: 400px;
+}
+
+.input:focus {
+  border: 1.5px solid #1F7A3D;
+  box-shadow: 0 0 0 2px #1F7A3D22;
+  background: #fff;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 2rem 2rem 1rem 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  align-items: center;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.label {
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  color: #222;
+  font-size: 1rem;
+  text-align: left;
+  width: 100%;
+}
+
+.botonera {
+  display: flex;
+  justify-content: center;
+  margin-top: 2.5rem;
+  width: 100%;
+}
+
+.tablaContenedor {
+  background: #e5e7eb;
+  border-radius: 1rem;
+  padding: 2rem 1rem 1rem 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 1rem;
+}
+
+.tabla th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  background: transparent;
+  color: #222;
+  font-size: 1rem;
+}
+
+.tabla td {
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  color: #222;
+  vertical-align: middle;
+}
+
+.tabla tr {
+  box-shadow: 0 1px 4px 0 #0001;
+}
+
+.tabla .acciones {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+} 
