@@ -5,37 +5,41 @@ import { useNavigate, useParams } from "react-router-dom"
 import styles from "./destinos.module.css"
 import { destinosService } from "../../services/destinosService"
 import { ArrowLeft } from "lucide-react"
+import { ContactosForm, Contacto } from "../../components/ContactosForm/ContactosForm"
 
 export default function EditarDestino() {
   const navigate = useNavigate()
-  const params = useParams()
-  const id = Number(params.id)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-
+  const { id } = useParams()
   const [formData, setFormData] = useState({
     nombre: "",
     pais: "",
     provincia: "",
     localidad: "",
     direccion: "",
+    contactos: [] as Contacto[]
   })
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchDestino = async () => {
+    const cargarDestino = async () => {
       try {
-        const destino = await destinosService.getDestinoById(id)
-        setFormData(destino)
-        setError(null)
+        if (id) {
+          const destino = await destinosService.getDestinoById(Number(id))
+          setFormData({
+            ...destino,
+            contactos: destino.contactos || []
+          })
+        }
       } catch (err) {
-        setError("Error al cargar el destino")
+        setError("Error al cargar el destino. Por favor, intente nuevamente.")
         console.error(err)
       } finally {
         setLoading(false)
       }
     }
 
-    fetchDestino()
+    cargarDestino()
   }, [id])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,21 +47,28 @@ export default function EditarDestino() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleContactosChange = (contactos: Contacto[]) => {
+    setFormData(prev => ({ ...prev, contactos }))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     
     try {
-      await destinosService.updateDestino(id, formData)
-      navigate("/destinos")
+      if (id) {
+        await destinosService.updateDestino(Number(id), formData)
+        navigate("/destinos")
+      }
     } catch (err) {
       setError("Error al actualizar el destino. Por favor, intente nuevamente.")
       console.error(err)
     }
   }
 
-  if (loading) return <div className={styles.container}>Cargando...</div>
-  if (error) return <div className={styles.container}>{error}</div>
+  if (loading) {
+    return <div className={styles.loading}>Cargando...</div>
+  }
 
   return (
     <div className={styles.container}>
@@ -124,9 +135,15 @@ export default function EditarDestino() {
               required
             />
           </div>
+
+          <ContactosForm 
+            contactos={formData.contactos}
+            onContactosChange={handleContactosChange}
+          />
+
           <div className={styles.botonera}>
             <button type="submit" className={styles.formBtn}>
-              Editar Destino
+              Guardar Cambios
             </button>
           </div>
         </form>

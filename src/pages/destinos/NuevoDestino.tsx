@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import styles from "./destinos.module.css"
 import { destinosService } from "../../services/destinosService"
 import { ArrowLeft } from "lucide-react"
+import { ContactosForm, Contacto } from "../../components/ContactosForm/ContactosForm"
 
 export default function NuevoDestino() {
   const navigate = useNavigate()
@@ -14,12 +15,17 @@ export default function NuevoDestino() {
     provincia: "",
     localidad: "",
     direccion: "",
+    contactos: [] as Contacto[]
   })
   const [error, setError] = useState<string | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleContactosChange = (contactos: Contacto[]) => {
+    setFormData(prev => ({ ...prev, contactos }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -100,6 +106,12 @@ export default function NuevoDestino() {
               required
             />
           </div>
+
+          <ContactosForm 
+            contactos={formData.contactos}
+            onContactosChange={handleContactosChange}
+          />
+
           <div className={styles.botonera}>
             <button type="submit" className={styles.formBtn}>
               Cargar Destino
