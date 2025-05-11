@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styles from "./clientes.module.css";
 import { clientesService } from "../../services/clientesService";
-import { Pencil, Trash2 } from "lucide-react";  // Importa los íconos
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([]);
@@ -23,68 +23,79 @@ export default function Clientes() {
         setLoading(false);
       }
     };
+
     fetchClientes();
   }, []);
 
   const handleDelete = async (id) => {
-    try {
-      await clientesService.deleteCliente(id);
-      setClientes((prev) => prev.filter((cliente) => cliente.id !== id));
-    } catch (err) {
-      console.error("Error al eliminar cliente", err);
+    if (window.confirm("¿Estás seguro de que deseas eliminar este cliente?")) {
+      try {
+        await clientesService.deleteCliente(id);
+        setClientes(clientes.filter(cliente => cliente.id !== id));
+      } catch (err) {
+        setError("Error al eliminar el cliente");
+        console.error(err);
+      }
     }
   };
 
-  if (loading) return <p>Cargando clientes...</p>;
-  if (error) return <p>{error}</p>;
+  if (loading) return <div className={styles.container}>Cargando...</div>;
+  if (error) return <div className={styles.container}>{error}</div>;
 
   return (
-    <div className={styles.contenedor}>
-      <div className={styles.encabezado}>
-        <h1 className={styles.titulo}>Clientes</h1>
-        <Link to="/clientes/nuevo">
-          <button className={styles.botonCrear}>Crear Cliente</button>
-        </Link>
-      </div>
-
-      <div className={styles.listaClientes}>
-        {clientes.map((cliente) => (
-          <div key={cliente.id} className={styles.clienteCard}>
-            <div className={styles.clienteContenido}>
-              <div>
-                <p className={styles.clienteTexto}>{cliente.razonSocial}</p>
-                <p className={styles.clienteSecundario}>
-                  CUIT/RUIT: {cliente.cuit_rut} | Tipo: {cliente.tipoEmpresa}
-                </p>
-                <p className={styles.clienteSecundario}>Dirección: {cliente.direccion}</p>
-                <div className={styles.contactos}>
-                  <p className="text-sm font-medium">
-                    Contactos ({cliente.contactos?.length ?? 0}):
-                  </p>
-                  {cliente.contactos?.map((contacto, index) => (
-                    <p key={index} className={styles.contactoItem}>
-                      {contacto.nombre} - {contacto.email} - {contacto.telefono}
-                    </p>
-                  ))}
-                </div>
-              </div>
-              <div className={styles.botonGrupo}>
-                <button
-                  className={`${styles.botonAccion} ${styles.botonBorrar}`}
-                  onClick={() => handleDelete(cliente.id)}
-                  title="Borrar"
-                >
-                  <Trash2 /> {/* Ícono de Borrar */}
-                </button>
-                <Link to={`/clientes/editar/${cliente.id}`}>
-                  <button className={`${styles.botonAccion} ${styles.botonEditar}`} title="Editar">
-                    <Pencil /> {/* Ícono de Editar */}
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        ))}
+    <div className={styles.container}>
+      <button className={styles.volverBtn} onClick={() => navigate(-1)}>
+        <ArrowLeft />
+        Volver
+      </button>
+      <h1 className={styles.titulo}>Clientes</h1>
+      <div className={styles.wrapper}>
+        <div className={styles.crearBtnContainer}>
+          <button className={styles.crearBtn} onClick={() => navigate("/clientes/nuevo")}>
+            Crear Cliente
+          </button>
+        </div>
+        <div className={styles.tablaContenedor}>
+          <table className={styles.tabla}>
+            <thead>
+              <tr>
+                <th>Razón Social</th>
+                <th>CUIT/RUT</th>
+                <th>Tipo</th>
+                <th>Dirección</th>
+                <th style={{ textAlign: "center" }}>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {clientes.map((cliente) => (
+                <tr key={cliente.id}>
+                  <td>{cliente.razonSocial}</td>
+                  <td>{cliente.cuit_rut}</td>
+                  <td>{cliente.tipoEmpresa}</td>
+                  <td>{cliente.direccion}</td>
+                  <td>
+                    <div className={styles.acciones}>
+                      <button 
+                        className={styles.accionesBtn} 
+                        onClick={() => navigate(`/clientes/editar/${cliente.id}`)}
+                        title="Editar"
+                      >
+                        <Pencil />
+                      </button>
+                      <button 
+                        className={`${styles.accionesBtn} ${styles.delete}`} 
+                        onClick={() => handleDelete(cliente.id)}
+                        title="Eliminar"
+                      >
+                        <Trash2 />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

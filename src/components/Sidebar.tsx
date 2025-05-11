@@ -8,11 +8,14 @@ export default function Sidebar() {
   return (
     <div className={styles.sidebar}>
       <Link to="/" className={styles.logoLink}>
-        <div className={styles.logoContainer}>
           <div className={styles.logoWrapper}>
-            <img src="/logo.png" alt="Logística ACME" className={styles.logoImage} />
+            <img 
+              src="/logo.png" 
+              alt="Logística ACME" 
+              className={styles.logoImage}
+              style={{ background: 'transparent' }}
+            />
           </div>
-        </div>
       </Link>
 
       <div className={styles.navLinks}>

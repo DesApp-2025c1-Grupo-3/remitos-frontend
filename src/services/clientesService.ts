@@ -1,42 +1,53 @@
-//import axios from 'axios';
+import axios from 'axios';
 
 const API_URL = 'http://localhost:3000/api'; // Ajusta la URL según tu configuración
 
 export interface Cliente {
     id: number;
-    razonSocial: string,
-    cuit_rut: string,
-    direccion: string,
-    tipoEmpresa: string,
-    contactos
+    razonSocial: string;
+    cuit_rut: string;
+    tipoEmpresa: string;
+    direccion: string;
+    contactos: Contacto[];
+}
+
+export interface Contacto {
+    nombre: string;
+    email: string;
+    telefono: string;
 }
 
 // Datos mock para desarrollo
 const mockClientes: Cliente[] = [
   {
     id: 1,
-    razonSocial: "La Perla SRL",
-    cuit_rut: "30-1245437-5",
-    direccion: "Maipu 4071",
-    tipoEmpresa: "Privada",
+    razonSocial: "Empresa A S.A.",
+    cuit_rut: "30-12345678-9",
+    tipoEmpresa: "S.A.",
+    direccion: "Av. Rivadavia 1234",
     contactos: [
-      { nombre: "Juan Pérez", email: "juan@example.com", telefono: "123456789" },
-      { nombre: "Ana López", email: "ana@example.com", telefono: "987654321" }
+      {
+        nombre: "Juan Pérez",
+        email: "juan@empresaa.com",
+        telefono: "11-1234-5678"
+      }
     ]
   },
   {
     id: 2,
-    razonSocial: "Distribuidora Central",
-    cuit_rut: "30-9876543-2",
-    direccion: "Av. San Martín 3456",
-    tipoEmpresa: "Pública",
+    razonSocial: "Comercio B S.R.L.",
+    cuit_rut: "30-87654321-0",
+    tipoEmpresa: "S.R.L.",
+    direccion: "Calle Corrientes 567",
     contactos: [
-      { nombre: "Carlos Gómez", email: "carlos@example.com", telefono: "111222333" }
+      {
+        nombre: "María García",
+        email: "maria@comerciob.com",
+        telefono: "11-8765-4321"
+      }
     ]
   }
 ];
-
-
 
 export const clientesService = {
   // Obtener todos los clientes
@@ -58,7 +69,7 @@ export const clientesService = {
     try {
       // Simulamos un delay de la API
       await new Promise(resolve => setTimeout(resolve, 500));
-      const cliente = mockClientes.find(d => d.id === id);
+      const cliente = mockClientes.find(c => c.id === id);
       if (!cliente) throw new Error('Cliente no encontrado');
       return cliente;
       // const response = await axios.get(`${API_URL}/cliente/${id}`);
@@ -76,7 +87,7 @@ export const clientesService = {
       await new Promise(resolve => setTimeout(resolve, 500));
       const newCliente = {
         ...cliente,
-        id: Math.max(...mockClientes.map(d => d.id)) + 1
+        id: Math.max(...mockClientes.map(c => c.id)) + 1
       };
       mockClientes.push(newCliente);
       return newCliente;
@@ -89,11 +100,11 @@ export const clientesService = {
   },
 
   // Actualizar un cliente existente
-  async updateCliente(id: number, cliente:Partial<Cliente>): Promise<Cliente> {
+  async updateCliente(id: number, cliente: Partial<Cliente>): Promise<Cliente> {
     try {
       // Simulamos un delay de la API
       await new Promise(resolve => setTimeout(resolve, 500));
-      const index = mockClientes.findIndex(d => d.id === id);
+      const index = mockClientes.findIndex(c => c.id === id);
       if (index === -1) throw new Error('Cliente no encontrado');
       
       mockClientes[index] = {
@@ -114,7 +125,7 @@ export const clientesService = {
     try {
       // Simulamos un delay de la API
       await new Promise(resolve => setTimeout(resolve, 500));
-      const index = mockClientes.findIndex(d => d.id === id);
+      const index = mockClientes.findIndex(c => c.id === id);
       if (index === -1) throw new Error('Cliente no encontrado');
       mockClientes.splice(index, 1);
       // await axios.delete(`${API_URL}/cliente/${id}`);
