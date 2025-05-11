@@ -1,31 +1,31 @@
 /* Sidebar.module.css */
 
 .sidebar {
-  background-color: hsl(140, 100%, 25%); /* Approximate green-700 */
+  background-color: hsl(140, 100%, 25%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  width: 240px; /* Incrementado de 180px a 240px */
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  width: 240px;
+  overflow-x: hidden;
 }
 
 .logoLink {
   display: block;
   text-decoration: none;
-  width: 100%; /* Ensure Link takes full width */
+  width: 100%;
 }
 
 .logoContainer {
-  padding: 1rem; /* 16px */
+  padding: 1rem;
   background-color: white;
-  margin: 1rem auto; /* Centrado horizontalmente */
+  margin: 1rem auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 120px; /* Default width */
-  height: 120px; /* Default height */
+  width: 120px;
+  height: 120px;
 }
 
 .logoWrapper {
@@ -56,15 +56,15 @@
 }
 
 .navButton {
-  width: 80%; /* Reducido de 100% a 80% */
+  width: 80%;
   background-color: black;
   color: white;
-  padding-top: 0.5rem; /* 8px */
-  padding-bottom: 0.5rem; /* 8px */
-  margin-left: 1rem; /* 16px */
-  margin-right: 1rem; /* 16px */
-  border-radius: 0.5rem; /* 8px */
-  font-size: 0.875rem; /* 14px */
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
   text-transform: uppercase;
   font-weight: 500;
   display: flex;
@@ -73,7 +73,7 @@
   border: none;
   cursor: pointer;
   height: 40px;
-  box-sizing: border-box; /* Important */
+  box-sizing: border-box;
 }
 
 .navIcon {
