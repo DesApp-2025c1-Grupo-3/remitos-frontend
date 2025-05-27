@@ -45,7 +45,8 @@
   width: 100%;
 }
 
-.input {
+.input,
+select.input {
   width: 100%;
   min-width: 0;
   margin: 0;
@@ -59,6 +60,8 @@
   transition: border 0.2s, box-shadow 0.2s;
   outline: none;
   box-shadow: none;
+  box-sizing: border-box;
+  height: 44px;
 }
 
 .input:focus {

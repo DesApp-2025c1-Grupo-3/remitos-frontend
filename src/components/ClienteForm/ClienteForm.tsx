@@ -54,20 +54,19 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
           />
         </div>
         <div className={styles.campo}>
-          <label className={styles.label}>Tipo de Empresa</label>
+          <label className={styles.label}>Tipo de cliente</label>
           <select
             name="tipoEmpresa"
             value={formData.tipoEmpresa}
             onChange={onChange}
             className={styles.input}
             required
+            style={{ width: '100%', maxWidth: 400, minWidth: 0, padding: '0.5rem 1rem', boxSizing: 'border-box', height: 44 }}
           >
-            <option value="">Seleccionar tipo</option>
-            <option value="S.A.">S.A.</option>
-            <option value="S.R.L.">S.R.L.</option>
-            <option value="S.A.S.">S.A.S.</option>
-            <option value="S.C.">S.C.</option>
-            <option value="Otro">Otro</option>
+            <option value="">Seleccionar tipo de cliente</option>
+            <option value="empresa privada">Empresa privada</option>
+            <option value="organismo estatal">Organismo estatal</option>
+            <option value="particular">Particular</option>
           </select>
         </div>
         <div className={styles.campo}>
