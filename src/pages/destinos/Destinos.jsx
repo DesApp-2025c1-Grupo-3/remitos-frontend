@@ -3,44 +3,58 @@ import { useNavigate } from "react-router-dom";
 import styles from "./destinos.module.css";
 import { destinosService } from "../../services/destinosService";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { useNotification } from "../../contexts/NotificationContext";
+import { ConfirmModal } from '../../components/ConfirmModal/ConfirmModal';
 
 export default function Destinos() {
   const [destinos, setDestinos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
+  const [destinoToDelete, setDestinoToDelete] = useState(null);
 
   useEffect(() => {
     const fetchDestinos = async () => {
       try {
         const data = await destinosService.getDestinos();
         setDestinos(data);
-        setError(null);
       } catch (err) {
-        setError("Error al cargar los destinos");
         console.error(err);
+        showNotification('Error al cargar los destinos', 'error');
       } finally {
         setLoading(false);
       }
     };
 
     fetchDestinos();
-  }, []);
+  }, [showNotification]);
 
-  const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar este destino?")) {
-      try {
-        await destinosService.deleteDestino(id);
-        setDestinos(destinos.filter(destino => destino.id !== id));
-      } catch (err) {
-        setError("Error al eliminar el destino");
-        console.error(err);
-      }
+  const handleDeleteClick = (destino) => {
+    setDestinoToDelete(destino);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await destinosService.deleteDestino(destinoToDelete.id);
+      showNotification('Destino eliminado exitosamente', 'success');
+      const fetchDestinos = async () => {
+        const data = await destinosService.getDestinos();
+        setDestinos(data);
+      };
+      fetchDestinos();
+    } catch (err) {
+      console.error(err);
+      showNotification('Error al eliminar el destino', 'error');
+    } finally {
+      setDestinoToDelete(null);
     }
   };
 
+  const handleDeleteCancel = () => {
+    setDestinoToDelete(null);
+  };
+
   if (loading) return <div className={styles.container}>Cargando...</div>;
-  if (error) return <div className={styles.container}>{error}</div>;
 
   return (
     <div className={styles.container}>
@@ -86,7 +100,7 @@ export default function Destinos() {
                       </button>
                       <button 
                         className={`${styles.accionesBtn} ${styles.delete}`} 
-                        onClick={() => handleDelete(destino.id)}
+                        onClick={() => handleDeleteClick(destino)}
                         title="Eliminar"
                       >
                         <Trash2 />
@@ -99,6 +113,23 @@ export default function Destinos() {
           </table>
         </div>
       </div>
+
+      {destinoToDelete && (
+        <ConfirmModal
+          isOpen={!!destinoToDelete}
+          title="Confirmar eliminación"
+          message={
+            <div style={{ textAlign: 'center' }}>
+              <div>¿Estás seguro que deseas eliminar el destino "{destinoToDelete.name}"?</div>
+              <div style={{ marginTop: '0.5rem' }}>
+                Esta acción no se puede deshacer
+              </div>
+            </div>
+          }
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+        />
+      )}
     </div>
   );
 } 

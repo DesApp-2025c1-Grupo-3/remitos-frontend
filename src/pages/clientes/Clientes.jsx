@@ -1,46 +1,60 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import styles from "./clientes.module.css";
 import { clientesService } from "../../services/clientesService";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { useNotification } from "../../contexts/NotificationContext";
+import { ConfirmModal } from '../../components/ConfirmModal/ConfirmModal';
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
+  const [clienteToDelete, setClienteToDelete] = useState(null);
 
   useEffect(() => {
     const fetchClientes = async () => {
       try {
         const data = await clientesService.getClientes();
         setClientes(data);
-        setError(null);
       } catch (err) {
-        setError("Error al cargar los clientes");
         console.error(err);
+        showNotification('Error al cargar los clientes', 'error');
       } finally {
         setLoading(false);
       }
     };
 
     fetchClientes();
-  }, []);
+  }, [showNotification]);
 
-  const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar este cliente?")) {
-      try {
-        await clientesService.deleteCliente(id);
-        setClientes(clientes.filter(cliente => cliente.id !== id));
-      } catch (err) {
-        setError("Error al eliminar el cliente");
-        console.error(err);
-      }
+  const handleDeleteClick = (cliente) => {
+    setClienteToDelete(cliente);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await clientesService.deleteCliente(clienteToDelete.id);
+      showNotification('Cliente eliminado exitosamente', 'success');
+      const fetchClientes = async () => {
+        const data = await clientesService.getClientes();
+        setClientes(data);
+      };
+      fetchClientes();
+    } catch (err) {
+      console.error(err);
+      showNotification('Error al eliminar el cliente', 'error');
+    } finally {
+      setClienteToDelete(null);
     }
   };
 
+  const handleDeleteCancel = () => {
+    setClienteToDelete(null);
+  };
+
   if (loading) return <div className={styles.container}>Cargando...</div>;
-  if (error) return <div className={styles.container}>{error}</div>;
 
   return (
     <div className={styles.container}>
@@ -51,9 +65,9 @@ export default function Clientes() {
       <h1 className={styles.titulo}>Clientes</h1>
       <div className={styles.wrapper}>
         <div className={styles.crearBtnContainer}>
-          <button className={styles.crearBtn} onClick={() => navigate("/clientes/nuevo")}>
+          <Link to="/clientes/nuevo" className={styles.crearBtn}>
             Crear Cliente
-          </button>
+          </Link>
         </div>
         <div className={styles.tablaContenedor}>
           <table className={styles.tabla}>
@@ -75,16 +89,16 @@ export default function Clientes() {
                   <td>{cliente.direccion}</td>
                   <td>
                     <div className={styles.acciones}>
-                      <button 
-                        className={styles.accionesBtn} 
-                        onClick={() => navigate(`/clientes/editar/${cliente.id}`)}
+                      <Link 
+                        to={`/clientes/editar/${cliente.id}`}
+                        className={styles.accionesBtn}
                         title="Editar"
                       >
                         <Pencil />
-                      </button>
+                      </Link>
                       <button 
                         className={`${styles.accionesBtn} ${styles.delete}`} 
-                        onClick={() => handleDelete(cliente.id)}
+                        onClick={() => handleDeleteClick(cliente)}
                         title="Eliminar"
                       >
                         <Trash2 />
@@ -97,6 +111,23 @@ export default function Clientes() {
           </table>
         </div>
       </div>
+
+      {clienteToDelete && (
+        <ConfirmModal
+          isOpen={!!clienteToDelete}
+          title="Confirmar eliminación"
+          message={
+            <div style={{ textAlign: 'center' }}>
+              <div>¿Estás seguro que deseas eliminar el cliente "{clienteToDelete.razonSocial}"?</div>
+              <div style={{ marginTop: '0.5rem' }}>
+                Esta acción no se puede deshacer
+              </div>
+            </div>
+          }
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+        />
+      )}
     </div>
   );
 }

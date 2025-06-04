@@ -7,10 +7,12 @@ import { clientesService } from "../../services/clientesService"
 import { ArrowLeft } from "lucide-react"
 import { ClienteForm, ClienteFormData } from "../../components/ClienteForm/ClienteForm"
 import { Contacto } from "../../types/contacto"
+import { useNotification } from "../../contexts/NotificationContext"
 
 export default function EditarCliente() {
   const navigate = useNavigate()
   const { id } = useParams()
+  const { showNotification } = useNotification()
   const [formData, setFormData] = useState<ClienteFormData>({
     razonSocial: null,
     cuit_rut: null,
@@ -18,7 +20,6 @@ export default function EditarCliente() {
     direccion: "",
     contactos: []
   })
-  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -35,15 +36,15 @@ export default function EditarCliente() {
           })
         }
       } catch (err) {
-        setError("Error al cargar el cliente. Por favor, intente nuevamente.")
         console.error(err)
+        showNotification('Error al cargar el cliente. Por favor, intente nuevamente.', 'error')
       } finally {
         setLoading(false)
       }
     }
 
     cargarCliente()
-  }, [id])
+  }, [id, showNotification])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -56,7 +57,6 @@ export default function EditarCliente() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
     
     try {
       if (id) {
@@ -65,11 +65,12 @@ export default function EditarCliente() {
         const clienteData = { razonSocial, cuit_rut, tipoEmpresa, direccion }
         
         await clientesService.updateCliente(Number(id), clienteData)
+        showNotification('Cliente actualizado exitosamente', 'success')
         navigate("/clientes")
       }
     } catch (err) {
-      setError("Error al actualizar el cliente. Por favor, intente nuevamente.")
       console.error(err)
+      showNotification('Error al actualizar el cliente. Por favor, intente nuevamente.', 'error')
     }
   }
 
@@ -91,7 +92,7 @@ export default function EditarCliente() {
         onChange={handleChange}
         onContactosChange={handleContactosChange}
         submitButtonText="Guardar Cambios"
-        error={error}
+        error={null}
       />
     </div>
   )

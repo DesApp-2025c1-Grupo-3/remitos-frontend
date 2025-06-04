@@ -4,9 +4,11 @@ import { remitosService } from "../../services/remitosService";
 import { clientesService } from "../../services/clientesService";
 import { destinosService } from "../../services/destinosService";
 import { RemitoForm } from "../../components/RemitoForm/RemitoForm";
+import { useNotification } from "../../contexts/NotificationContext";
 
 export default function NuevoRemito() {
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
   const [formData, setFormData] = useState({
     numero: "",
     cliente: "",
@@ -23,14 +25,25 @@ export default function NuevoRemito() {
     cantidadBobinas: "",
     cantidadTambores: "",
   });
-  const [error, setError] = useState(null);
   const [clientes, setClientes] = useState([]);
   const [destinos, setDestinos] = useState([]);
 
   useEffect(() => {
-    clientesService.getClientes().then(setClientes);
-    destinosService.getDestinos().then(setDestinos);
-  }, []);
+    const fetchData = async () => {
+      try {
+        const [clientesData, destinosData] = await Promise.all([
+          clientesService.getClientes(),
+          destinosService.getDestinos()
+        ]);
+        setClientes(clientesData);
+        setDestinos(destinosData);
+      } catch (err) {
+        console.error(err);
+        showNotification('Error al cargar los datos iniciales', 'error');
+      }
+    };
+    fetchData();
+  }, [showNotification]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,12 +52,13 @@ export default function NuevoRemito() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
     try {
       await remitosService.createRemito(formData);
+      showNotification('Remito creado exitosamente', 'success');
       navigate("/remitos");
-    } catch {
-      setError("Error al crear el remito. Por favor, intente nuevamente.");
+    } catch (err) {
+      console.error(err);
+      showNotification('Error al crear el remito. Por favor, intente nuevamente.', 'error');
     }
   };
 
@@ -56,7 +70,6 @@ export default function NuevoRemito() {
         onSubmit={handleSubmit}
         onChange={handleChange}
         submitButtonText="Cargar Remito"
-        error={error}
         clientes={clientes}
         destinos={destinos}
         onNuevoCliente={() => navigate("/clientes/nuevo")}

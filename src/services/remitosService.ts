@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001'; // Actualizado para coincidir con otros servicios
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_REMITOS === 'true';
+
+// Configuración de axios para incluir la API key en todas las peticiones
+axios.defaults.headers.common['X-API-Key'] = import.meta.env.VITE_API_KEY;
 
 export interface Remito {
   id: number;
@@ -63,47 +67,87 @@ const mockRemitos: Remito[] = [
 
 export const remitosService = {
   async getRemitos(): Promise<Remito[]> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return mockRemitos;
-    // const response = await axios.get(`${API_URL}/remitos`);
-    // return response.data;
+    try {
+      if (USE_MOCK_DATA) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        return mockRemitos;
+      }
+      const response = await axios.get(`${API_URL}/remitos`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener remitos:', error);
+      throw error;
+    }
   },
+
   async getRemitoById(id: number): Promise<Remito> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const remito = mockRemitos.find(r => r.id === id);
-    if (!remito) throw new Error('Remito no encontrado');
-    return remito;
-    // const response = await axios.get(`${API_URL}/remito/${id}`);
-    // return response.data;
+    try {
+      if (USE_MOCK_DATA) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const remito = mockRemitos.find(r => r.id === id);
+        if (!remito) throw new Error('Remito no encontrado');
+        return remito;
+      }
+      const response = await axios.get(`${API_URL}/remito/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error al obtener remito con ID ${id}:`, error);
+      throw error;
+    }
   },
+
   async createRemito(remito: Omit<Remito, 'id'>): Promise<Remito> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const newRemito = {
-      ...remito,
-      id: Math.max(...mockRemitos.map(r => r.id)) + 1
-    };
-    mockRemitos.push(newRemito);
-    return newRemito;
-    // const response = await axios.post(`${API_URL}/remito`, remito);
-    // return response.data;
+    try {
+      if (USE_MOCK_DATA) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const newRemito = {
+          ...remito,
+          id: Math.max(...mockRemitos.map(r => r.id)) + 1
+        };
+        mockRemitos.push(newRemito);
+        return newRemito;
+      }
+      const response = await axios.post(`${API_URL}/remito`, remito);
+      return response.data;
+    } catch (error) {
+      console.error('Error al crear remito:', error);
+      throw error;
+    }
   },
+
   async updateRemito(id: number, remito: Partial<Remito>): Promise<Remito> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const index = mockRemitos.findIndex(r => r.id === id);
-    if (index === -1) throw new Error('Remito no encontrado');
-    mockRemitos[index] = {
-      ...mockRemitos[index],
-      ...remito
-    };
-    return mockRemitos[index];
-    // const response = await axios.put(`${API_URL}/remito/${id}`, remito);
-    // return response.data;
+    try {
+      if (USE_MOCK_DATA) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const index = mockRemitos.findIndex(r => r.id === id);
+        if (index === -1) throw new Error('Remito no encontrado');
+        mockRemitos[index] = {
+          ...mockRemitos[index],
+          ...remito
+        };
+        return mockRemitos[index];
+      }
+      const response = await axios.put(`${API_URL}/remito/${id}`, remito);
+      return response.data;
+    } catch (error) {
+      console.error(`Error al actualizar remito con ID ${id}:`, error);
+      throw error;
+    }
   },
+
   async deleteRemito(id: number): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const index = mockRemitos.findIndex(r => r.id === id);
-    if (index === -1) throw new Error('Remito no encontrado');
-    mockRemitos.splice(index, 1);
-    // await axios.delete(`${API_URL}/remito/${id}`);
+    try {
+      if (USE_MOCK_DATA) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const index = mockRemitos.findIndex(r => r.id === id);
+        if (index === -1) throw new Error('Remito no encontrado');
+        mockRemitos.splice(index, 1);
+        return;
+      }
+      await axios.delete(`${API_URL}/remito/${id}`);
+    } catch (error) {
+      console.error(`Error al eliminar remito con ID ${id}:`, error);
+      throw error;
+    }
   }
 }; 

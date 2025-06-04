@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import styles from '../Form.module.css';
+import { Upload } from 'lucide-react';
 
 export interface RemitoFormData {
   numero: string;
@@ -50,9 +51,39 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
   const [busquedaDestino, setBusquedaDestino] = useState('');
   const [campoCliente, setCampoCliente] = useState<'razonSocial' | 'cuit_rut' | 'direccion'>('razonSocial');
   const [campoDestino, setCampoDestino] = useState<'nombre' | 'provincia' | 'direccion'>('nombre');
+  const [isDragging, setIsDragging] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
 
   const clientesFiltrados = clientes?.filter(c => (c[campoCliente] || '').toLowerCase().includes(busquedaCliente.toLowerCase()));
   const destinosFiltrados = destinos?.filter(d => (d[campoDestino] || '').toLowerCase().includes(busquedaDestino.toLowerCase()));
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    setFiles(prev => [...prev, ...droppedFiles]);
+  }, []);
+
+  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const selectedFiles = Array.from(e.target.files);
+      setFiles(prev => [...prev, ...selectedFiles]);
+    }
+  }, []);
+
+  const removeFile = useCallback((index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  }, []);
 
   return (
     <div className={styles.wrapper}>
@@ -216,9 +247,67 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
             {/* Adjuntos (opcional, solo visual) */}
             <div className={styles.campo} style={{ marginTop: 32 }}>
               <label className={styles.label}>Adjuntos</label>
-              <button type="button" style={{ background: '#1F7A3D', color: '#fff', border: 'none', borderRadius: 8, padding: '0.5rem 1.2rem', fontWeight: 600, cursor: 'pointer', marginTop: 8 }}>
-                Adjuntar archivos
-              </button>
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                style={{
+                  border: `2px dashed ${isDragging ? '#1F7A3D' : '#e5e7eb'}`,
+                  borderRadius: 8,
+                  padding: '1.2rem',
+                  textAlign: 'center',
+                  background: isDragging ? '#f0fdf4' : '#fff',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  marginTop: 8
+                }}
+                onClick={() => document.getElementById('fileInput')?.click()}
+              >
+                <input
+                  type="file"
+                  id="fileInput"
+                  multiple
+                  onChange={handleFileInput}
+                  style={{ display: 'none' }}
+                />
+                <Upload size={20} style={{ color: '#1F7A3D', marginBottom: 6 }} />
+                <div style={{ color: '#1F7A3D', fontWeight: 500, fontSize: 14 }}>
+                  Arrastra archivos aquí o haz clic para seleccionar
+                </div>
+              </div>
+              {files.length > 0 && (
+                <div style={{ marginTop: 16 }}>
+                  {files.map((file, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '8px 12px',
+                        background: '#f3f4f6',
+                        borderRadius: 6,
+                        marginBottom: 8
+                      }}
+                    >
+                      <div style={{ fontSize: 14 }}>{file.name}</div>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(index)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#dc2626',
+                          cursor: 'pointer',
+                          padding: 4
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <div className={styles.campo}>
               <label className={styles.label}>Observaciones</label>
@@ -234,7 +323,17 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
           </div>
         </div>
         <div className={styles.botonera} style={{ marginTop: 40 }}>
-          <button type="submit" className={styles.formBtn} style={{ fontSize: 22, padding: '1.2rem 3.5rem', borderRadius: 24, fontWeight: 700, boxShadow: '0 4px 12px 0 #0002' }}>
+          <button 
+            type="submit" 
+            className={styles.formBtn} 
+            style={{ 
+              fontSize: 18, 
+              padding: '0.8rem 2rem', 
+              borderRadius: 20, 
+              fontWeight: 600, 
+              boxShadow: '0 4px 12px 0 #0002' 
+            }}
+          >
             {submitButtonText}
           </button>
         </div>

@@ -2,35 +2,58 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { remitosService } from "../../services/remitosService";
 import styles from "./remitos.module.css";
+import { useNotification } from "../../contexts/NotificationContext";
+import { ConfirmModal } from '../../components/ConfirmModal/ConfirmModal';
+import { Pencil, Trash2 } from "lucide-react";
 
 export default function Remitos() {
   const [remitos, setRemitos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { showNotification } = useNotification();
+  const [remitoToDelete, setRemitoToDelete] = useState(null);
 
   useEffect(() => {
-    remitosService.getRemitos()
-      .then(data => {
-        setRemitos(data);
-        setError(null);
-      })
-      .catch(() => setError("Error al cargar los remitos"))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar este remito?")) {
+    const fetchRemitos = async () => {
       try {
-        await remitosService.deleteRemito(id);
-        setRemitos(remitos.filter(remito => remito.id !== id));
-      } catch {
-        setError("Error al eliminar el remito");
+        const data = await remitosService.getRemitos();
+        setRemitos(data);
+      } catch (err) {
+        console.error(err);
+        showNotification('Error al cargar los remitos', 'error');
+      } finally {
+        setLoading(false);
       }
+    };
+
+    fetchRemitos();
+  }, [showNotification]);
+
+  const handleDeleteClick = (remito) => {
+    setRemitoToDelete(remito);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await remitosService.deleteRemito(remitoToDelete.id);
+      showNotification('Remito eliminado exitosamente', 'success');
+      const fetchRemitos = async () => {
+        const data = await remitosService.getRemitos();
+        setRemitos(data);
+      };
+      fetchRemitos();
+    } catch (err) {
+      console.error(err);
+      showNotification('Error al eliminar el remito', 'error');
+    } finally {
+      setRemitoToDelete(null);
     }
   };
 
+  const handleDeleteCancel = () => {
+    setRemitoToDelete(null);
+  };
+
   if (loading) return <div className={styles.container}>Cargando...</div>;
-  if (error) return <div className={styles.container}>{error}</div>;
 
   return (
     <div className={styles.container}>
@@ -61,14 +84,19 @@ export default function Remitos() {
                   <td>{remito.fecha}</td>
                   <td>
                     <div className={styles.acciones}>
-                      <Link to={`/remitos/editar/${remito.id}`}>
-                        <button className={styles.accionesBtn}>Editar</button>
-                      </Link>
-                      <button
-                        className={`${styles.accionesBtn} ${styles.delete}`}
-                        onClick={() => handleDelete(remito.id)}
+                      <Link 
+                        to={`/remitos/editar/${remito.id}`}
+                        className={styles.accionesBtn}
+                        title="Editar"
                       >
-                        Borrar
+                        <Pencil />
+                      </Link>
+                      <button 
+                        className={`${styles.accionesBtn} ${styles.delete}`} 
+                        onClick={() => handleDeleteClick(remito)}
+                        title="Eliminar"
+                      >
+                        <Trash2 />
                       </button>
                     </div>
                   </td>
@@ -78,6 +106,23 @@ export default function Remitos() {
           </table>
         </div>
       </div>
+
+      {remitoToDelete && (
+        <ConfirmModal
+          isOpen={!!remitoToDelete}
+          title="Confirmar eliminación"
+          message={
+            <div style={{ textAlign: 'center' }}>
+              <div>¿Estás seguro que deseas eliminar el remito número "{remitoToDelete.numero}"?</div>
+              <div style={{ marginTop: '0.5rem' }}>
+                Esta acción no se puede deshacer
+              </div>
+            </div>
+          }
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+        />
+      )}
     </div>
   );
 } 

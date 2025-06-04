@@ -1,8 +1,11 @@
 import axios from 'axios';
 import { Contacto } from '../types/contacto';
 
-const API_URL = 'http://localhost:3001';
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DESTINOS === 'true';
+
+// Configuración de axios para incluir la API key en todas las peticiones
+axios.defaults.headers.common['X-API-Key'] = import.meta.env.VITE_API_KEY;
 
 export interface Destino {
   id: number;
@@ -207,8 +210,8 @@ export const destinosService = {
       }
 
       // Remover contactos antes de enviar al backend
-      const { contactos, ...destinoSinContactos }: CreateDestinoBackendData = destino;
-      const response = await axios.post(`${API_URL}/destino`, destinoSinContactos);
+      const { contactos, ...destinoSinContactos } = destino;
+      const response = await axios.post(`${API_URL}/destino`, destinoSinContactos as CreateDestinoBackendData);
       return response.data;
     } catch (error) {
       console.error('Error al crear destino:', error);

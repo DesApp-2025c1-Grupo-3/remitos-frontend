@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { Contacto } from '../types/contacto';
 
-const API_URL = 'http://localhost:3001';
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_CLIENTES === 'true';
 
 // Interfaz para la respuesta del backend
 export interface Cliente {
@@ -149,7 +149,6 @@ export const clientesService = {
         return mockClientes;
       }
       const response = await axios.get(`${API_URL}/cliente`);
-      console.log(response);
       return response.data;
     } catch (error) {
       console.error('Error al obtener clientes:', error);

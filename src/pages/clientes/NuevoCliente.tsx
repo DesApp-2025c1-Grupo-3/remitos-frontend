@@ -7,9 +7,11 @@ import { clientesService } from "../../services/clientesService"
 import { ArrowLeft } from "lucide-react"
 import { ClienteForm, ClienteFormData } from "../../components/ClienteForm/ClienteForm"
 import { Contacto } from "../../types/contacto"
+import { useNotification } from "../../contexts/NotificationContext"
 
 export default function NuevoCliente() {
   const navigate = useNavigate()
+  const { showNotification } = useNotification()
   const [formData, setFormData] = useState<ClienteFormData>({
     razonSocial: null,
     cuit_rut: null,
@@ -17,7 +19,6 @@ export default function NuevoCliente() {
     direccion: "",
     contactos: []
   })
-  const [error, setError] = useState<string | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -30,7 +31,6 @@ export default function NuevoCliente() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
     
     try {
       // Extraer solo los campos básicos del cliente
@@ -50,10 +50,11 @@ export default function NuevoCliente() {
         // Si no hay contactos, usar createCliente normal
         await clientesService.createCliente(clienteData)
       }
+      showNotification('Cliente creado exitosamente', 'success')
       navigate("/clientes")
     } catch (err) {
-      setError("Error al crear el cliente. Por favor, intente nuevamente.")
       console.error(err)
+      showNotification('Error al crear el cliente. Por favor, intente nuevamente.', 'error')
     }
   }
 
@@ -71,7 +72,7 @@ export default function NuevoCliente() {
         onChange={handleChange}
         onContactosChange={handleContactosChange}
         submitButtonText="Cargar Cliente"
-        error={error}
+        error={null}
       />
     </div>
   )
