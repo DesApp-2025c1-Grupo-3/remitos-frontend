@@ -82,33 +82,41 @@ export default function Destinos() {
               </tr>
             </thead>
             <tbody>
-              {destinos.map((destino) => (
-                <tr key={destino.id}>
-                  <td>{destino.name}</td>
-                  <td>{destino.pais}</td>
-                  <td>{destino.provincia}</td>
-                  <td>{destino.localidad}</td>
-                  <td>{destino.direccion}</td>
-                  <td>
-                    <div className={styles.acciones}>
-                      <button 
-                        className={styles.accionesBtn} 
-                        onClick={() => navigate(`/destinos/editar/${destino.id}`)}
-                        title="Editar"
-                      >
-                        <Pencil />
-                      </button>
-                      <button 
-                        className={`${styles.accionesBtn} ${styles.delete}`} 
-                        onClick={() => handleDeleteClick(destino)}
-                        title="Eliminar"
-                      >
-                        <Trash2 />
-                      </button>
-                    </div>
+              {destinos.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>
+                    Aún no hay destinos registrados
                   </td>
                 </tr>
-              ))}
+              ) : (
+                destinos.map((destino) => (
+                  <tr key={destino.id}>
+                    <td>{destino.name}</td>
+                    <td>{destino.pais}</td>
+                    <td>{destino.provincia}</td>
+                    <td>{destino.localidad}</td>
+                    <td>{destino.direccion}</td>
+                    <td>
+                      <div className={styles.acciones}>
+                        <button 
+                          className={styles.accionesBtn} 
+                          onClick={() => navigate(`/destinos/editar/${destino.id}`)}
+                          title="Editar"
+                        >
+                          <Pencil />
+                        </button>
+                        <button 
+                          className={`${styles.accionesBtn} ${styles.delete}`} 
+                          onClick={() => handleDeleteClick(destino)}
+                          title="Eliminar"
+                        >
+                          <Trash2 />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

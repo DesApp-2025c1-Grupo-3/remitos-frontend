@@ -76,32 +76,40 @@ export default function Remitos() {
               </tr>
             </thead>
             <tbody>
-              {remitos.map(remito => (
-                <tr key={remito.id}>
-                  <td>{remito.numero}</td>
-                  <td>{remito.cliente}</td>
-                  <td>{remito.destino}</td>
-                  <td>{remito.fecha}</td>
-                  <td>
-                    <div className={styles.acciones}>
-                      <Link 
-                        to={`/remitos/editar/${remito.id}`}
-                        className={styles.accionesBtn}
-                        title="Editar"
-                      >
-                        <Pencil />
-                      </Link>
-                      <button 
-                        className={`${styles.accionesBtn} ${styles.delete}`} 
-                        onClick={() => handleDeleteClick(remito)}
-                        title="Eliminar"
-                      >
-                        <Trash2 />
-                      </button>
-                    </div>
+              {remitos.length === 0 ? (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>
+                    Aún no hay remitos registrados
                   </td>
                 </tr>
-              ))}
+              ) : (
+                remitos.map(remito => (
+                  <tr key={remito.id}>
+                    <td>{remito.numero}</td>
+                    <td>{remito.cliente}</td>
+                    <td>{remito.destino}</td>
+                    <td>{remito.fecha}</td>
+                    <td>
+                      <div className={styles.acciones}>
+                        <Link 
+                          to={`/remitos/editar/${remito.id}`}
+                          className={styles.accionesBtn}
+                          title="Editar"
+                        >
+                          <Pencil />
+                        </Link>
+                        <button 
+                          className={`${styles.accionesBtn} ${styles.delete}`} 
+                          onClick={() => handleDeleteClick(remito)}
+                          title="Eliminar"
+                        >
+                          <Trash2 />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

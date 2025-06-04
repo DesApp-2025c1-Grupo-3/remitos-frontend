@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import styles from '../Form.module.css';
-import { Upload } from 'lucide-react';
+import { Upload, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export interface RemitoFormData {
   numero: string;
@@ -41,9 +42,9 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
   clientes,
   destinos,
   onNuevoCliente,
-  onNuevoDestino,
-  onVolver
+  onNuevoDestino
 }) => {
+  const navigate = useNavigate();
   // Estados para modales
   const [modalCliente, setModalCliente] = useState(false);
   const [modalDestino, setModalDestino] = useState(false);
@@ -89,9 +90,6 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
     <div className={styles.wrapper}>
       {error && <div className={styles.error}>{error}</div>}
       <form onSubmit={onSubmit} className={styles.formulario} style={{maxWidth: 1100, width: '100%'}}>
-        <button type="button" onClick={onVolver} style={{ position: 'absolute', top: 20, left: 20, background: '#1F7A3D', color: '#fff', border: 'none', borderRadius: 8, padding: '0.5rem 1.2rem', fontWeight: 600, cursor: 'pointer' }}>
-          Volver
-        </button>
         <div style={{ display: 'flex', gap: '2rem', width: '100%', justifyContent: 'center', flexWrap: 'wrap' }}>
           {/* Columna izquierda */}
           <div style={{ flex: 1, minWidth: 320 }}>

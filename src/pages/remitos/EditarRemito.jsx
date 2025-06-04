@@ -5,6 +5,8 @@ import { clientesService } from "../../services/clientesService";
 import { destinosService } from "../../services/destinosService";
 import { RemitoForm } from "../../components/RemitoForm/RemitoForm";
 import { useNotification } from "../../contexts/NotificationContext";
+import { ArrowLeft } from "lucide-react";
+import styles from "./remitos.module.css";
 
 export default function EditarRemito() {
   const navigate = useNavigate();
@@ -69,11 +71,15 @@ export default function EditarRemito() {
     }
   };
 
-  if (loading) return <div className="max-w-4xl mx-auto">Cargando...</div>;
+  if (loading) return <div className={styles.container}>Cargando...</div>;
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-center mb-8">Editar Remito</h1>
+    <div className={styles.container}>
+      <button className={styles.volverBtn} onClick={() => navigate(-1)}>
+        <ArrowLeft />
+        Volver
+      </button>
+      <h1 className={styles.titulo}>EDITAR REMITO</h1>
       <RemitoForm
         formData={formData}
         onSubmit={handleSubmit}

@@ -81,32 +81,40 @@ export default function Clientes() {
               </tr>
             </thead>
             <tbody>
-              {clientes.map((cliente) => (
-                <tr key={cliente.id}>
-                  <td>{cliente.razonSocial}</td>
-                  <td>{cliente.cuit_rut}</td>
-                  <td>{cliente.tipoEmpresa}</td>
-                  <td>{cliente.direccion}</td>
-                  <td>
-                    <div className={styles.acciones}>
-                      <Link 
-                        to={`/clientes/editar/${cliente.id}`}
-                        className={styles.accionesBtn}
-                        title="Editar"
-                      >
-                        <Pencil />
-                      </Link>
-                      <button 
-                        className={`${styles.accionesBtn} ${styles.delete}`} 
-                        onClick={() => handleDeleteClick(cliente)}
-                        title="Eliminar"
-                      >
-                        <Trash2 />
-                      </button>
-                    </div>
+              {clientes.length === 0 ? (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>
+                    Aún no hay clientes registrados
                   </td>
                 </tr>
-              ))}
+              ) : (
+                clientes.map((cliente) => (
+                  <tr key={cliente.id}>
+                    <td>{cliente.razonSocial}</td>
+                    <td>{cliente.cuit_rut}</td>
+                    <td>{cliente.tipoEmpresa}</td>
+                    <td>{cliente.direccion}</td>
+                    <td>
+                      <div className={styles.acciones}>
+                        <Link 
+                          to={`/clientes/editar/${cliente.id}`}
+                          className={styles.accionesBtn}
+                          title="Editar"
+                        >
+                          <Pencil />
+                        </Link>
+                        <button 
+                          className={`${styles.accionesBtn} ${styles.delete}`} 
+                          onClick={() => handleDeleteClick(cliente)}
+                          title="Eliminar"
+                        >
+                          <Trash2 />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

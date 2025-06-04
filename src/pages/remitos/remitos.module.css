@@ -44,6 +44,32 @@
   transform: translateY(-1px) scale(1.02);
 }
 
+.volverBtn {
+  background: none;
+  border: none;
+  color: #1F7A3D;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 0.25rem;
+  transition: background 0.2s;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.volverBtn:hover {
+  background: #e5e7eb;
+}
+
+.volverBtn svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
 .tablaContenedor {
   background: #e5e7eb;
   border-radius: 1rem;
