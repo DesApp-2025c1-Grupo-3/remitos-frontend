@@ -6,14 +6,14 @@ import styles from "./clientes.module.css"
 import { clientesService } from "../../services/clientesService"
 import { ArrowLeft } from "lucide-react"
 import { ClienteForm, ClienteFormData } from "../../components/ClienteForm/ClienteForm"
-import { Contacto } from "../../components/ContactosForm/ContactosForm"
+import { Contacto } from "../../types/contacto"
 
 export default function EditarCliente() {
   const navigate = useNavigate()
   const { id } = useParams()
   const [formData, setFormData] = useState<ClienteFormData>({
-    razonSocial: "",
-    cuit_rut: "",
+    razonSocial: null,
+    cuit_rut: null,
     tipoEmpresa: "",
     direccion: "",
     contactos: []
@@ -27,7 +27,10 @@ export default function EditarCliente() {
         if (id) {
           const cliente = await clientesService.getClienteById(Number(id))
           setFormData({
-            ...cliente,
+            razonSocial: cliente.razonSocial,
+            cuit_rut: cliente.cuit_rut,
+            tipoEmpresa: cliente.tipoEmpresa,
+            direccion: cliente.direccion,
             contactos: cliente.contactos || []
           })
         }
@@ -57,7 +60,11 @@ export default function EditarCliente() {
     
     try {
       if (id) {
-        await clientesService.updateCliente(Number(id), formData)
+        // Extraer solo los campos básicos del cliente
+        const { razonSocial, cuit_rut, tipoEmpresa, direccion } = formData
+        const clienteData = { razonSocial, cuit_rut, tipoEmpresa, direccion }
+        
+        await clientesService.updateCliente(Number(id), clienteData)
         navigate("/clientes")
       }
     } catch (err) {

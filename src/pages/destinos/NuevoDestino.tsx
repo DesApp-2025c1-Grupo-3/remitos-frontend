@@ -6,39 +6,49 @@ import styles from "./destinos.module.css"
 import { destinosService } from "../../services/destinosService"
 import { ArrowLeft } from "lucide-react"
 import { DestinoForm, DestinoFormData } from "../../components/DestinoForm/DestinoForm"
-import { Contacto } from "../../components/ContactosForm/ContactosForm"
+import { Contacto } from "../../types/contacto"
+import { useNotification } from "../../contexts/NotificationContext"
 
 export default function NuevoDestino() {
   const navigate = useNavigate()
+  const { showNotification } = useNotification()
   const [formData, setFormData] = useState<DestinoFormData>({
-    nombre: "",
+    name: "",
     pais: "",
     provincia: "",
     localidad: "",
     direccion: "",
     contactos: []
   })
-  const [error, setError] = useState<string | null>(null)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
   }
 
-  const handleContactosChange = (contactos: Contacto[]) => {
-    setFormData(prev => ({ ...prev, contactos }))
+  const handleContactoChange = (contactos: Contacto[]) => {
+    setFormData(prev => ({
+      ...prev,
+      contactos
+    }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
     
     try {
       await destinosService.createDestino(formData)
+      showNotification("Destino creado exitosamente", "success")
       navigate("/destinos")
     } catch (err) {
-      setError("Error al crear el destino. Por favor, intente nuevamente.")
-      console.error(err)
+      console.error("Error al crear destino:", err)
+      showNotification(
+        "Error al crear el destino. Por favor, intente nuevamente.",
+        "error"
+      )
     }
   }
 
@@ -52,11 +62,10 @@ export default function NuevoDestino() {
       
       <DestinoForm
         formData={formData}
-        onSubmit={handleSubmit}
         onChange={handleChange}
-        onContactosChange={handleContactosChange}
-        submitButtonText="Cargar Destino"
-        error={error}
+        onSubmit={handleSubmit}
+        onContactoChange={handleContactoChange}
+        contactos={formData.contactos}
       />
     </div>
   )

@@ -70,7 +70,7 @@ export default function Destinos() {
             <tbody>
               {destinos.map((destino) => (
                 <tr key={destino.id}>
-                  <td>{destino.nombre}</td>
+                  <td>{destino.name}</td>
                   <td>{destino.pais}</td>
                   <td>{destino.provincia}</td>
                   <td>{destino.localidad}</td>

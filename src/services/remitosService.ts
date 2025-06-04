@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api'; // Ajusta la URL según tu configuración
+const API_URL = 'http://localhost:3001'; // Actualizado para coincidir con otros servicios
 
 export interface Remito {
   id: number;

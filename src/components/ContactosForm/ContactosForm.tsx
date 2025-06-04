@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, X, Pencil } from 'lucide-react';
 import styles from './ContactosForm.module.css';
-
-export interface Contacto {
-  nombre: string;
-  email: string;
-  telefono: string;
-}
+import { Contacto } from '../../types/contacto';
 
 interface ContactosFormProps {
   contactos: Contacto[];
@@ -20,14 +15,17 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
   const [showModal, setShowModal] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [nuevoContacto, setNuevoContacto] = useState<Contacto>({
-    nombre: '',
-    email: '',
-    telefono: '',
+    personaAutorizada: '',
+    correoElectronico: '',
+    telefono: 0,
   });
 
   const handleContactoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setNuevoContacto((prev) => ({ ...prev, [name]: value }));
+    setNuevoContacto((prev) => ({
+      ...prev,
+      [name]: name === 'telefono' ? parseInt(value) || 0 : value
+    }));
   };
 
   const abrirModalEdicion = (index: number) => {
@@ -37,7 +35,7 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
   };
 
   const agregarContacto = () => {
-    if (nuevoContacto.nombre && nuevoContacto.email && nuevoContacto.telefono) {
+    if (nuevoContacto.personaAutorizada && nuevoContacto.correoElectronico && nuevoContacto.telefono) {
       if (editingIndex !== null) {
         // Editar contacto existente
         const nuevosContactos = [...contactos];
@@ -49,9 +47,9 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
       }
       
       setNuevoContacto({
-        nombre: '',
-        email: '',
-        telefono: '',
+        personaAutorizada: '',
+        correoElectronico: '',
+        telefono: 0,
       });
       setEditingIndex(null);
       setShowModal(false);
@@ -66,9 +64,9 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
     setShowModal(false);
     setEditingIndex(null);
     setNuevoContacto({
-      nombre: '',
-      email: '',
-      telefono: '',
+      personaAutorizada: '',
+      correoElectronico: '',
+      telefono: 0,
     });
   };
 
@@ -90,9 +88,9 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
           {contactos.map((contacto, index) => (
             <div key={index} className={styles.contactoItem}>
               <div className={styles.contactoInfo}>
-                <span className={styles.nombreContacto}>{contacto.nombre}</span>
+                <span className={styles.nombreContacto}>{contacto.personaAutorizada}</span>
                 <span className={styles.detallesContacto}>
-                  {contacto.email} | {contacto.telefono}
+                  {contacto.correoElectronico} | {contacto.telefono}
                 </span>
               </div>
               <div className={styles.acciones}>
@@ -122,34 +120,38 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
             <h3>{editingIndex !== null ? 'Editar contacto' : 'Agregar contacto'}</h3>
             <div className={styles.modalContent}>
               <div className={styles.formGroup}>
-                <label>Nombre</label>
+                <label>Persona autorizada</label>
                 <input
-                  name="nombre"
-                  value={nuevoContacto.nombre}
+                  name="personaAutorizada"
+                  value={nuevoContacto.personaAutorizada}
                   onChange={handleContactoChange}
-                  placeholder="Nombre del contacto"
+                  placeholder="Nombre de la persona autorizada"
                   className={styles.input}
+                  required
                 />
               </div>
               <div className={styles.formGroup}>
                 <label>Correo electrónico</label>
                 <input
-                  name="email"
+                  name="correoElectronico"
                   type="email"
-                  value={nuevoContacto.email}
+                  value={nuevoContacto.correoElectronico}
                   onChange={handleContactoChange}
                   placeholder="Email del contacto"
                   className={styles.input}
+                  required
                 />
               </div>
               <div className={styles.formGroup}>
                 <label>Teléfono</label>
                 <input
                   name="telefono"
-                  value={nuevoContacto.telefono}
+                  type="number"
+                  value={nuevoContacto.telefono || ''}
                   onChange={handleContactoChange}
                   placeholder="Teléfono del contacto"
                   className={styles.input}
+                  required
                 />
               </div>
             </div>

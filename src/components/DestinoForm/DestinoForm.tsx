@@ -1,42 +1,43 @@
 import React from 'react';
 import styles from '../Form.module.css';
-import { ContactosForm, Contacto } from '../ContactosForm/ContactosForm';
+import { ContactosForm } from '../ContactosForm/ContactosForm';
+import { Contacto } from '../../types/contacto';
+import { isFeatureEnabled } from '../../config/features';
 
 export interface DestinoFormData {
-  nombre: string;
+  name: string;
   pais: string;
   provincia: string;
   localidad: string;
   direccion: string;
-  contactos: Contacto[];
+  contactos?: Contacto[];
 }
 
 interface DestinoFormProps {
   formData: DestinoFormData;
-  onSubmit: (e: React.FormEvent) => Promise<void>;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onContactosChange: (contactos: Contacto[]) => void;
-  submitButtonText: string;
-  error: string | null;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  onContactoChange?: (contactos: Contacto[]) => void;
+  contactos?: Contacto[];
 }
 
 export const DestinoForm: React.FC<DestinoFormProps> = ({
   formData,
-  onSubmit,
   onChange,
-  onContactosChange,
-  submitButtonText,
-  error
+  onSubmit,
+  onContactoChange,
+  contactos = []
 }) => {
+  const showContactos = isFeatureEnabled('ENABLE_CONTACTOS');
+
   return (
     <div className={styles.wrapper}>
-      {error && <div className={styles.error}>{error}</div>}
       <form onSubmit={onSubmit} className={styles.formulario}>
         <div className={styles.campo}>
           <label className={styles.label}>Nombre del destino</label>
           <input
-            name="nombre"
-            value={formData.nombre}
+            name="name"
+            value={formData.name}
             onChange={onChange}
             placeholder="Ingresar nombre del destino"
             className={styles.input}
@@ -88,14 +89,16 @@ export const DestinoForm: React.FC<DestinoFormProps> = ({
           />
         </div>
 
-        <ContactosForm 
-          contactos={formData.contactos}
-          onContactosChange={onContactosChange}
-        />
+        {showContactos && onContactoChange && (
+          <ContactosForm 
+            contactos={contactos}
+            onContactosChange={onContactoChange}
+          />
+        )}
 
         <div className={styles.botonera}>
           <button type="submit" className={styles.formBtn}>
-            {submitButtonText}
+            Guardar
           </button>
         </div>
       </form>

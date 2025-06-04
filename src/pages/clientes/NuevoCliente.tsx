@@ -6,13 +6,13 @@ import styles from "./clientes.module.css"
 import { clientesService } from "../../services/clientesService"
 import { ArrowLeft } from "lucide-react"
 import { ClienteForm, ClienteFormData } from "../../components/ClienteForm/ClienteForm"
-import { Contacto } from "../../components/ContactosForm/ContactosForm"
+import { Contacto } from "../../types/contacto"
 
 export default function NuevoCliente() {
   const navigate = useNavigate()
   const [formData, setFormData] = useState<ClienteFormData>({
-    razonSocial: "",
-    cuit_rut: "",
+    razonSocial: null,
+    cuit_rut: null,
     tipoEmpresa: "",
     direccion: "",
     contactos: []
@@ -33,7 +33,23 @@ export default function NuevoCliente() {
     setError(null)
     
     try {
-      await clientesService.createCliente(formData)
+      // Extraer solo los campos básicos del cliente
+      const { razonSocial, cuit_rut, tipoEmpresa, direccion } = formData
+      const clienteData = { razonSocial, cuit_rut, tipoEmpresa, direccion }
+
+      // Si hay contactos, usar createClienteWithContacto
+      if (formData.contactos && formData.contactos.length > 0) {
+        const contacto = formData.contactos[0] // Tomamos el primer contacto
+        await clientesService.createClienteWithContacto({
+          ...clienteData,
+          personaAutorizada: contacto.personaAutorizada,
+          correoElectronico: contacto.correoElectronico,
+          telefono: contacto.telefono
+        })
+      } else {
+        // Si no hay contactos, usar createCliente normal
+        await clientesService.createCliente(clienteData)
+      }
       navigate("/clientes")
     } catch (err) {
       setError("Error al crear el cliente. Por favor, intente nuevamente.")

@@ -25,7 +25,7 @@ interface RemitoFormProps {
   submitButtonText: string;
   error: string | null;
   clientes?: { id: number, razonSocial: string, cuit_rut: string, direccion: string }[];
-  destinos?: { id: number, nombre: string, provincia: string, direccion: string }[];
+  destinos?: { id: number, name: string, provincia: string, direccion: string }[];
   onNuevoCliente?: () => void;
   onNuevoDestino?: () => void;
   onVolver?: () => void;
@@ -298,14 +298,14 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
               </div>
               <div style={{ maxHeight: 300, overflowY: 'auto' }}>
                 {destinosFiltrados && destinosFiltrados.length > 0 ? destinosFiltrados.map(d => (
-                  <div key={d.id} style={{ padding: 12, cursor: 'pointer', borderRadius: 6, background: formData.destino === d.nombre ? '#e5e7eb' : 'transparent', marginBottom: 6, border: '1px solid #e5e7eb' }}
+                  <div key={d.id} style={{ padding: 12, cursor: 'pointer', borderRadius: 6, background: formData.destino === d.name ? '#e5e7eb' : 'transparent', marginBottom: 6, border: '1px solid #e5e7eb' }}
                     onClick={() => {
-                      onChange({ target: { name: 'destino', value: d.nombre } } as any);
+                      onChange({ target: { name: 'destino', value: d.name } } as any);
                       setModalDestino(false);
                       setBusquedaDestino('');
                     }}
                   >
-                    <div style={{ fontWeight: 600 }}>{d.nombre}</div>
+                    <div style={{ fontWeight: 600 }}>{d.name}</div>
                     <div style={{ fontSize: 13, color: '#444' }}>Provincia: {d.provincia}</div>
                     <div style={{ fontSize: 13, color: '#666' }}>{d.direccion}</div>
                   </div>
