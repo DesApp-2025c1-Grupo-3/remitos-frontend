@@ -10,7 +10,7 @@ export interface Remito {
   id: number;
   numero: string;
   cliente: string;
-  destino: string;
+  destino?: string;
   fecha: string;
   peso: string;
   volumen: string;
@@ -31,7 +31,7 @@ const mockRemitos: Remito[] = [
     id: 1,
     numero: 'R-00123',
     cliente: 'Cliente A',
-    destino: 'Buenos Aires, Argentina',
+    destino: undefined,
     fecha: '15/04/2023',
     peso: '1500',
     volumen: '3.5',
@@ -150,4 +150,4 @@ export const remitosService = {
       throw error;
     }
   }
-}; 
+};

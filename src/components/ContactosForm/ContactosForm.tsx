@@ -19,13 +19,24 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
     correoElectronico: '',
     telefono: 0,
   });
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [telefonoError, setTelefonoError] = useState<string | null>(null);
 
   const handleContactoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setNuevoContacto((prev) => ({
-      ...prev,
-      [name]: name === 'telefono' ? parseInt(value) || 0 : value
-    }));
+    if (name === 'telefono') {
+      // Solo permitir hasta 10 dígitos numéricos
+      const soloNumeros = value.replace(/\D/g, '').slice(0, 10);
+      setNuevoContacto((prev) => ({
+        ...prev,
+        telefono: soloNumeros ? parseInt(soloNumeros) : 0
+      }));
+    } else {
+      setNuevoContacto((prev) => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const abrirModalEdicion = (index: number) => {
@@ -34,26 +45,47 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
     setShowModal(true);
   };
 
+  const validateEmail = (email: string) => {
+    // Validación básica de email
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+  const validateTelefono = (telefono: number) => {
+    // Debe tener exactamente 10 dígitos
+    return telefono && telefono.toString().length === 10;
+  };
+
   const agregarContacto = () => {
-    if (nuevoContacto.personaAutorizada && nuevoContacto.correoElectronico && nuevoContacto.telefono) {
-      if (editingIndex !== null) {
-        // Editar contacto existente
-        const nuevosContactos = [...contactos];
-        nuevosContactos[editingIndex] = nuevoContacto;
-        onContactosChange(nuevosContactos);
-      } else {
-        // Agregar nuevo contacto
-        onContactosChange([...contactos, nuevoContacto]);
-      }
-      
-      setNuevoContacto({
-        personaAutorizada: '',
-        correoElectronico: '',
-        telefono: 0,
-      });
-      setEditingIndex(null);
-      setShowModal(false);
+    let valid = true;
+    setEmailError(null);
+    setTelefonoError(null);
+    if (!validateEmail(nuevoContacto.correoElectronico)) {
+      setEmailError('Ingrese un email válido');
+      valid = false;
     }
+    if (!validateTelefono(nuevoContacto.telefono)) {
+      setTelefonoError('El teléfono debe tener exactamente 10 dígitos');
+      valid = false;
+    }
+    if (!nuevoContacto.personaAutorizada) {
+      valid = false;
+    }
+    if (!valid) return;
+    if (editingIndex !== null) {
+      // Editar contacto existente
+      const nuevosContactos = [...contactos];
+      nuevosContactos[editingIndex] = nuevoContacto;
+      onContactosChange(nuevosContactos);
+    } else {
+      // Agregar nuevo contacto
+      onContactosChange([...contactos, nuevoContacto]);
+    }
+    setNuevoContacto({
+      personaAutorizada: '',
+      correoElectronico: '',
+      telefono: 0,
+    });
+    setEditingIndex(null);
+    setShowModal(false);
   };
 
   const eliminarContacto = (index: number) => {
@@ -138,21 +170,26 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
                   value={nuevoContacto.correoElectronico}
                   onChange={handleContactoChange}
                   placeholder="Email del contacto"
-                  className={styles.input}
+                  className={emailError ? `${styles.input} ${styles.inputError}` : styles.input}
                   required
                 />
+                {emailError && <div className={styles.inputErrorMsg}>{emailError}</div>}
               </div>
               <div className={styles.formGroup}>
                 <label>Teléfono</label>
                 <input
                   name="telefono"
-                  type="number"
-                  value={nuevoContacto.telefono || ''}
+                  type="text"
+                  value={nuevoContacto.telefono ? nuevoContacto.telefono.toString() : ''}
                   onChange={handleContactoChange}
                   placeholder="Teléfono del contacto"
-                  className={styles.input}
+                  className={telefonoError ? `${styles.input} ${styles.inputError}` : styles.input}
                   required
+                  maxLength={10}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                 />
+                {telefonoError && <div className={styles.inputErrorMsg}>{telefonoError}</div>}
               </div>
             </div>
             <div className={styles.modalFooter}>
@@ -176,4 +213,4 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
       )}
     </div>
   );
-}; 
+};

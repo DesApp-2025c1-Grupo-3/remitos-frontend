@@ -15,7 +15,7 @@
 .formulario {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.7rem; /* antes 1.5rem */
   background: #fff;
   border-radius: 0.5rem;
   padding: 2rem 2rem 1rem 2rem;
@@ -29,8 +29,8 @@
 .campo {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1.2rem;
+  gap: 0.3rem; /* antes 0.5rem */
+  margin-bottom: 0.5rem; /* antes 1.2rem */
   width: 100%;
   max-width: 400px;
   align-self: center;
@@ -45,12 +45,13 @@
   width: 100%;
 }
 
-.input {
+.input, select.input {
   width: 100%;
   min-width: 0;
+  max-width: 400px;
   margin: 0;
   display: block;
-  background: #e5e7eb;
+  background: #e5e7eb !important;
   border: none;
   border-radius: 0.35rem;
   padding: 0.5rem 1rem;
@@ -59,32 +60,11 @@
   transition: border 0.2s, box-shadow 0.2s;
   outline: none;
   box-shadow: none;
-  max-width: 400px;
-  /* Unificar altura de input y select */
-  height: 44px;
   box-sizing: border-box;
-}
-
-.input:focus {
-  border: 1.5px solid #1F7A3D;
-  box-shadow: 0 0 0 2px #1F7A3D22;
-  background: #fff;
-}
-
-/* Unificar estilos para select */
-input.input, select.input {
   height: 44px;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  border-radius: 0.35rem;
-  border: none;
-  background: #e5e7eb;
-  color: #222;
-  max-width: 400px;
-  box-sizing: border-box;
 }
 
-select.input:focus {
+.input:focus, select.input:focus {
   border: 1.5px solid #1F7A3D;
   box-shadow: 0 0 0 2px #1F7A3D22;
   background: #fff;
@@ -117,4 +97,39 @@ select.input:focus {
   background: #17602e;
   box-shadow: 0 6px 16px 0 #0003;
   transform: translateY(-2px) scale(1.03);
+}
+
+.dropdown {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1.5px solid #1F7A3D;
+  border-radius: 0 0 0.35rem 0.35rem;
+  z-index: 10;
+  max-height: 180px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dropdownItem {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  background: #fff;
+  transition: background 0.15s;
+}
+
+.dropdownItemActive {
+  background: #e5e7eb;
+}
+
+.dropdownItemHover {
+  background: #8eb6a3;
+}
+
+.dropdownContainer {
+  position: relative;
 }

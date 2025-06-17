@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../Form.module.css';
+import styles from './ClienteForm.module.css';
 import { ContactosForm } from '../ContactosForm/ContactosForm';
 import { Contacto } from '../../types/contacto';
 import { isFeatureEnabled } from '../../config/features';
@@ -30,12 +30,16 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
   error
 }) => {
   const showContactos = isFeatureEnabled('ENABLE_CONTACTOS');
+  const [cuitError, setCuitError] = React.useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name === 'cuit_rut') {
-      // Solo permitir números en el input
+      // Solo permitir números
       const numericValue = value.replace(/\D/g, '');
+      // Validar longitud en tiempo real
+      if (numericValue.length > 11) return;
+      setCuitError(null);
       onChange({
         target: {
           name,
@@ -47,10 +51,38 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
     }
   };
 
+  // Valida formato de CUIT argentino (11 dígitos, dígito verificador)
+  function validarCuit(cuit: string): boolean {
+    if (!/^\d{11}$/.test(cuit)) return false;
+    const mult = [5,4,3,2,7,6,5,4,3,2];
+    let suma = 0;
+    for (let i = 0; i < 10; i++) {
+      suma += parseInt(cuit[i]) * mult[i];
+    }
+    let resto = suma % 11;
+    let digito = resto === 0 ? 0 : resto === 1 ? 9 : 11 - resto;
+    return digito === parseInt(cuit[10]);
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // Validación de CUIT: debe tener exactamente 11 dígitos
+    if (!formData.cuit_rut || formData.cuit_rut.length !== 11) {
+      setCuitError('El CUIT debe tener exactamente 11 dígitos');
+      return;
+    }
+    if (!validarCuit(formData.cuit_rut)) {
+      setCuitError('Formato de CUIT incorrecto');
+      return;
+    }
+    setCuitError(null);
+    await onSubmit(e);
+  };
+
   return (
     <div className={styles.wrapper}>
-      {error && <div className={styles.error}>{error}</div>}
-      <form onSubmit={onSubmit} className={styles.formulario}>
+      {/* Eliminado el error global */}
+      <form onSubmit={handleSubmit} className={styles.formulario}>
         <div className={styles.campo}>
           <label className={styles.label}>Razón Social</label>
           <input
@@ -67,12 +99,14 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
             name="cuit_rut"
             value={formData.cuit_rut || ''}
             onChange={handleChange}
-            placeholder="Ingresar CUIT/RUT (solo números)"
-            className={styles.input}
+            placeholder="Ingresar CUIT/RUT"
+            className={cuitError ? `${styles.input} ${styles.inputError}` : styles.input}
             type="text"
             pattern="[0-9]*"
             inputMode="numeric"
+            maxLength={11}
           />
+          {cuitError && <div className={styles.inputErrorMsg}>{cuitError}</div>}
         </div>
         <div className={styles.campo}>
           <label className={styles.label}>Tipo de cliente</label>
@@ -117,4 +151,4 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
       </form>
     </div>
   );
-}; 
+};

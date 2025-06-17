@@ -15,7 +15,7 @@
 .formulario {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.7rem; /* antes 1.5rem */
   background: #fff;
   border-radius: 0.5rem;
   padding: 2rem 2rem 1rem 2rem;
@@ -29,8 +29,8 @@
 .campo {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1.2rem;
+  gap: 0.3rem; /* antes 0.5rem */
+  margin-bottom: 0.5rem; /* antes 1.2rem */
   width: 100%;
   max-width: 400px;
   align-self: center;
@@ -45,9 +45,10 @@
   width: 100%;
 }
 
-.input {
+.input, select.input {
   width: 100%;
   min-width: 0;
+  max-width: 400px;
   margin: 0;
   display: block;
   background: #e5e7eb;
@@ -59,12 +60,33 @@
   transition: border 0.2s, box-shadow 0.2s;
   outline: none;
   box-shadow: none;
+  box-sizing: border-box;
+  height: 44px;
 }
 
-.input:focus {
+.input:focus, select.input:focus {
   border: 1.5px solid #1F7A3D;
   box-shadow: 0 0 0 2px #1F7A3D22;
   background: #fff;
+}
+
+.inputError {
+  border: 1.5px solid #dc2626 !important;
+  background: #fee2e2 !important;
+}
+
+.inputError:focus {
+  border: 2px solid #dc2626 !important;
+  box-shadow: 0 0 0 2px #dc262622;
+}
+
+.inputErrorMsg {
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  background: none;
+  padding-left: 2px;
 }
 
 .botonera {
@@ -94,4 +116,4 @@
   background: #17602e;
   box-shadow: 0 6px 16px 0 #0003;
   transform: translateY(-2px) scale(1.03);
-} 
+}

@@ -2,7 +2,7 @@
 export const FEATURES = {
   // Habilitar/deshabilitar la funcionalidad de contactos en general
   // Cuando está deshabilitado, los contactos no se mostrarán ni en clientes ni en destinos
-  ENABLE_CONTACTOS: false,
+  ENABLE_CONTACTOS: true,
 } as const;
 
 // Tipo para acceder a las keys de los feature flags

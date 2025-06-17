@@ -10,7 +10,7 @@ axios.defaults.headers.common['X-API-Key'] = import.meta.env.VITE_API_KEY;
 export interface Destino {
   id: number;
   name: string;
-  pais: string;
+  pais?: string;
   provincia: string;
   localidad: string;
   direccion: string;
@@ -43,7 +43,7 @@ const mockDestinos: Destino[] = [
   {
     id: 1,
     name: "Depósito Central",
-    pais: "Argentina",
+    pais: undefined,
     provincia: "Buenos Aires",
     localidad: "La Plata",
     direccion: "Calle 7 1234",
@@ -63,7 +63,7 @@ const mockDestinos: Destino[] = [
   {
     id: 2,
     name: "Sucursal Montevideo",
-    pais: "Uruguay",
+    pais: undefined,
     provincia: "Montevideo",
     localidad: "Centro",
     direccion: "Av. 18 de Julio 456",
@@ -83,7 +83,7 @@ const mockDestinos: Destino[] = [
   {
     id: 3,
     name: "Sucursal Santiago",
-    pais: "Chile",
+    pais: undefined,
     provincia: "Santiago",
     localidad: "Las Condes",
     direccion: "Av. Apoquindo 789",
@@ -103,7 +103,7 @@ const mockDestinos: Destino[] = [
   {
     id: 4,
     name: "Depósito Norte",
-    pais: "Argentina",
+    pais: undefined,
     provincia: "Córdoba",
     localidad: "Córdoba Capital",
     direccion: "Av. Colón 1234",
@@ -123,7 +123,7 @@ const mockDestinos: Destino[] = [
   {
     id: 5,
     name: "Sucursal Rosario",
-    pais: "Argentina",
+    pais: undefined,
     provincia: "Santa Fe",
     localidad: "Rosario",
     direccion: "Av. Pellegrini 456",
