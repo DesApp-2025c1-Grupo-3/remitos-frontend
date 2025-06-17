@@ -60,8 +60,8 @@ export default function Remitos() {
       <h1 className={styles.titulo}>Remitos</h1>
       <div className={styles.wrapper}>
         <div className={styles.crearBtnContainer}>
-          <Link to="/remitos/nuevo">
-            <button className={styles.crearBtn}>Crear Remito</button>
+          <Link to="/remitos/nuevo" className={styles.crearBtn}>
+            Crear Remito
           </Link>
         </div>
         <div className={styles.tablaContenedor}>
@@ -133,4 +133,4 @@ export default function Remitos() {
       )}
     </div>
   );
-} 
+}

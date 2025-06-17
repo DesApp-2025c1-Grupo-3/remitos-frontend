@@ -37,11 +37,11 @@ export default function Sidebar() {
           </button>
         </Link>
 
-        <Link to="/reportes">
+        {/* <Link to="/reportes">
           <button className={styles.navButton}>
             Reportes
           </button>
-        </Link>
+        </Link> */}
       </div>
     </div>
   );

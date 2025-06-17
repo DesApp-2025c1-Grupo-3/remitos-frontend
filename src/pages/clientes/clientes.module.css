@@ -39,7 +39,6 @@
   display: inline-block;
   letter-spacing: 0.5px;
 }
-
 .crearBtn:hover {
   background: #17602e;
   box-shadow: 0 4px 10px 0 #0002;
@@ -155,4 +154,8 @@
 
 .contactoItem:last-child {
   margin-bottom: 0;
+}
+
+a:hover{
+  color: #fff !important;
 }

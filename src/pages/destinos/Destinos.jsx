@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import styles from "./destinos.module.css";
 import { destinosService } from "../../services/destinosService";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
@@ -65,9 +65,9 @@ export default function Destinos() {
       <h1 className={styles.titulo}>Destinos</h1>
       <div className={styles.wrapper}>
         <div className={styles.crearBtnContainer}>
-          <button className={styles.crearBtn} onClick={() => navigate("/destinos/nuevo")}>
+          <Link to="/destinos/nuevo" className={styles.crearBtn}>
             Crear Destino
-          </button>
+          </Link>
         </div>
         <div className={styles.tablaContenedor}>
           <table className={styles.tabla}>
@@ -140,4 +140,4 @@ export default function Destinos() {
       )}
     </div>
   );
-} 
+}
