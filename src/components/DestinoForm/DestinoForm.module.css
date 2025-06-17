@@ -59,9 +59,32 @@
   transition: border 0.2s, box-shadow 0.2s;
   outline: none;
   box-shadow: none;
+  max-width: 400px;
+  /* Unificar altura de input y select */
+  height: 44px;
+  box-sizing: border-box;
 }
 
 .input:focus {
+  border: 1.5px solid #1F7A3D;
+  box-shadow: 0 0 0 2px #1F7A3D22;
+  background: #fff;
+}
+
+/* Unificar estilos para select */
+input.input, select.input {
+  height: 44px;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 0.35rem;
+  border: none;
+  background: #e5e7eb;
+  color: #222;
+  max-width: 400px;
+  box-sizing: border-box;
+}
+
+select.input:focus {
   border: 1.5px solid #1F7A3D;
   box-shadow: 0 0 0 2px #1F7A3D22;
   background: #fff;
@@ -94,4 +117,4 @@
   background: #17602e;
   box-shadow: 0 6px 16px 0 #0003;
   transform: translateY(-2px) scale(1.03);
-} 
+}

@@ -7,16 +7,21 @@ import { useNotification } from "../../contexts/NotificationContext";
 import { ConfirmModal } from '../../components/ConfirmModal/ConfirmModal';
 
 export default function Clientes() {
-  const [clientes, setClientes] = useState([]);
+  // Cambiar el estado inicial a objeto de paginación
+  const [clientes, setClientes] = useState({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [clienteToDelete, setClienteToDelete] = useState(null);
+  // Estado para paginación
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchClientes = async () => {
+      setLoading(true);
       try {
-        const data = await clientesService.getClientes();
+        // Suponiendo que el servicio acepta un parámetro de página
+        const data = await clientesService.getClientes({ page: currentPage });
         setClientes(data);
       } catch (err) {
         console.error(err);
@@ -25,9 +30,8 @@ export default function Clientes() {
         setLoading(false);
       }
     };
-
     fetchClientes();
-  }, [showNotification]);
+  }, [currentPage, showNotification]);
 
   const handleDeleteClick = (cliente) => {
     setClienteToDelete(cliente);
@@ -37,11 +41,9 @@ export default function Clientes() {
     try {
       await clientesService.deleteCliente(clienteToDelete.id);
       showNotification('Cliente eliminado exitosamente', 'success');
-      const fetchClientes = async () => {
-        const data = await clientesService.getClientes();
-        setClientes(data);
-      };
-      fetchClientes();
+      // Recargar la página actual
+      const data = await clientesService.getClientes({ page: currentPage });
+      setClientes(data);
     } catch (err) {
       console.error(err);
       showNotification('Error al eliminar el cliente', 'error');
@@ -55,6 +57,29 @@ export default function Clientes() {
   };
 
   if (loading) return <div className={styles.container}>Cargando...</div>;
+
+  // Renderiza los controles de paginación
+  const renderPagination = () => (
+    <div className={styles.pagination} style={{ marginTop: "1rem", display: "flex", gap: "1rem", justifyContent: "center" }}>
+      <button
+        className={styles.crearBtn}
+        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+        disabled={currentPage === 1}
+        style={{ opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+      >
+        Anterior
+      </button>
+      <span style={{ alignSelf: 'center' }}>Página {clientes.currentPage} de {clientes.totalPages}</span>
+      <button
+        className={styles.crearBtn}
+        onClick={() => setCurrentPage((p) => Math.min(clientes.totalPages, p + 1))}
+        disabled={currentPage === clientes.totalPages}
+        style={{ opacity: currentPage === clientes.totalPages ? 0.5 : 1, cursor: currentPage === clientes.totalPages ? 'not-allowed' : 'pointer' }}
+      >
+        Siguiente
+      </button>
+    </div>
+  );
 
   return (
     <div className={styles.container}>
@@ -81,14 +106,14 @@ export default function Clientes() {
               </tr>
             </thead>
             <tbody>
-              {clientes.length === 0 ? (
+              {clientes.data.length === 0 ? (
                 <tr>
                   <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>
                     Aún no hay clientes registrados
                   </td>
                 </tr>
               ) : (
-                clientes.map((cliente) => (
+                clientes.data.map((cliente) => (
                   <tr key={cliente.id}>
                     <td>{cliente.razonSocial}</td>
                     <td>{cliente.cuit_rut}</td>
@@ -118,6 +143,7 @@ export default function Clientes() {
             </tbody>
           </table>
         </div>
+        {renderPagination()}
       </div>
 
       {clienteToDelete && (

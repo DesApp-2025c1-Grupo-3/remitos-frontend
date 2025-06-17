@@ -7,16 +7,21 @@ import { useNotification } from "../../contexts/NotificationContext";
 import { ConfirmModal } from '../../components/ConfirmModal/ConfirmModal';
 
 export default function Destinos() {
-  const [destinos, setDestinos] = useState([]);
+  // Cambiar el estado inicial a objeto de paginación
+  const [destinos, setDestinos] = useState({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [destinoToDelete, setDestinoToDelete] = useState(null);
+  // Estado para paginación
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchDestinos = async () => {
+      setLoading(true);
       try {
-        const data = await destinosService.getDestinos();
+        // Suponiendo que el servicio acepta un parámetro de página
+        const data = await destinosService.getDestinos({ page: currentPage });
         setDestinos(data);
       } catch (err) {
         console.error(err);
@@ -27,7 +32,7 @@ export default function Destinos() {
     };
 
     fetchDestinos();
-  }, [showNotification]);
+  }, [currentPage, showNotification]);
 
   const handleDeleteClick = (destino) => {
     setDestinoToDelete(destino);
@@ -37,11 +42,9 @@ export default function Destinos() {
     try {
       await destinosService.deleteDestino(destinoToDelete.id);
       showNotification('Destino eliminado exitosamente', 'success');
-      const fetchDestinos = async () => {
-        const data = await destinosService.getDestinos();
-        setDestinos(data);
-      };
-      fetchDestinos();
+      // Recargar la página actual
+      const data = await destinosService.getDestinos({ page: currentPage });
+      setDestinos(data);
     } catch (err) {
       console.error(err);
       showNotification('Error al eliminar el destino', 'error');
@@ -55,6 +58,29 @@ export default function Destinos() {
   };
 
   if (loading) return <div className={styles.container}>Cargando...</div>;
+
+  // Renderiza los controles de paginación
+  const renderPagination = () => (
+    <div className={styles.pagination} style={{ marginTop: "1rem", display: "flex", gap: "1rem", justifyContent: "center" }}>
+      <button
+        className={styles.crearBtn}
+        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+        disabled={currentPage === 1}
+        style={{ opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+      >
+        Anterior
+      </button>
+      <span style={{ alignSelf: 'center' }}>Página {destinos.currentPage} de {destinos.totalPages}</span>
+      <button
+        className={styles.crearBtn}
+        onClick={() => setCurrentPage((p) => Math.min(destinos.totalPages, p + 1))}
+        disabled={currentPage === destinos.totalPages}
+        style={{ opacity: currentPage === destinos.totalPages ? 0.5 : 1, cursor: currentPage === destinos.totalPages ? 'not-allowed' : 'pointer' }}
+      >
+        Siguiente
+      </button>
+    </div>
+  );
 
   return (
     <div className={styles.container}>
@@ -82,16 +108,16 @@ export default function Destinos() {
               </tr>
             </thead>
             <tbody>
-              {destinos.length === 0 ? (
+              {destinos.data.length === 0 ? (
                 <tr>
                   <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>
                     Aún no hay destinos registrados
                   </td>
                 </tr>
               ) : (
-                destinos.map((destino) => (
+                destinos.data.map((destino) => (
                   <tr key={destino.id}>
-                    <td>{destino.name}</td>
+                    <td>{destino.nombre || destino.name}</td>
                     <td>{destino.pais}</td>
                     <td>{destino.provincia}</td>
                     <td>{destino.localidad}</td>
@@ -120,6 +146,7 @@ export default function Destinos() {
             </tbody>
           </table>
         </div>
+        {renderPagination()}
       </div>
 
       {destinoToDelete && (

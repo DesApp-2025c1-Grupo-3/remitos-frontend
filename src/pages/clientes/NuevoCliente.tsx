@@ -31,25 +31,12 @@ export default function NuevoCliente() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
     try {
       // Extraer solo los campos básicos del cliente
       const { razonSocial, cuit_rut, tipoEmpresa, direccion } = formData
       const clienteData = { razonSocial, cuit_rut, tipoEmpresa, direccion }
-
-      // Si hay contactos, usar createClienteWithContacto
-      if (formData.contactos && formData.contactos.length > 0) {
-        const contacto = formData.contactos[0] // Tomamos el primer contacto
-        await clientesService.createClienteWithContacto({
-          ...clienteData,
-          personaAutorizada: contacto.personaAutorizada,
-          correoElectronico: contacto.correoElectronico,
-          telefono: contacto.telefono
-        })
-      } else {
-        // Si no hay contactos, usar createCliente normal
-        await clientesService.createCliente(clienteData)
-      }
+      // Usar SIEMPRE createCliente, nunca createClienteWithContacto
+      await clientesService.createCliente(clienteData)
       showNotification('Cliente creado exitosamente', 'success')
       navigate("/clientes")
     } catch (err) {
@@ -76,4 +63,4 @@ export default function NuevoCliente() {
       />
     </div>
   )
-} 
+}

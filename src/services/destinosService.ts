@@ -329,5 +329,15 @@ export const georefService = {
     const res = await fetch(`https://apis.datos.gob.ar/georef/api/localidades?provincia=${provinciaId}&campos=id,nombre&max=5000`);
     const data = await res.json();
     return (data.localidades || []).sort((a: any, b: any) => a.nombre.localeCompare(b.nombre));
+  },
+  async getBrEstados() {
+    const res = await fetch('https://brasilapi.com.br/api/ibge/uf/v1');
+    const data = await res.json();
+    return (data || []).map((uf: any) => ({ id: uf.sigla, nombre: uf.nome, sigla: uf.sigla }));
+  },
+  async getBrMunicipios(uf: string) {
+    const res = await fetch(`https://brasilapi.com.br/api/ibge/municipios/v1/${uf}`);
+    const data = await res.json();
+    return (data || []).map((mun: any) => ({ id: mun.codigo_ibge, nombre: mun.nome }));
   }
 };
