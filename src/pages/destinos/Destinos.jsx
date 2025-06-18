@@ -13,7 +13,7 @@ export default function Destinos() {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [destinoToDelete, setDestinoToDelete] = useState(null);
-  // Estado para paginación
+
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function Destinos() {
       setLoading(true);
       try {
         // Suponiendo que el servicio acepta un parámetro de página
-        const data = await destinosService.getDestinos({ page: currentPage });
+        const data = await destinosService.getDestinos({ page: currentPage, limit: 10 });
         setDestinos(data);
       } catch (err) {
         console.error(err);
@@ -43,7 +43,7 @@ export default function Destinos() {
       await destinosService.deleteDestino(destinoToDelete.id);
       showNotification('Destino eliminado exitosamente', 'success');
       // Recargar la página actual
-      const data = await destinosService.getDestinos({ page: currentPage });
+      const data = await destinosService.getDestinos({ page: currentPage, limit: 10 });
       setDestinos(data);
     } catch (err) {
       console.error(err);
@@ -64,7 +64,7 @@ export default function Destinos() {
     <div className={styles.pagination} style={{ marginTop: "1rem", display: "flex", gap: "1rem", justifyContent: "center" }}>
       <button
         className={styles.crearBtn}
-        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
         disabled={currentPage === 1}
         style={{ opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
       >
@@ -73,7 +73,7 @@ export default function Destinos() {
       <span style={{ alignSelf: 'center' }}>Página {destinos.currentPage} de {destinos.totalPages}</span>
       <button
         className={styles.crearBtn}
-        onClick={() => setCurrentPage((p) => Math.min(destinos.totalPages, p + 1))}
+        onClick={() => setCurrentPage(p => Math.min(destinos.totalPages, p + 1))}
         disabled={currentPage === destinos.totalPages}
         style={{ opacity: currentPage === destinos.totalPages ? 0.5 : 1, cursor: currentPage === destinos.totalPages ? 'not-allowed' : 'pointer' }}
       >
@@ -84,11 +84,14 @@ export default function Destinos() {
 
   return (
     <div className={styles.container}>
-      <button className={styles.volverBtn} onClick={() => navigate(-1)}>
-        <ArrowLeft />
-        Volver
-      </button>
-      <h1 className={styles.titulo}>Destinos</h1>
+      <div className={styles.header}>
+        <button className={styles.volverBtn} onClick={() => navigate(-1)}>
+          <ArrowLeft />
+          Volver
+        </button>
+        <h1 className={styles.titulo}>Destinos</h1>
+        <div style={{ width: '120px' }}></div> {/* Spacer para centrar el título */}
+      </div>
       <div className={styles.wrapper}>
         <div className={styles.crearBtnContainer}>
           <Link to="/destinos/nuevo" className={styles.crearBtn}>
@@ -146,7 +149,7 @@ export default function Destinos() {
             </tbody>
           </table>
         </div>
-        {renderPagination()}
+        {destinos.totalPages > 1 && renderPagination()}
       </div>
 
       {destinoToDelete && (

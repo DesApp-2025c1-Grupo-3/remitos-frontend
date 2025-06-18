@@ -145,7 +145,7 @@ const prepararDatosActualizacion = (cliente: UpdateClienteData): any => {
 
 export const clientesService = {
   // Obtener todos los clientes
-  async getClientes(params?: { page?: number }): Promise<{ data: Cliente[], totalItems: number, totalPages: number, currentPage: number }> {
+  async getClientes(params?: { page?: number, limit?: number }): Promise<{ data: Cliente[], totalItems: number, totalPages: number, currentPage: number }> {
     try {
       if (USE_MOCK_DATA) {
         await mockDelay();

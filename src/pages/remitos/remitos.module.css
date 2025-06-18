@@ -1,12 +1,29 @@
 .container {
-  padding: 2rem;
+  padding: 1rem 2rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 1920px) {
+  .header {
+    max-width: 1400px;
+  }
 }
 
 .titulo {
   text-align: center;
   font-size: 2rem;
   font-weight: bold;
-  margin-bottom: 2rem;
+  margin: 0;
+  flex: 1;
 }
 
 .wrapper {
@@ -14,11 +31,17 @@
   margin: 0 auto;
 }
 
+@media (min-width: 1920px) {
+  .wrapper {
+    max-width: 1400px;
+  }
+}
+
 .crearBtnContainer {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   width: 100%;
 }
 
@@ -26,9 +49,9 @@
   background: #1F7A3D;
   color: #fff;
   border: none;
-  border-radius: 0.5rem;
-  padding: 0.5rem 1.2rem;
-  font-size: 0.95rem;
+  border-radius: 0.4rem;
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 2px 6px 0 #0001;
@@ -51,14 +74,13 @@
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  margin-bottom: 1.5rem;
   padding: 0.5rem 1.2rem;
   border-radius: 0.25rem;
   transition: background 0.2s;
-  align-self: flex-start;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  margin: 0;
 }
 
 .volverBtn:hover {
@@ -78,26 +100,33 @@
   margin: 0 auto;
 }
 
+@media (min-width: 1920px) {
+  .tablaContenedor {
+    max-width: 1400px;
+    padding: 2rem 2rem 1rem 2rem;
+  }
+}
+
 .tabla {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 1rem;
+  border-spacing: 0 0.2rem;
 }
 
 .tabla th {
   text-align: left;
-  padding: 0.75rem 1rem;
+  padding: 0.32rem 1rem;
   font-weight: 600;
   background: transparent;
   color: #222;
-  font-size: 1rem;
+  font-size: 0.88rem;
 }
 
 .tabla td {
   background: #fff;
   border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
+  padding: 0.32rem 1rem;
+  font-size: 0.88rem;
   color: #222;
   vertical-align: middle;
 }
@@ -113,34 +142,31 @@
 }
 
 .accionesBtn {
-  background: #1F7A3D;
-  color: #fff;
+  background: none;
   border: none;
-  border-radius: 1.2rem;
-  padding: 0.5rem;
-  font-size: 0.95rem;
-  font-weight: 500;
+  padding: 0.25rem;
   cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 6px 0 #0001;
+  transition: opacity 0.2s, transform 0.1s;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 0.25rem;
 }
 
 .accionesBtn:hover {
-  background: #17602e;
+  opacity: 0.7;
+  transform: scale(1.1);
 }
 
 .accionesBtn svg {
-  width: 1.2rem;
-  height: 1.2rem;
+  width: 1rem;
+  height: 1rem;
 }
 
-.accionesBtn.delete {
-  background: #dc2626;
+.accionesBtn:not(.delete) svg {
+  color: #16a34a;
 }
 
-.accionesBtn.delete:hover {
-  background: #b91c1c;
+.accionesBtn.delete svg {
+  color: #dc2626;
 } 

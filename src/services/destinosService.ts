@@ -75,7 +75,7 @@ const getNextContactoId = (destinos: Destino[]): number => {
 
 export const destinosService = {
   // Obtener todos los destinos
-  async getDestinos(params?: { page?: number }): Promise<{ data: Destino[], totalItems: number, totalPages: number, currentPage: number }> {
+  async getDestinos(params?: { page?: number, limit?: number }): Promise<{ data: Destino[], totalItems: number, totalPages: number, currentPage: number }> {
     try {
       if (USE_MOCK_DATA) {
         await mockDelay();

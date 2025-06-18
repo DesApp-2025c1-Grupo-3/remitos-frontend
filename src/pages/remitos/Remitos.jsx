@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { remitosService } from "../../services/remitosService";
 import styles from "./remitos.module.css";
 import { useNotification } from "../../contexts/NotificationContext";
 import { ConfirmModal } from '../../components/ConfirmModal/ConfirmModal';
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, ArrowLeft } from "lucide-react";
 
 export default function Remitos() {
   const [remitos, setRemitos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [remitoToDelete, setRemitoToDelete] = useState(null);
 
@@ -57,7 +58,14 @@ export default function Remitos() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.titulo}>Remitos</h1>
+      <div className={styles.header}>
+        <button className={styles.volverBtn} onClick={() => navigate(-1)}>
+          <ArrowLeft />
+          Volver
+        </button>
+        <h1 className={styles.titulo}>Remitos</h1>
+        <div style={{ width: '120px' }}></div> {/* Spacer para centrar el título */}
+      </div>
       <div className={styles.wrapper}>
         <div className={styles.crearBtnContainer}>
           <Link to="/remitos/nuevo" className={styles.crearBtn}>

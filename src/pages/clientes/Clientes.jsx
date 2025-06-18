@@ -13,7 +13,7 @@ export default function Clientes() {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [clienteToDelete, setClienteToDelete] = useState(null);
-  // Estado para paginación
+
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function Clientes() {
       setLoading(true);
       try {
         // Suponiendo que el servicio acepta un parámetro de página
-        const data = await clientesService.getClientes({ page: currentPage });
+        const data = await clientesService.getClientes({ page: currentPage, limit: 10 });
         setClientes(data);
       } catch (err) {
         console.error(err);
@@ -42,7 +42,7 @@ export default function Clientes() {
       await clientesService.deleteCliente(clienteToDelete.id);
       showNotification('Cliente eliminado exitosamente', 'success');
       // Recargar la página actual
-      const data = await clientesService.getClientes({ page: currentPage });
+      const data = await clientesService.getClientes({ page: currentPage, limit: 10 });
       setClientes(data);
     } catch (err) {
       console.error(err);
@@ -63,7 +63,7 @@ export default function Clientes() {
     <div className={styles.pagination} style={{ marginTop: "1rem", display: "flex", gap: "1rem", justifyContent: "center" }}>
       <button
         className={styles.crearBtn}
-        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
         disabled={currentPage === 1}
         style={{ opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
       >
@@ -72,7 +72,7 @@ export default function Clientes() {
       <span style={{ alignSelf: 'center' }}>Página {clientes.currentPage} de {clientes.totalPages}</span>
       <button
         className={styles.crearBtn}
-        onClick={() => setCurrentPage((p) => Math.min(clientes.totalPages, p + 1))}
+        onClick={() => setCurrentPage(p => Math.min(clientes.totalPages, p + 1))}
         disabled={currentPage === clientes.totalPages}
         style={{ opacity: currentPage === clientes.totalPages ? 0.5 : 1, cursor: currentPage === clientes.totalPages ? 'not-allowed' : 'pointer' }}
       >
@@ -83,11 +83,14 @@ export default function Clientes() {
 
   return (
     <div className={styles.container}>
-      <button className={styles.volverBtn} onClick={() => navigate(-1)}>
-        <ArrowLeft />
-        Volver
-      </button>
-      <h1 className={styles.titulo}>Clientes</h1>
+      <div className={styles.header}>
+        <button className={styles.volverBtn} onClick={() => navigate(-1)}>
+          <ArrowLeft />
+          Volver
+        </button>
+        <h1 className={styles.titulo}>Clientes</h1>
+        <div style={{ width: '120px' }}></div> {/* Spacer para centrar el título */}
+      </div>
       <div className={styles.wrapper}>
         <div className={styles.crearBtnContainer}>
           <Link to="/clientes/nuevo" className={styles.crearBtn}>
@@ -143,7 +146,7 @@ export default function Clientes() {
             </tbody>
           </table>
         </div>
-        {renderPagination()}
+        {clientes.totalPages > 1 && renderPagination()}
       </div>
 
       {clienteToDelete && (
