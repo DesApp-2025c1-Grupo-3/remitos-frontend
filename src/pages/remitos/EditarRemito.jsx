@@ -35,17 +35,23 @@ export default function EditarRemito() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [remitoData, clientesData, destinosData] = await Promise.all([
+        const [remitoData, clientesResponse, destinosResponse] = await Promise.all([
           remitosService.getRemitoById(Number(id)),
           clientesService.getClientes(),
           destinosService.getDestinos()
         ]);
+        
         setFormData(remitoData);
-        setClientes(clientesData);
-        setDestinos(destinosData);
+        // Asegurar que sean arrays
+        setClientes(Array.isArray(clientesResponse.data) ? clientesResponse.data : []);
+        setDestinos(Array.isArray(destinosResponse.data) ? destinosResponse.data : []);
       } catch (err) {
-        console.error(err);
+        console.error('Error en fetchData:', err);
+        console.error('Error details:', err.response?.data || err.message);
         showNotification('Error al cargar los datos del remito', 'error');
+        // En caso de error, establecer arrays vacíos
+        setClientes([]);
+        setDestinos([]);
       } finally {
         setLoading(false);
       }

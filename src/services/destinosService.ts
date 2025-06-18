@@ -9,7 +9,7 @@ axios.defaults.headers.common['X-API-Key'] = import.meta.env.VITE_API_KEY;
 
 export interface Destino {
   id: number;
-  name: string;
+  nombre: string;
   pais?: string;
   provincia: string;
   localidad: string;
@@ -21,7 +21,7 @@ export interface Destino {
 }
 
 export interface CreateDestinoData {
-  name: string;
+  nombre: string;
   pais: string;
   provincia: string;
   localidad: string;
@@ -31,7 +31,7 @@ export interface CreateDestinoData {
 
 // Interfaz para enviar al backend (sin contactos)
 interface CreateDestinoBackendData {
-  name: string;
+  nombre: string;
   pais: string;
   provincia: string;
   localidad: string;
@@ -42,7 +42,7 @@ interface CreateDestinoBackendData {
 const mockDestinos: Destino[] = [
   {
     id: 1,
-    name: "Depósito Central",
+    nombre: "Depósito Central",
     pais: undefined,
     provincia: "Buenos Aires",
     localidad: "La Plata",
@@ -62,7 +62,7 @@ const mockDestinos: Destino[] = [
   },
   {
     id: 2,
-    name: "Sucursal Montevideo",
+    nombre: "Sucursal Montevideo",
     pais: undefined,
     provincia: "Montevideo",
     localidad: "Centro",
@@ -82,7 +82,7 @@ const mockDestinos: Destino[] = [
   },
   {
     id: 3,
-    name: "Sucursal Santiago",
+    nombre: "Sucursal Santiago",
     pais: undefined,
     provincia: "Santiago",
     localidad: "Las Condes",
@@ -102,7 +102,7 @@ const mockDestinos: Destino[] = [
   },
   {
     id: 4,
-    name: "Depósito Norte",
+    nombre: "Depósito Norte",
     pais: undefined,
     provincia: "Córdoba",
     localidad: "Córdoba Capital",
@@ -122,7 +122,7 @@ const mockDestinos: Destino[] = [
   },
   {
     id: 5,
-    name: "Sucursal Rosario",
+    nombre: "Sucursal Rosario",
     pais: undefined,
     provincia: "Santa Fe",
     localidad: "Rosario",
@@ -160,14 +160,44 @@ const getNextContactoId = (destinos: Destino[]): number => {
 
 export const destinosService = {
   // Obtener todos los destinos
-  async getDestinos(): Promise<Destino[]> {
+  async getDestinos(params?: { page?: number }): Promise<{ data: Destino[], totalItems: number, totalPages: number, currentPage: number }> {
     try {
       if (USE_MOCK_DATA) {
         await mockDelay();
-        return mockDestinos;
+        return {
+          data: mockDestinos,
+          totalItems: mockDestinos.length,
+          totalPages: 1,
+          currentPage: 1
+        };
       }
-      const response = await axios.get(`${API_URL}/destino`);
-      return response.data;
+      const response = await axios.get(`${API_URL}/destino`, { params });
+      // El backend devuelve una respuesta paginada, necesitamos extraer el array data
+      const responseData = response.data;
+      if (responseData && responseData.data && Array.isArray(responseData.data)) {
+        return {
+          data: responseData.data,
+          totalItems: responseData.totalItems || responseData.data.length,
+          totalPages: responseData.totalPages || 1,
+          currentPage: responseData.currentPage || 1
+        };
+      } else if (Array.isArray(responseData)) {
+        // Fallback: si la respuesta es directamente un array
+        return {
+          data: responseData,
+          totalItems: responseData.length,
+          totalPages: 1,
+          currentPage: 1
+        };
+      } else {
+        console.error('Respuesta inesperada del backend:', responseData);
+        return {
+          data: [],
+          totalItems: 0,
+          totalPages: 1,
+          currentPage: 1
+        };
+      }
     } catch (error) {
       console.error('Error al obtener destinos:', error);
       throw error;
@@ -184,7 +214,13 @@ export const destinosService = {
         return destino;
       }
       const response = await axios.get(`${API_URL}/destino/${id}`);
-      return response.data;
+      // El backend puede devolver una respuesta paginada o directa
+      const responseData = response.data;
+      if (responseData && responseData.data) {
+        return responseData.data;
+      } else {
+        return responseData;
+      }
     } catch (error) {
       console.error(`Error al obtener destino con ID ${id}:`, error);
       throw error;

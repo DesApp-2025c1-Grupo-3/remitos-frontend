@@ -117,7 +117,7 @@ export default function Destinos() {
               ) : (
                 destinos.data.map((destino) => (
                   <tr key={destino.id}>
-                    <td>{destino.nombre || destino.name}</td>
+                    <td>{destino.nombre}</td>
                     <td>{destino.pais}</td>
                     <td>{destino.provincia}</td>
                     <td>{destino.localidad}</td>
@@ -155,7 +155,7 @@ export default function Destinos() {
           title="Confirmar eliminación"
           message={
             <div style={{ textAlign: 'center' }}>
-              <div>¿Estás seguro que deseas eliminar el destino "{destinoToDelete.name}"?</div>
+              <div>¿Estás seguro que deseas eliminar el destino "{destinoToDelete.nombre}"?</div>
               <div style={{ marginTop: '0.5rem' }}>
                 Esta acción no se puede deshacer
               </div>

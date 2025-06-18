@@ -142,14 +142,44 @@ const getNextContactoId = (clientes: Cliente[]): number => {
 
 export const clientesService = {
   // Obtener todos los clientes
-  async getClientes(): Promise<Cliente[]> {
+  async getClientes(params?: { page?: number }): Promise<{ data: Cliente[], totalItems: number, totalPages: number, currentPage: number }> {
     try {
       if (USE_MOCK_DATA) {
         await mockDelay();
-        return mockClientes;
+        return {
+          data: mockClientes,
+          totalItems: mockClientes.length,
+          totalPages: 1,
+          currentPage: 1
+        };
       }
-      const response = await axios.get(`${API_URL}/cliente`);
-      return response.data;
+      const response = await axios.get(`${API_URL}/cliente`, { params });
+      // El backend devuelve una respuesta paginada
+      const responseData = response.data;
+      if (responseData && responseData.data && Array.isArray(responseData.data)) {
+        return {
+          data: responseData.data,
+          totalItems: responseData.totalItems || responseData.data.length,
+          totalPages: responseData.totalPages || 1,
+          currentPage: responseData.currentPage || 1
+        };
+      } else if (Array.isArray(responseData)) {
+        // Fallback: si la respuesta es directamente un array
+        return {
+          data: responseData,
+          totalItems: responseData.length,
+          totalPages: 1,
+          currentPage: 1
+        };
+      } else {
+        console.error('Respuesta inesperada del backend:', responseData);
+        return {
+          data: [],
+          totalItems: 0,
+          totalPages: 1,
+          currentPage: 1
+        };
+      }
     } catch (error) {
       console.error('Error al obtener clientes:', error);
       throw error;
@@ -166,7 +196,13 @@ export const clientesService = {
         return cliente;
       }
       const response = await axios.get(`${API_URL}/cliente/${id}`);
-      return response.data;
+      // El backend puede devolver una respuesta paginada o directa
+      const responseData = response.data;
+      if (responseData && responseData.data) {
+        return responseData.data;
+      } else {
+        return responseData;
+      }
     } catch (error) {
       console.error(`Error al obtener cliente con ID ${id}:`, error);
       throw error;

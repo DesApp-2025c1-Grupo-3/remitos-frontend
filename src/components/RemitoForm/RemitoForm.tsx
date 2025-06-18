@@ -27,7 +27,7 @@ interface RemitoFormProps {
   submitButtonText: string;
   error: string | null;
   clientes?: { id: number, razonSocial: string, cuit_rut: string, direccion: string }[];
-  destinos?: { id: number, name: string, provincia: string, direccion: string }[];
+  destinos?: { id: number, nombre: string, provincia: string, localidad: string, direccion: string }[];
   onNuevoCliente?: () => void;
   onNuevoDestino?: () => void;
   onVolver?: () => void;
@@ -51,12 +51,17 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
   const [busquedaCliente, setBusquedaCliente] = useState('');
   const [busquedaDestino, setBusquedaDestino] = useState('');
   const [campoCliente, setCampoCliente] = useState<'razonSocial' | 'cuit_rut' | 'direccion'>('razonSocial');
-  const [campoDestino, setCampoDestino] = useState<'nombre' | 'provincia' | 'direccion'>('nombre');
+  const [campoDestino, setCampoDestino] = useState<'provincia' | 'localidad' | 'direccion'>('provincia');
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
 
-  const clientesFiltrados = clientes?.filter(c => (c[campoCliente] || '').toLowerCase().includes(busquedaCliente.toLowerCase()));
-  const destinosFiltrados = destinos?.filter(d => (d[campoDestino] || '').toLowerCase().includes(busquedaDestino.toLowerCase()));
+  // Validar que clientes y destinos sean arrays antes de usar filter
+  const clientesFiltrados = Array.isArray(clientes) 
+    ? clientes.filter(c => (c[campoCliente] || '').toLowerCase().includes(busquedaCliente.toLowerCase()))
+    : [];
+  const destinosFiltrados = Array.isArray(destinos)
+    ? destinos.filter(d => (d[campoDestino] || '').toLowerCase().includes(busquedaDestino.toLowerCase()))
+    : [];
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -380,8 +385,8 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
               <h3 style={{ marginBottom: 16 }}>Buscar destino</h3>
               <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
                 <select value={campoDestino} onChange={e => setCampoDestino(e.target.value as any)} style={{ padding: 6, borderRadius: 6, border: '1px solid #ccc' }}>
-                  <option value="nombre">Nombre</option>
                   <option value="provincia">Provincia</option>
+                  <option value="localidad">Localidad</option>
                   <option value="direccion">Dirección</option>
                 </select>
                 <input
@@ -389,24 +394,26 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
                   type="text"
                   value={busquedaDestino}
                   onChange={e => setBusquedaDestino(e.target.value)}
-                  placeholder={`Buscar por ${campoDestino === 'nombre' ? 'nombre' : campoDestino === 'provincia' ? 'provincia' : 'dirección'}...`}
+                  placeholder={`Buscar por ${campoDestino === 'provincia' ? 'provincia' : campoDestino === 'localidad' ? 'localidad' : 'dirección'}...`}
                   style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #ccc' }}
                 />
               </div>
               <div style={{ maxHeight: 300, overflowY: 'auto' }}>
-                {destinosFiltrados && destinosFiltrados.length > 0 ? destinosFiltrados.map(d => (
-                  <div key={d.id} style={{ padding: 12, cursor: 'pointer', borderRadius: 6, background: formData.destino === d.name ? '#e5e7eb' : 'transparent', marginBottom: 6, border: '1px solid #e5e7eb' }}
-                    onClick={() => {
-                      onChange({ target: { name: 'destino', value: d.name } } as any);
-                      setModalDestino(false);
-                      setBusquedaDestino('');
-                    }}
-                  >
-                    <div style={{ fontWeight: 600 }}>{d.name}</div>
-                    <div style={{ fontSize: 13, color: '#444' }}>Provincia: {d.provincia}</div>
-                    <div style={{ fontSize: 13, color: '#666' }}>{d.direccion}</div>
-                  </div>
-                )) : <div style={{ color: '#888', padding: 8 }}>Sin resultados</div>}
+                {destinosFiltrados && destinosFiltrados.length > 0 ? destinosFiltrados.map(d => {
+                  const destinoDisplayName = `${d.provincia} - ${d.localidad}`;
+                  return (
+                    <div key={d.id} style={{ padding: 12, cursor: 'pointer', borderRadius: 6, background: formData.destino === destinoDisplayName ? '#e5e7eb' : 'transparent', marginBottom: 6, border: '1px solid #e5e7eb' }}
+                      onClick={() => {
+                        onChange({ target: { name: 'destino', value: destinoDisplayName } } as any);
+                        setModalDestino(false);
+                        setBusquedaDestino('');
+                      }}
+                    >
+                      <div style={{ fontWeight: 600 }}>{destinoDisplayName}</div>
+                      <div style={{ fontSize: 13, color: '#666' }}>{d.direccion}</div>
+                    </div>
+                  );
+                }) : <div style={{ color: '#888', padding: 8 }}>Sin resultados</div>}
               </div>
               <button type="button" onClick={() => setModalDestino(false)} style={{ marginTop: 18, background: '#1F7A3D', color: '#fff', border: 'none', borderRadius: 8, padding: '0.5rem 1.2rem', fontWeight: 600, cursor: 'pointer' }}>Cerrar</button>
             </div>

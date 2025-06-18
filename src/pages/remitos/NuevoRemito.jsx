@@ -33,15 +33,21 @@ export default function NuevoRemito() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [clientesData, destinosData] = await Promise.all([
+        const [clientesResponse, destinosResponse] = await Promise.all([
           clientesService.getClientes(),
           destinosService.getDestinos()
         ]);
-        setClientes(clientesData);
-        setDestinos(destinosData);
+        
+        // Asegurar que sean arrays
+        setClientes(Array.isArray(clientesResponse.data) ? clientesResponse.data : []);
+        setDestinos(Array.isArray(destinosResponse.data) ? destinosResponse.data : []);
       } catch (err) {
-        console.error(err);
+        console.error('Error en fetchData:', err);
+        console.error('Error details:', err.response?.data || err.message);
         showNotification('Error al cargar los datos iniciales', 'error');
+        // En caso de error, establecer arrays vacíos
+        setClientes([]);
+        setDestinos([]);
       }
     };
     fetchData();

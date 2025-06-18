@@ -82,6 +82,7 @@ export const DestinoForm: React.FC<DestinoFormProps> = ({
   const [showPaisDropdown, setShowPaisDropdown] = useState(false);
   const [paisHoveredIndex, setPaisHoveredIndex] = useState(-1);
   const paisFiltrados = paisInput ? paises.filter(p => p.nombre.toLowerCase().includes(paisInput.toLowerCase())) : paises;
+  const paisInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (pais === 'Brasil') {
@@ -133,6 +134,9 @@ export const DestinoForm: React.FC<DestinoFormProps> = ({
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
+      if (paisInputRef.current && !paisInputRef.current.contains(e.target as Node)) {
+        setShowPaisDropdown(false);
+      }
       if (provinciaInputRef.current && !provinciaInputRef.current.contains(e.target as Node)) {
         setShowProvinciaDropdown(false);
       }
@@ -214,6 +218,7 @@ export const DestinoForm: React.FC<DestinoFormProps> = ({
               required
               autoComplete="off"
               name="pais"
+              ref={paisInputRef}
             />
             {showPaisDropdown && paisFiltrados.length > 0 && (
               <ul className={styles.dropdown}>
@@ -251,175 +256,179 @@ export const DestinoForm: React.FC<DestinoFormProps> = ({
         {/* Provincia y localidad progresivos para Argentina */}
         {pais === 'Argentina' && (
           <>
-            {provincias.length > 0 && (
-              <div className={styles.campo}>
-                <label className={styles.label}>Provincia destino</label>
-                <div className={styles.dropdownContainer}>
-                  <input
-                    type="text"
-                    className={styles.input}
-                    placeholder={loadingProvincias ? "Cargando..." : "Seleccione una provincia"}
-                    value={provinciaInput}
-                    onChange={e => {
-                      setProvinciaInput(e.target.value);
-                      setShowProvinciaDropdown(true);
-                    }}
-                    onFocus={() => setShowProvinciaDropdown(true)}
-                    ref={provinciaInputRef}
-                    disabled={loadingProvincias}
-                    required
-                    autoComplete="off"
-                    name="provincia"
-                  />
-                  {showProvinciaDropdown && provinciasFiltradas.length > 0 && (
-                    <ul className={styles.dropdown}>
-                      {provinciasFiltradas.map((prov, index) => (
-                        <li
-                          key={prov.id}
-                          className={styles.dropdownItem + (provinciaId === prov.id ? ' ' + styles.dropdownItemActive : '') + (index === provinciaHoveredIndex ? ' ' + styles.dropdownItemHover : '')}
-                          onMouseEnter={() => setProvinciaHoveredIndex(index)}
-                          onMouseLeave={() => setProvinciaHoveredIndex(-1)}
-                          onMouseDown={() => handleProvinciaSelect(prov)}
-                        >
-                          {prov.nombre}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
+            <div className={styles.campo}>
+              <label className={styles.label}>Provincia destino</label>
+              <div className={styles.dropdownContainer}>
+                <input
+                  type="text"
+                  className={styles.input}
+                  placeholder={loadingProvincias ? "Cargando provincias..." : "Seleccione una provincia"}
+                  value={provinciaInput}
+                  onChange={e => {
+                    setProvinciaInput(e.target.value);
+                    setShowProvinciaDropdown(true);
+                  }}
+                  onFocus={() => setShowProvinciaDropdown(true)}
+                  ref={provinciaInputRef}
+                  disabled={loadingProvincias}
+                  required
+                  autoComplete="off"
+                  name="provincia"
+                />
+                {showProvinciaDropdown && provinciasFiltradas.length > 0 && (
+                  <ul className={styles.dropdown}>
+                    {provinciasFiltradas.map((prov, index) => (
+                      <li
+                        key={prov.id}
+                        className={styles.dropdownItem + (provinciaId === prov.id ? ' ' + styles.dropdownItemActive : '') + (index === provinciaHoveredIndex ? ' ' + styles.dropdownItemHover : '')}
+                        onMouseEnter={() => setProvinciaHoveredIndex(index)}
+                        onMouseLeave={() => setProvinciaHoveredIndex(-1)}
+                        onMouseDown={() => handleProvinciaSelect(prov)}
+                      >
+                        {prov.nombre}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-            )}
-            {provinciaId && localidades.length > 0 && (
-              <div className={styles.campo}>
-                <label className={styles.label}>Localidad destino</label>
-                <div className={styles.dropdownContainer}>
-                  <input
-                    type="text"
-                    className={styles.input}
-                    placeholder={loadingLocalidades ? "Cargando..." : "Seleccione una localidad"}
-                    value={localidadInput}
-                    onChange={e => {
-                      setLocalidadInput(e.target.value);
-                      setShowLocalidadDropdown(true);
-                    }}
-                    onFocus={() => setShowLocalidadDropdown(true)}
-                    ref={localidadInputRef}
-                    disabled={loadingLocalidades || !provinciaId}
-                    required
-                    autoComplete="off"
-                    name="localidad"
-                  />
-                  {showLocalidadDropdown && localidadesFiltradas.length > 0 && (
-                    <ul className={styles.dropdown}>
-                      {localidadesFiltradas.map((loc, index) => (
-                        <li
-                          key={loc.id}
-                          className={styles.dropdownItem + (localidadId === loc.id ? ' ' + styles.dropdownItemActive : '') + (index === localidadHoveredIndex ? ' ' + styles.dropdownItemHover : '')}
-                          onMouseEnter={() => setLocalidadHoveredIndex(index)}
-                          onMouseLeave={() => setLocalidadHoveredIndex(-1)}
-                          onMouseDown={() => handleLocalidadSelect(loc)}
-                        >
-                          {loc.nombre}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
+            </div>
+            <div className={styles.campo}>
+              <label className={styles.label}>Localidad destino</label>
+              <div className={styles.dropdownContainer}>
+                <input
+                  type="text"
+                  className={styles.input}
+                  placeholder={
+                    !provinciaId 
+                      ? "Seleccione primero una provincia" 
+                      : loadingLocalidades 
+                        ? "Cargando localidades..." 
+                        : "Seleccione una localidad"
+                  }
+                  value={localidadInput}
+                  onChange={e => {
+                    setLocalidadInput(e.target.value);
+                    setShowLocalidadDropdown(true);
+                  }}
+                  onFocus={() => setShowLocalidadDropdown(true)}
+                  ref={localidadInputRef}
+                  disabled={loadingLocalidades || !provinciaId}
+                  required
+                  autoComplete="off"
+                  name="localidad"
+                />
+                {showLocalidadDropdown && localidadesFiltradas.length > 0 && (
+                  <ul className={styles.dropdown}>
+                    {localidadesFiltradas.map((loc, index) => (
+                      <li
+                        key={loc.id}
+                        className={styles.dropdownItem + (localidadId === loc.id ? ' ' + styles.dropdownItemActive : '') + (index === localidadHoveredIndex ? ' ' + styles.dropdownItemHover : '')}
+                        onMouseEnter={() => setLocalidadHoveredIndex(index)}
+                        onMouseLeave={() => setLocalidadHoveredIndex(-1)}
+                        onMouseDown={() => handleLocalidadSelect(loc)}
+                      >
+                        {loc.nombre}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-            )}
+            </div>
           </>
         )}
         {/* Estado y municipio progresivos para Brasil */}
         {pais === 'Brasil' && (
           <>
-            {brEstados.length > 0 && (
-              <div className={styles.campo}>
-                <label className={styles.label}>Estado</label>
-                <div className={styles.dropdownContainer}>
-                  <input
-                    type="text"
-                    className={styles.input}
-                    placeholder={loadingBrEstados ? "Cargando..." : "Seleccione un estado"}
-                    value={provinciaInput}
-                    onChange={e => {
-                      setProvinciaInput(e.target.value);
-                      setShowProvinciaDropdown(true);
-                    }}
-                    onFocus={() => setShowProvinciaDropdown(true)}
-                    ref={provinciaInputRef}
-                    disabled={loadingBrEstados}
-                    required
-                    autoComplete="off"
-                    name="provincia"
-                  />
-                  {showProvinciaDropdown && brEstados.filter(est => est.nombre.toLowerCase().includes(provinciaInput.toLowerCase())).length > 0 && (
-                    <ul className={styles.dropdown}>
-                      {brEstados.filter(est => est.nombre.toLowerCase().includes(provinciaInput.toLowerCase())).map((est, index) => (
-                        <li
-                          key={est.id}
-                          className={styles.dropdownItem + (brEstadoId === est.id ? ' ' + styles.dropdownItemActive : '') + (index === provinciaHoveredIndex ? ' ' + styles.dropdownItemHover : '')}
-                          onMouseEnter={() => setProvinciaHoveredIndex(index)}
-                          onMouseLeave={() => setProvinciaHoveredIndex(-1)}
-                          onMouseDown={() => {
-                            setBrEstadoId(est.id);
-                            setProvinciaInput(est.nombre);
-                            setShowProvinciaDropdown(false);
-                            setBrMunicipioId('');
-                            onChange({ target: { name: 'provincia', value: est.nombre } } as any);
-                            onChange({ target: { name: 'localidad', value: '' } } as any);
-                          }}
-                        >
-                          {est.nombre} ({est.sigla})
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
+            <div className={styles.campo}>
+              <label className={styles.label}>Estado</label>
+              <div className={styles.dropdownContainer}>
+                <input
+                  type="text"
+                  className={styles.input}
+                  placeholder={loadingBrEstados ? "Cargando estados..." : "Seleccione un estado"}
+                  value={provinciaInput}
+                  onChange={e => {
+                    setProvinciaInput(e.target.value);
+                    setShowProvinciaDropdown(true);
+                  }}
+                  onFocus={() => setShowProvinciaDropdown(true)}
+                  ref={provinciaInputRef}
+                  disabled={loadingBrEstados}
+                  required
+                  autoComplete="off"
+                  name="provincia"
+                />
+                {showProvinciaDropdown && brEstados.filter(est => est.nombre.toLowerCase().includes(provinciaInput.toLowerCase())).length > 0 && (
+                  <ul className={styles.dropdown}>
+                    {brEstados.filter(est => est.nombre.toLowerCase().includes(provinciaInput.toLowerCase())).map((est, index) => (
+                      <li
+                        key={est.id}
+                        className={styles.dropdownItem + (brEstadoId === est.id ? ' ' + styles.dropdownItemActive : '') + (index === provinciaHoveredIndex ? ' ' + styles.dropdownItemHover : '')}
+                        onMouseEnter={() => setProvinciaHoveredIndex(index)}
+                        onMouseLeave={() => setProvinciaHoveredIndex(-1)}
+                        onMouseDown={() => {
+                          setBrEstadoId(est.id);
+                          setProvinciaInput(est.nombre);
+                          setShowProvinciaDropdown(false);
+                          setBrMunicipioId('');
+                          onChange({ target: { name: 'provincia', value: est.nombre } } as any);
+                          onChange({ target: { name: 'localidad', value: '' } } as any);
+                        }}
+                      >
+                        {est.nombre} ({est.sigla})
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-            )}
-            {brEstadoId && brMunicipios.length > 0 && (
-              <div className={styles.campo}>
-                <label className={styles.label}>Municipio</label>
-                <div className={styles.dropdownContainer}>
-                  <input
-                    type="text"
-                    className={styles.input}
-                    placeholder={loadingBrMunicipios ? "Cargando..." : "Seleccione un municipio"}
-                    value={localidadInput}
-                    onChange={e => {
-                      setLocalidadInput(e.target.value);
-                      setShowLocalidadDropdown(true);
-                    }}
-                    onFocus={() => setShowLocalidadDropdown(true)}
-                    ref={localidadInputRef}
-                    disabled={loadingBrMunicipios || !brEstadoId}
-                    required
-                    autoComplete="off"
-                    name="localidad"
-                  />
-                  {showLocalidadDropdown && brMunicipios.filter(mun => mun.nombre.toLowerCase().includes(localidadInput.toLowerCase())).length > 0 && (
-                    <ul className={styles.dropdown}>
-                      {brMunicipios.filter(mun => mun.nombre.toLowerCase().includes(localidadInput.toLowerCase())).map((mun, index) => (
-                        <li
-                          key={mun.id}
-                          className={styles.dropdownItem + (brMunicipioId === mun.id ? ' ' + styles.dropdownItemActive : '') + (index === localidadHoveredIndex ? ' ' + styles.dropdownItemHover : '')}
-                          onMouseEnter={() => setLocalidadHoveredIndex(index)}
-                          onMouseLeave={() => setLocalidadHoveredIndex(-1)}
-                          onMouseDown={() => {
-                            setBrMunicipioId(mun.id);
-                            setLocalidadInput(mun.nombre);
-                            setShowLocalidadDropdown(false);
-                            onChange({ target: { name: 'localidad', value: mun.nombre } } as any);
-                          }}
-                        >
-                          {mun.nombre}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
+            </div>
+            <div className={styles.campo}>
+              <label className={styles.label}>Municipio</label>
+              <div className={styles.dropdownContainer}>
+                <input
+                  type="text"
+                  className={styles.input}
+                  placeholder={
+                    !brEstadoId 
+                      ? "Seleccione primero un estado" 
+                      : loadingBrMunicipios 
+                        ? "Cargando municipios..." 
+                        : "Seleccione un municipio"
+                  }
+                  value={localidadInput}
+                  onChange={e => {
+                    setLocalidadInput(e.target.value);
+                    setShowLocalidadDropdown(true);
+                  }}
+                  onFocus={() => setShowLocalidadDropdown(true)}
+                  ref={localidadInputRef}
+                  disabled={loadingBrMunicipios || !brEstadoId}
+                  required
+                  autoComplete="off"
+                  name="localidad"
+                />
+                {showLocalidadDropdown && brMunicipios.filter(mun => mun.nombre.toLowerCase().includes(localidadInput.toLowerCase())).length > 0 && (
+                  <ul className={styles.dropdown}>
+                    {brMunicipios.filter(mun => mun.nombre.toLowerCase().includes(localidadInput.toLowerCase())).map((mun, index) => (
+                      <li
+                        key={mun.id}
+                        className={styles.dropdownItem + (brMunicipioId === mun.id ? ' ' + styles.dropdownItemActive : '') + (index === localidadHoveredIndex ? ' ' + styles.dropdownItemHover : '')}
+                        onMouseEnter={() => setLocalidadHoveredIndex(index)}
+                        onMouseLeave={() => setLocalidadHoveredIndex(-1)}
+                        onMouseDown={() => {
+                          setBrMunicipioId(mun.id);
+                          setLocalidadInput(mun.nombre);
+                          setShowLocalidadDropdown(false);
+                          onChange({ target: { name: 'localidad', value: mun.nombre } } as any);
+                        }}
+                      >
+                        {mun.nombre}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-            )}
+            </div>
           </>
         )}
         <div className={styles.campo}>
