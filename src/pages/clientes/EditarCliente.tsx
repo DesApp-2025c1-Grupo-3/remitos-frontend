@@ -22,6 +22,12 @@ export default function EditarCliente() {
     contactos: []
   })
   const [loading, setLoading] = useState(true)
+  const [errors, setErrors] = useState({
+    contactos: false,
+    razonSocial: false,
+    tipoEmpresa: false,
+    direccion: false
+  })
 
   useEffect(() => {
     const cargarCliente = async () => {
@@ -54,10 +60,30 @@ export default function EditarCliente() {
 
   const handleContactosChange = (contactos: Contacto[]) => {
     setFormData(prev => ({ ...prev, contactos }))
+    // Ocultar error si se agrega al menos un contacto
+    if (contactos.length > 0) {
+      setErrors(prev => ({ ...prev, contactos: false }))
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validar todos los campos y recoger errores
+    const newErrors = {
+      contactos: !formData.contactos || formData.contactos.length === 0,
+      razonSocial: !formData.razonSocial || formData.razonSocial.trim() === '',
+      tipoEmpresa: !formData.tipoEmpresa || formData.tipoEmpresa.trim() === '',
+      direccion: !formData.direccion || formData.direccion.trim() === ''
+    }
+    
+    setErrors(newErrors)
+    
+    // Si hay errores, no enviar el formulario
+    const hasErrors = Object.values(newErrors).some(error => error)
+    if (hasErrors) {
+      return
+    }
     
     try {
       if (id) {
@@ -92,6 +118,12 @@ export default function EditarCliente() {
         onContactosChange={handleContactosChange}
         submitButtonText="Guardar Cambios"
         error={null}
+        showContactError={errors.contactos}
+        fieldErrors={{
+          razonSocial: errors.razonSocial,
+          tipoEmpresa: errors.tipoEmpresa,
+          direccion: errors.direccion
+        }}
       />
     </div>
   )

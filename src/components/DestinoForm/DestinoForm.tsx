@@ -21,6 +21,14 @@ interface DestinoFormProps {
   onSubmit: (e: React.FormEvent) => void;
   onContactoChange?: (contactos: Contacto[]) => void;
   contactos?: Contacto[];
+  showContactError?: boolean;
+  fieldErrors?: {
+    nombre?: boolean;
+    pais?: boolean;
+    provincia?: boolean;
+    localidad?: boolean;
+    direccion?: boolean;
+  };
 }
 
 export const DestinoForm: React.FC<DestinoFormProps> = ({
@@ -28,7 +36,9 @@ export const DestinoForm: React.FC<DestinoFormProps> = ({
   onChange,
   onSubmit,
   onContactoChange,
-  contactos = []
+  contactos = [],
+  showContactError = false,
+  fieldErrors = {}
 }) => {
   const showContactos = isFeatureEnabled('ENABLE_CONTACTOS');
 
@@ -197,23 +207,24 @@ export const DestinoForm: React.FC<DestinoFormProps> = ({
       <form onSubmit={handleSubmit} className={styles.formulario}>
         <div className={styles.campo}>
           <label className={styles.label}>
-            Nombre del destino
-            <span className={styles.optional}> (opcional)</span>
+            Nombre
           </label>
           <input
             name="nombre"
             value={formData.nombre}
             onChange={onChange}
-            placeholder="Ingresar nombre del destino (opcional)"
-            className={styles.input}
+            placeholder="Ingresar nombre"
+            className={fieldErrors.nombre ? `${styles.input} ${styles.inputError}` : styles.input}
+            required
           />
+          {fieldErrors.nombre && <div className={styles.inputErrorMsg}>El nombre es requerido</div>}
         </div>
         <div className={styles.campo}>
           <label className={styles.label}>País</label>
           <div className={styles.dropdownContainer}>
             <input
               type="text"
-              className={styles.input}
+              className={fieldErrors.pais ? `${styles.input} ${styles.inputError}` : styles.input}
               placeholder="Seleccione un país"
               value={paisInput}
               onChange={e => {
@@ -258,16 +269,17 @@ export const DestinoForm: React.FC<DestinoFormProps> = ({
               </ul>
             )}
           </div>
+          {fieldErrors.pais && <div className={styles.inputErrorMsg}>El país es requerido</div>}
         </div>
         {/* Provincia y localidad progresivos para Argentina */}
         {pais === 'Argentina' && (
           <>
             <div className={styles.campo}>
-              <label className={styles.label}>Provincia destino</label>
+              <label className={styles.label}>Provincia</label>
               <div className={styles.dropdownContainer}>
                 <input
                   type="text"
-                  className={styles.input}
+                  className={fieldErrors.provincia ? `${styles.input} ${styles.inputError}` : styles.input}
                   placeholder={loadingProvincias ? "Cargando provincias..." : "Seleccione una provincia"}
                   value={provinciaInput}
                   onChange={e => {
@@ -299,7 +311,7 @@ export const DestinoForm: React.FC<DestinoFormProps> = ({
               </div>
             </div>
             <div className={styles.campo}>
-              <label className={styles.label}>Localidad destino</label>
+              <label className={styles.label}>Localidad</label>
               <div className={styles.dropdownContainer}>
                 <input
                   type="text"
@@ -443,15 +455,17 @@ export const DestinoForm: React.FC<DestinoFormProps> = ({
             name="direccion"
             value={formData.direccion}
             onChange={onChange}
-            placeholder="Ingresar dirección de destino de mercadería"
-            className={styles.input}
+            placeholder="Ingresar dirección de destino"
+            className={fieldErrors.direccion ? `${styles.input} ${styles.inputError}` : styles.input}
             required
           />
+          {fieldErrors.direccion && <div className={styles.inputErrorMsg}>La dirección es requerida</div>}
         </div>
         {showContactos && onContactoChange && (
           <ContactosForm 
             contactos={contactos}
             onContactosChange={onContactoChange}
+            showError={showContactError}
           />
         )}
         <div className={styles.botonera}>

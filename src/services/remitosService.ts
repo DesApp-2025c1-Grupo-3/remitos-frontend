@@ -3,9 +3,6 @@ import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_REMITOS === 'true';
 
-// Configuración de axios para incluir la API key en todas las peticiones
-axios.defaults.headers.common['X-API-Key'] = import.meta.env.VITE_API_KEY;
-
 export interface Remito {
   id: number;
   numero: string;

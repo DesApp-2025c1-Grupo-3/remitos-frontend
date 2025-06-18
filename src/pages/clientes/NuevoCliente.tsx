@@ -19,6 +19,12 @@ export default function NuevoCliente() {
     direccion: "",
     contactos: []
   })
+  const [errors, setErrors] = useState({
+    contactos: false,
+    razonSocial: false,
+    tipoEmpresa: false,
+    direccion: false
+  })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -27,19 +33,34 @@ export default function NuevoCliente() {
 
   const handleContactosChange = (contactos: Contacto[]) => {
     setFormData(prev => ({ ...prev, contactos }))
+    // Ocultar error si se agrega al menos un contacto
+    if (contactos.length > 0) {
+      setErrors(prev => ({ ...prev, contactos: false }))
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validar todos los campos y recoger errores
+    const newErrors = {
+      contactos: !formData.contactos || formData.contactos.length === 0,
+      razonSocial: !formData.razonSocial || formData.razonSocial.trim() === '',
+      tipoEmpresa: !formData.tipoEmpresa || formData.tipoEmpresa.trim() === '',
+      direccion: !formData.direccion || formData.direccion.trim() === ''
+    }
+    
+    setErrors(newErrors)
+    
+    // Si hay errores, no enviar el formulario
+    const hasErrors = Object.values(newErrors).some(error => error)
+    if (hasErrors) {
+      return
+    }
+    
     try {
-      // Validar que haya al menos un contacto válido
-      if (!formData.contactos || formData.contactos.length === 0) {
-        showNotification('Se requiere al menos un contacto para crear el cliente. Agregue un contacto antes de guardar.', 'error')
-        return
-      }
-
       const primerContacto = formData.contactos[0];
-      if (!primerContacto.personaAutorizada || !primerContacto.correoElectronico || primerContacto.telefono <= 0) {
+      if (!primerContacto.personaAutorizada || !primerContacto.correoElectronico || !primerContacto.telefono) {
         showNotification('El contacto debe tener todos los campos completos: persona autorizada, correo electrónico y teléfono.', 'error')
         return
       }
@@ -79,6 +100,12 @@ export default function NuevoCliente() {
         onContactosChange={handleContactosChange}
         submitButtonText="Cargar Cliente"
         error={null}
+        showContactError={errors.contactos}
+        fieldErrors={{
+          razonSocial: errors.razonSocial,
+          tipoEmpresa: errors.tipoEmpresa,
+          direccion: errors.direccion
+        }}
       />
     </div>
   )

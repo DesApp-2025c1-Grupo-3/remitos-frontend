@@ -6,11 +6,13 @@ import { Contacto } from '../../types/contacto';
 interface ContactosFormProps {
   contactos: Contacto[];
   onContactosChange: (contactos: Contacto[]) => void;
+  showError?: boolean;
 }
 
 export const ContactosForm: React.FC<ContactosFormProps> = ({
   contactos,
   onContactosChange,
+  showError = false,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -123,6 +125,12 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
           + Nuevo contacto
         </button>
       </div>
+      
+      {showError && (
+        <div className={styles.errorMessage}>
+          Se requiere agregar al menos un contacto
+        </div>
+      )}
 
       {contactos.length > 0 && (
         <div className={styles.listaContactos}>

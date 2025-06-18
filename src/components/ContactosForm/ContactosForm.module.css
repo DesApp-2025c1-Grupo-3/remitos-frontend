@@ -36,6 +36,17 @@
   background: #17602e;
 }
 
+.errorMessage {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  color: #dc2626;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
 .listaContactos {
   display: flex;
   flex-direction: column;

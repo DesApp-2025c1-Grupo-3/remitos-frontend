@@ -2,10 +2,33 @@ import axios from 'axios';
 import { Contacto } from '../types/contacto';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DESTINOS;
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DESTINOS === 'true';
 
-// Configuración de axios para incluir la API key en todas las peticiones
-axios.defaults.headers.common['X-API-Key'] = import.meta.env.VITE_API_KEY;
+// Función auxiliar para manejar errores de validación del backend
+const handleValidationErrors = (error: any): string => {
+  if (axios.isAxiosError(error) && error.response) {
+    const { status, data } = error.response;
+    
+    if (status === 400 && data.errores) {
+      // Errores de validación específicos
+      const errores = data.errores;
+      if (Array.isArray(errores)) {
+        const mensajes = errores.map((err: any) => {
+          if (err.atributo === 'contactos' && err.error.includes('requerido')) {
+            return 'Se requiere agregar al menos un contacto para el destino.';
+          }
+          return err.error || err.message || 'Error de validación';
+        });
+        return mensajes.join('. ');
+      }
+    } else if (status === 400) {
+      return 'Datos inválidos. Verifique que todos los campos requeridos estén completos y que haya al menos un contacto.';
+    } else if (status === 422) {
+      return 'Error de validación. Verifique el formato de los datos y que haya al menos un contacto.';
+    }
+  }
+  return 'Error inesperado. Por favor, intente nuevamente.';
+};
 
 export interface Destino {
   id: number;
@@ -137,10 +160,15 @@ export const destinosService = {
         return newDestino;
       }
 
+      // Validar que haya al menos un contacto (requerido por el esquema del backend)
+      if (!destino.contactos || destino.contactos.length === 0) {
+        throw new Error('Se requiere agregar al menos un contacto para el destino.');
+      }
+
       // Usar siempre /destinoContacto para incluir el nombre independientemente de si hay contactos
-      const contactosParaEnvio = destino.contactos ? destino.contactos.map(contacto => {
+      const contactosParaEnvio = destino.contactos.map(contacto => {
         // Validar formato de teléfono según backend: patrón /^\+?\d{10,15}$/
-        const telefonoStr = contacto.telefono.toString().trim();
+        const telefonoStr = String(contacto.telefono).trim();
         const telefonoRegex = /^\+?\d{10,15}$/;
         
         if (!telefonoRegex.test(telefonoStr)) {
@@ -152,7 +180,7 @@ export const destinosService = {
           correoElectronico: contacto.correoElectronico,
           telefono: telefonoStr // Enviar como string según backend
         };
-      }) : [];
+      });
 
       const destinoCompleto = {
         nombre: destino.nombre,
@@ -167,15 +195,8 @@ export const destinosService = {
       return response.data;
     } catch (error) {
       console.error('Error al crear destino:', error);
-      if (axios.isAxiosError(error) && error.response) {
-        // Manejar errores específicos del backend
-        if (error.response.status === 400) {
-          throw new Error('Datos inválidos. Verifique que todos los campos requeridos estén completos.');
-        } else if (error.response.status === 422) {
-          throw new Error('Error de validación. Verifique el formato de los datos.');
-        }
-      }
-      throw new Error('Error al crear el destino. Por favor, intente nuevamente.');
+      const mensaje = handleValidationErrors(error);
+      throw new Error(mensaje);
     }
   },
 
@@ -259,7 +280,8 @@ export const destinosService = {
       }
     } catch (error) {
       console.error('Error al crear destino con contacto:', error);
-      throw error;
+      const mensaje = handleValidationErrors(error);
+      throw new Error(mensaje);
     }
   },
 
@@ -280,35 +302,34 @@ export const destinosService = {
       }
 
       // Preparar datos para actualización
-      // Filtrar contactos para enviar solo los campos que acepta el backend (si se proporcionan)
-      let contactosParaEnvio;
-      if (destino.contactos) {
-        contactosParaEnvio = destino.contactos.map((contacto: any) => ({
-          personaAutorizada: contacto.personaAutorizada,
-          correoElectronico: contacto.correoElectronico,
-          telefono: contacto.telefono
-          // NO incluir: id, createdAt, updatedAt, clienteId, destinoId
-        }));
+      // Validar que haya al menos un contacto (requerido por el esquema del backend)
+      if (!destino.contactos || destino.contactos.length === 0) {
+        throw new Error('Se requiere agregar al menos un contacto para el destino.');
       }
+      
+      // Filtrar contactos para enviar solo los campos que acepta el backend
+      const contactosParaEnvio = destino.contactos.map((contacto: any) => ({
+        personaAutorizada: contacto.personaAutorizada,
+        correoElectronico: contacto.correoElectronico,
+        telefono: String(contacto.telefono)
+        // NO incluir: id, createdAt, updatedAt, clienteId, destinoId
+      }));
 
       const updateData: any = {
         nombre: destino.nombre,
         pais: destino.pais,
         provincia: destino.provincia,
         localidad: destino.localidad,
-        direccion: destino.direccion
+        direccion: destino.direccion,
+        contactos: contactosParaEnvio
       };
-      
-      // Solo incluir contactos si se proporcionaron
-      if (contactosParaEnvio !== undefined) {
-        updateData.contactos = contactosParaEnvio;
-      }
 
             const response = await axios.put(`${API_URL}/destino/${id}`, updateData);
       return response.data;
     } catch (error) {
       console.error(`Error al actualizar destino con ID ${id}:`, error);
-      throw error;
+      const mensaje = handleValidationErrors(error);
+      throw new Error(mensaje);
     }
   },
 

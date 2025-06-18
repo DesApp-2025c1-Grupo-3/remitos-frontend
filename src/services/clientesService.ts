@@ -4,6 +4,34 @@ import { Contacto } from '../types/contacto';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_CLIENTES === 'true';
 
+// Función auxiliar para manejar errores de validación del backend
+const handleValidationErrors = (error: any): string => {
+  if (axios.isAxiosError(error) && error.response) {
+    const { status, data } = error.response;
+    
+    if (status === 400 && data.errores) {
+      // Errores de validación específicos
+      const errores = data.errores;
+      if (Array.isArray(errores)) {
+        const mensajes = errores.map((err: any) => {
+          if (err.atributo === 'contactos' && err.error.includes('requerido')) {
+            return 'Se requiere agregar al menos un contacto para el cliente.';
+          }
+          return err.error || err.message || 'Error de validación';
+        });
+        return mensajes.join('. ');
+      }
+    } else if (status === 400) {
+      return 'Datos inválidos. Verifique que todos los campos requeridos estén completos y que haya al menos un contacto.';
+    } else if (status === 422) {
+      return 'Error de validación. Verifique el formato de los datos y que haya al menos un contacto.';
+    } else if (status === 404) {
+      return 'Cliente no encontrado.';
+    }
+  }
+  return 'Error inesperado. Por favor, intente nuevamente.';
+};
+
 // Interfaz para la respuesta del backend
 export interface Cliente {
   id: number;
@@ -99,12 +127,12 @@ const validarClienteBasico = (cliente: ClienteBackendData): boolean => {
 const prepararDatosActualizacion = (cliente: UpdateClienteData): any => {
   const clienteBasico = {
     razonSocial: cliente.razonSocial,
-    cuit_rut: cliente.cuit_rut ? parseInt(cliente.cuit_rut) : null,
+    cuit_rut: cliente.cuit_rut, // Mantener como string según el backend
     tipoEmpresa: cliente.tipoEmpresa,
     direccion: cliente.direccion
   };
 
-  // El esquema requiere al menos un contacto, usar únicamente los datos del formulario
+  // Preparar contactos limpiando campos de base de datos
   const contactos = cliente.contactos && cliente.contactos.length > 0 
     ? limpiarContactos(cliente.contactos)
     : [];
@@ -275,7 +303,8 @@ export const clientesService = {
       return response.data;
     } catch (error) {
       console.error('Error al crear cliente con contacto:', error);
-      throw error;
+      const mensaje = handleValidationErrors(error);
+      throw new Error(mensaje);
     }
   },
 
@@ -295,12 +324,12 @@ export const clientesService = {
         return mockClientes[index];
       }
       
-      // 1. Preparar datos para la actualización (incluyendo contacto mínimo requerido por el esquema)
+      // Preparar datos para la actualización
       const datosActualizacion = prepararDatosActualizacion(cliente);
       
       // Validar que haya al menos un contacto (requerido por el esquema del backend)
       if (!datosActualizacion.contactos || datosActualizacion.contactos.length === 0) {
-        throw new Error('Se requiere al menos un contacto para actualizar el cliente. Agregue un contacto antes de guardar.');
+        throw new Error('Se requiere agregar al menos un contacto para el cliente.');
       }
       
       // Validar datos básicos antes de enviar
@@ -311,60 +340,22 @@ export const clientesService = {
         direccion: datosActualizacion.direccion
       });
       
-      // Enviar datos al endpoint de actualización
+      // El esquema del backend requiere SIEMPRE contactos, así que enviamos todo junto
+      // Usar PUT /cliente/:id con todos los datos incluyendo contactos
       const response = await axios.put(`${API_URL}/cliente/${id}`, datosActualizacion);
       
-      // 2. Si hay contactos para actualizar, manejarlos por separado usando endpoints específicos
-      if (cliente.contactos && cliente.contactos.length > 0) {
-        // Obtener el cliente actual con sus contactos para comparar
-        const clienteActual = await this.getClienteById(id);
-        const contactosActuales = clienteActual.contactos || [];
-        
-        // Procesar cada contacto
-        for (const contactoNuevo of cliente.contactos) {
-          // Si el contacto tiene ID, actualizarlo
-          if (contactoNuevo.id) {
-            const datosContacto = prepararContactoParaEndpoint(contactoNuevo, 'update');
-            await axios.put(`${API_URL}/contacto/${contactoNuevo.id}`, datosContacto);
-          } else {
-            // Si no tiene ID, es un nuevo contacto
-            const datosContacto = prepararContactoParaEndpoint(contactoNuevo, 'add');
-            await axios.post(`${API_URL}/agregarContactoACliente/${id}`, datosContacto);
-          }
-        }
-        
-        // Verificar si hay contactos que se eliminaron del frontend
-        const contactosNuevosIds = cliente.contactos
-          .filter(c => c.id)
-          .map(c => c.id);
-        
-        const contactosAEliminar = contactosActuales.filter(
-          c => c.id && !contactosNuevosIds.includes(c.id)
-        );
-        
-        // Eliminar contactos que ya no están en el frontend
-        for (const contactoAEliminar of contactosAEliminar) {
-          if (contactoAEliminar.id) {
-            await axios.delete(`${API_URL}/contacto/${contactoAEliminar.id}`);
-          }
-        }
+      // Si la respuesta no incluye contactos, obtener el cliente completo
+      if (response.data && response.data.id) {
+        const clienteCompleto = await this.getClienteById(id);
+        return clienteCompleto;
       }
       
-      // 3. Obtener el cliente actualizado con todos sus contactos
-      const clienteActualizado = await this.getClienteById(id);
-      return clienteActualizado;
+      return response.data;
+      
     } catch (error) {
       console.error(`Error al actualizar cliente con ID ${id}:`, error);
-      if (axios.isAxiosError(error) && error.response) {
-        if (error.response.status === 404) {
-          throw new Error('Cliente no encontrado');
-        } else if (error.response.status === 400) {
-          throw new Error('Datos inválidos. Verifique que todos los campos requeridos estén completos.');
-        } else if (error.response.status === 422) {
-          throw new Error('Error de validación. Verifique el formato de los datos.');
-        }
-      }
-      throw new Error('Error al actualizar el cliente. Por favor, intente nuevamente.');
+      const mensaje = handleValidationErrors(error);
+      throw new Error(mensaje);
     }
   },
 

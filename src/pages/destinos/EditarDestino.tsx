@@ -22,6 +22,14 @@ export default function EditarDestino() {
     contactos: []
   })
   const [loading, setLoading] = useState(true)
+  const [errors, setErrors] = useState({
+    contactos: false,
+    nombre: false,
+    pais: false,
+    provincia: false,
+    localidad: false,
+    direccion: false
+  })
 
   useEffect(() => {
     const fetchDestino = async () => {
@@ -64,11 +72,33 @@ export default function EditarDestino() {
       ...prev,
       contactos
     }))
+    // Ocultar error si se agrega al menos un contacto
+    if (contactos.length > 0) {
+      setErrors(prev => ({ ...prev, contactos: false }))
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!id) return
+    
+    // Validar todos los campos y recoger errores
+    const newErrors = {
+      contactos: !formData.contactos || formData.contactos.length === 0,
+      nombre: !formData.nombre || formData.nombre.trim() === '',
+      pais: !formData.pais || formData.pais.trim() === '',
+      provincia: !formData.provincia || formData.provincia.trim() === '',
+      localidad: !formData.localidad || formData.localidad.trim() === '',
+      direccion: !formData.direccion || formData.direccion.trim() === ''
+    }
+    
+    setErrors(newErrors)
+    
+    // Si hay errores, no enviar el formulario
+    const hasErrors = Object.values(newErrors).some(error => error)
+    if (hasErrors) {
+      return
+    }
     
     try {
       await destinosService.updateDestino(parseInt(id), formData)
@@ -101,6 +131,14 @@ export default function EditarDestino() {
         onChange={handleChange}
         onContactoChange={handleContactoChange}
         contactos={formData.contactos}
+        showContactError={errors.contactos}
+        fieldErrors={{
+          nombre: errors.nombre,
+          pais: errors.pais,
+          provincia: errors.provincia,
+          localidad: errors.localidad,
+          direccion: errors.direccion
+        }}
       />
     </div>
   )

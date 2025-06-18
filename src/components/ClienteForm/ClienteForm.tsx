@@ -19,6 +19,12 @@ interface ClienteFormProps {
   onContactosChange: (contactos: Contacto[]) => void;
   submitButtonText: string;
   error: string | null;
+  showContactError?: boolean;
+  fieldErrors?: {
+    razonSocial?: boolean;
+    tipoEmpresa?: boolean;
+    direccion?: boolean;
+  };
 }
 
 export const ClienteForm: React.FC<ClienteFormProps> = ({
@@ -27,7 +33,9 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
   onChange,
   onContactosChange,
   submitButtonText,
-  error
+  error,
+  showContactError = false,
+  fieldErrors = {}
 }) => {
   const showContactos = isFeatureEnabled('ENABLE_CONTACTOS');
   const [cuitError, setCuitError] = React.useState<string | null>(null);
@@ -91,8 +99,10 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
             value={formData.razonSocial || ''}
             onChange={handleChange}
             placeholder="Ingresar razón social"
-            className={styles.input}
+            className={fieldErrors.razonSocial ? `${styles.input} ${styles.inputError}` : styles.input}
+            required
           />
+          {fieldErrors.razonSocial && <div className={styles.inputErrorMsg}>La razón social es requerida</div>}
         </div>
         <div className={styles.campo}>
           <label className={styles.label}>CUIT/RUT</label>
@@ -115,7 +125,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
             name="tipoEmpresa"
             value={formData.tipoEmpresa}
             onChange={handleChange}
-            className={styles.input}
+            className={fieldErrors.tipoEmpresa ? `${styles.input} ${styles.inputError}` : styles.input}
             required
             style={{ width: '100%', maxWidth: 400, minWidth: 0, padding: '0.5rem 1rem', boxSizing: 'border-box', height: 44 }}
           >
@@ -124,6 +134,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
             <option value="organismo estatal">Organismo estatal</option>
             <option value="particular">Particular</option>
           </select>
+          {fieldErrors.tipoEmpresa && <div className={styles.inputErrorMsg}>El tipo de cliente es requerido</div>}
         </div>
         <div className={styles.campo}>
           <label className={styles.label}>Dirección</label>
@@ -132,15 +143,17 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
             value={formData.direccion}
             onChange={handleChange}
             placeholder="Ingresar dirección"
-            className={styles.input}
+            className={fieldErrors.direccion ? `${styles.input} ${styles.inputError}` : styles.input}
             required
           />
+          {fieldErrors.direccion && <div className={styles.inputErrorMsg}>La dirección es requerida</div>}
         </div>
 
         {showContactos && (
           <ContactosForm 
             contactos={formData.contactos || []}
             onContactosChange={onContactosChange}
+            showError={showContactError}
           />
         )}
 
