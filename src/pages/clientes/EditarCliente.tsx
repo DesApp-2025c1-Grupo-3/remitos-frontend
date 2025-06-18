@@ -8,12 +8,13 @@ import { ArrowLeft } from "lucide-react"
 import { ClienteForm, ClienteFormData } from "../../components/ClienteForm/ClienteForm"
 import { Contacto } from "../../types/contacto"
 import { useNotification } from "../../contexts/NotificationContext"
+import { UpdateClienteData } from "../../services/clientesService"
 
 export default function EditarCliente() {
   const navigate = useNavigate()
   const { id } = useParams()
   const { showNotification } = useNotification()
-  const [formData, setFormData] = useState<ClienteFormData>({
+  const [formData, setFormData] = useState<UpdateClienteData>({
     razonSocial: null,
     cuit_rut: null,
     tipoEmpresa: "",
@@ -60,11 +61,9 @@ export default function EditarCliente() {
     
     try {
       if (id) {
-        // Extraer solo los campos básicos del cliente
-        const { razonSocial, cuit_rut, tipoEmpresa, direccion } = formData
-        const clienteData = { razonSocial, cuit_rut, tipoEmpresa, direccion }
+        // Actualizar el cliente con todos los datos incluyendo contactos
+        await clientesService.updateCliente(Number(id), formData)
         
-        await clientesService.updateCliente(Number(id), clienteData)
         showNotification('Cliente actualizado exitosamente', 'success')
         navigate("/clientes")
       }

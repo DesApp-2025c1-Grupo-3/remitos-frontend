@@ -67,11 +67,12 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Validación de CUIT: debe tener exactamente 11 dígitos
-    if (!formData.cuit_rut || formData.cuit_rut.length !== 11) {
+    if (formData.cuit_rut && formData.cuit_rut.length !== 11) {
       setCuitError('El CUIT debe tener exactamente 11 dígitos');
       return;
     }
-    if (!validarCuit(formData.cuit_rut)) {
+    // Solo validar formato si hay CUIT ingresado
+    if (formData.cuit_rut && !validarCuit(formData.cuit_rut)) {
       setCuitError('Formato de CUIT incorrecto');
       return;
     }

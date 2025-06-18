@@ -17,7 +17,7 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
   const [nuevoContacto, setNuevoContacto] = useState<Contacto>({
     personaAutorizada: '',
     correoElectronico: '',
-    telefono: 0,
+    telefono: '', // Cambiado a string según backend
   });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [telefonoError, setTelefonoError] = useState<string | null>(null);
@@ -25,11 +25,19 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
   const handleContactoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === 'telefono') {
-      // Solo permitir hasta 10 dígitos numéricos
-      const soloNumeros = value.replace(/\D/g, '').slice(0, 10);
+      // Solo permitir hasta 15 dígitos numéricos (según patrón backend /^\+?\d{10,15}$/)
+      const soloNumeros = value.replace(/\D/g, '').slice(0, 15);
+      
+      // Validar longitud según backend (10-15 dígitos)
+      if (soloNumeros.length > 0 && soloNumeros.length < 10) {
+        setTelefonoError('El teléfono debe tener entre 10 y 15 dígitos');
+      } else {
+        setTelefonoError(null);
+      }
+      
       setNuevoContacto((prev) => ({
         ...prev,
-        telefono: soloNumeros ? parseInt(soloNumeros) : 0
+        telefono: soloNumeros
       }));
     } else {
       setNuevoContacto((prev) => ({
@@ -49,9 +57,10 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
     // Validación básica de email
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
-  const validateTelefono = (telefono: number) => {
-    // Debe tener exactamente 10 dígitos
-    return telefono && telefono.toString().length === 10;
+  const validateTelefono = (telefono: string) => {
+    // Validar según patrón del backend: /^\+?\d{10,15}$/
+    const telefonoRegex = /^\+?\d{10,15}$/;
+    return telefonoRegex.test(telefono);
   };
 
   const agregarContacto = () => {
@@ -63,7 +72,7 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
       valid = false;
     }
     if (!validateTelefono(nuevoContacto.telefono)) {
-      setTelefonoError('El teléfono debe tener exactamente 10 dígitos');
+      setTelefonoError('El teléfono debe tener entre 10 y 15 dígitos');
       valid = false;
     }
     if (!nuevoContacto.personaAutorizada) {
@@ -82,7 +91,7 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
     setNuevoContacto({
       personaAutorizada: '',
       correoElectronico: '',
-      telefono: 0,
+      telefono: '',
     });
     setEditingIndex(null);
     setShowModal(false);
@@ -98,7 +107,7 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
     setNuevoContacto({
       personaAutorizada: '',
       correoElectronico: '',
-      telefono: 0,
+      telefono: '',
     });
   };
 
@@ -180,12 +189,12 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
                 <input
                   name="telefono"
                   type="text"
-                  value={nuevoContacto.telefono ? nuevoContacto.telefono.toString() : ''}
+                  value={nuevoContacto.telefono}
                   onChange={handleContactoChange}
-                  placeholder="Teléfono del contacto"
+                  placeholder="Teléfono del contacto (10-15 dígitos)"
                   className={telefonoError ? `${styles.input} ${styles.inputError}` : styles.input}
                   required
-                  maxLength={10}
+                  maxLength={15}
                   inputMode="numeric"
                   pattern="[0-9]*"
                 />

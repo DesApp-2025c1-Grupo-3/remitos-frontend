@@ -32,16 +32,35 @@ export default function NuevoCliente() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      // Extraer solo los campos básicos del cliente
-      const { razonSocial, cuit_rut, tipoEmpresa, direccion } = formData
-      const clienteData = { razonSocial, cuit_rut, tipoEmpresa, direccion }
-      // Usar SIEMPRE createCliente, nunca createClienteWithContacto
-      await clientesService.createCliente(clienteData)
+      // Validar que haya al menos un contacto válido
+      if (!formData.contactos || formData.contactos.length === 0) {
+        showNotification('Se requiere al menos un contacto para crear el cliente. Agregue un contacto antes de guardar.', 'error')
+        return
+      }
+
+      const primerContacto = formData.contactos[0];
+      if (!primerContacto.personaAutorizada || !primerContacto.correoElectronico || primerContacto.telefono <= 0) {
+        showNotification('El contacto debe tener todos los campos completos: persona autorizada, correo electrónico y teléfono.', 'error')
+        return
+      }
+
+      // Usar createClienteWithContacto con los datos del formulario
+      await clientesService.createClienteWithContacto({
+        razonSocial: formData.razonSocial,
+        cuit_rut: formData.cuit_rut,
+        tipoEmpresa: formData.tipoEmpresa,
+        direccion: formData.direccion,
+        personaAutorizada: primerContacto.personaAutorizada,
+        correoElectronico: primerContacto.correoElectronico,
+        telefono: primerContacto.telefono.toString()
+      });
+      
       showNotification('Cliente creado exitosamente', 'success')
       navigate("/clientes")
     } catch (err) {
       console.error(err)
-      showNotification('Error al crear el cliente. Por favor, intente nuevamente.', 'error')
+      const errorMessage = err instanceof Error ? err.message : 'Error al crear el cliente. Por favor, intente nuevamente.'
+      showNotification(errorMessage, 'error')
     }
   }
 

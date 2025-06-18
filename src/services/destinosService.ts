@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { Contacto } from '../types/contacto';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DESTINOS === 'true';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DESTINOS;
 
 // Configuración de axios para incluir la API key en todas las peticiones
 axios.defaults.headers.common['X-API-Key'] = import.meta.env.VITE_API_KEY;
@@ -10,7 +10,7 @@ axios.defaults.headers.common['X-API-Key'] = import.meta.env.VITE_API_KEY;
 export interface Destino {
   id: number;
   nombre: string;
-  pais?: string;
+  pais: string;
   provincia: string;
   localidad: string;
   direccion: string;
@@ -29,118 +29,10 @@ export interface CreateDestinoData {
   contactos?: Contacto[];
 }
 
-// Interfaz para enviar al backend (sin contactos)
-interface CreateDestinoBackendData {
-  nombre: string;
-  pais: string;
-  provincia: string;
-  localidad: string;
-  direccion: string;
-}
+// Ya no necesitamos esta interfaz separada, siempre usamos destinoContactoSchema
 
 // Datos mock para desarrollo
-const mockDestinos: Destino[] = [
-  {
-    id: 1,
-    nombre: "Depósito Central",
-    pais: undefined,
-    provincia: "Buenos Aires",
-    localidad: "La Plata",
-    direccion: "Calle 7 1234",
-    activo: true,
-    contactos: [
-      {
-        id: 1,
-        personaAutorizada: "Juan Pérez",
-        correoElectronico: "juan@depocentral.com",
-        telefono: 2211234567,
-        destinoId: 1
-      }
-    ],
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01')
-  },
-  {
-    id: 2,
-    nombre: "Sucursal Montevideo",
-    pais: undefined,
-    provincia: "Montevideo",
-    localidad: "Centro",
-    direccion: "Av. 18 de Julio 456",
-    activo: true,
-    contactos: [
-      {
-        id: 2,
-        personaAutorizada: "María García",
-        correoElectronico: "maria@sucursalmontevideo.com",
-        telefono: 59812345678,
-        destinoId: 2
-      }
-    ],
-    createdAt: new Date('2024-01-02'),
-    updatedAt: new Date('2024-01-02')
-  },
-  {
-    id: 3,
-    nombre: "Sucursal Santiago",
-    pais: undefined,
-    provincia: "Santiago",
-    localidad: "Las Condes",
-    direccion: "Av. Apoquindo 789",
-    activo: true,
-    contactos: [
-      {
-        id: 3,
-        personaAutorizada: "Carlos Rodríguez",
-        correoElectronico: "carlos@sucursalsantiago.com",
-        telefono: 56212345678,
-        destinoId: 3
-      }
-    ],
-    createdAt: new Date('2024-01-03'),
-    updatedAt: new Date('2024-01-03')
-  },
-  {
-    id: 4,
-    nombre: "Depósito Norte",
-    pais: undefined,
-    provincia: "Córdoba",
-    localidad: "Córdoba Capital",
-    direccion: "Av. Colón 1234",
-    activo: true,
-    contactos: [
-      {
-        id: 4,
-        personaAutorizada: "Ana Martínez",
-        correoElectronico: "ana@deponorte.com",
-        telefono: 3511234567,
-        destinoId: 4
-      }
-    ],
-    createdAt: new Date('2024-01-04'),
-    updatedAt: new Date('2024-01-04')
-  },
-  {
-    id: 5,
-    nombre: "Sucursal Rosario",
-    pais: undefined,
-    provincia: "Santa Fe",
-    localidad: "Rosario",
-    direccion: "Av. Pellegrini 456",
-    activo: true,
-    contactos: [
-      {
-        id: 5,
-        personaAutorizada: "Luis Fernández",
-        correoElectronico: "luis@sucursalrosario.com",
-        telefono: 3411234567,
-        destinoId: 5
-      }
-    ],
-    createdAt: new Date('2024-01-05'),
-    updatedAt: new Date('2024-01-05')
-  }
-];
+const mockDestinos: Destino[] = [];
 
 // Simular delay de red
 const mockDelay = () => new Promise(resolve => setTimeout(resolve, 500));
@@ -245,13 +137,45 @@ export const destinosService = {
         return newDestino;
       }
 
-      // Remover contactos antes de enviar al backend
-      const { contactos, ...destinoSinContactos } = destino;
-      const response = await axios.post(`${API_URL}/destino`, destinoSinContactos as CreateDestinoBackendData);
+      // Usar siempre /destinoContacto para incluir el nombre independientemente de si hay contactos
+      const contactosParaEnvio = destino.contactos ? destino.contactos.map(contacto => {
+        // Validar formato de teléfono según backend: patrón /^\+?\d{10,15}$/
+        const telefonoStr = contacto.telefono.toString().trim();
+        const telefonoRegex = /^\+?\d{10,15}$/;
+        
+        if (!telefonoRegex.test(telefonoStr)) {
+          throw new Error(`El teléfono "${telefonoStr}" debe tener entre 10 y 15 dígitos, opcionalmente iniciando con "+"`);
+        }
+        
+        return {
+          personaAutorizada: contacto.personaAutorizada,
+          correoElectronico: contacto.correoElectronico,
+          telefono: telefonoStr // Enviar como string según backend
+        };
+      }) : [];
+
+      const destinoCompleto = {
+        nombre: destino.nombre,
+        pais: destino.pais,
+        provincia: destino.provincia,
+        localidad: destino.localidad,
+        direccion: destino.direccion,
+        contactos: contactosParaEnvio
+      };
+      
+      const response = await axios.post(`${API_URL}/destinoContacto`, destinoCompleto);
       return response.data;
     } catch (error) {
       console.error('Error al crear destino:', error);
-      throw error;
+      if (axios.isAxiosError(error) && error.response) {
+        // Manejar errores específicos del backend
+        if (error.response.status === 400) {
+          throw new Error('Datos inválidos. Verifique que todos los campos requeridos estén completos.');
+        } else if (error.response.status === 422) {
+          throw new Error('Error de validación. Verifique el formato de los datos.');
+        }
+      }
+      throw new Error('Error al crear el destino. Por favor, intente nuevamente.');
     }
   },
 
@@ -259,7 +183,7 @@ export const destinosService = {
   async createDestinoWithContacto(destino: CreateDestinoData & { 
     personaAutorizada: string;
     correoElectronico: string;
-    telefono: number;
+    telefono: string; // Cambiado a string según backend
   }): Promise<Destino> {
     try {
       if (USE_MOCK_DATA) {
@@ -282,8 +206,57 @@ export const destinosService = {
         mockDestinos.push(newDestino);
         return newDestino;
       }
-      const response = await axios.post(`${API_URL}/destinoContacto`, destino);
-      return response.data;
+      
+      // Intentar usar /destinoContacto con contactos sin IDs de relación
+      const destinoData = {
+        nombre: destino.nombre,
+        pais: destino.pais,
+        provincia: destino.provincia,
+        localidad: destino.localidad,
+        direccion: destino.direccion,
+        contactos: [{
+          personaAutorizada: destino.personaAutorizada,
+          correoElectronico: destino.correoElectronico,
+          telefono: destino.telefono
+          // NO incluir clienteId ni destinoId
+        }]
+      };
+      
+      try {
+        const response = await axios.post(`${API_URL}/destinoContacto`, destinoData);
+        return response.data;
+      } catch (contactoError) {
+        console.warn('Error al crear destino con contacto, intentando sin contactos:', contactoError);
+        
+        // Si falla, intentar crear sin contactos y luego agregar el contacto por separado
+        const { nombre, ...destinoSinNombre } = destino;
+        const destinoData = {
+          pais: destinoSinNombre.pais,
+          provincia: destinoSinNombre.provincia,
+          localidad: destinoSinNombre.localidad,
+          direccion: destinoSinNombre.direccion
+        };
+        
+        const response = await axios.post(`${API_URL}/destino`, destinoData);
+        const nuevoDestino = response.data;
+        
+        // Agregar el contacto por separado
+        try {
+          await axios.post(`${API_URL}/agregarContactoADestino/${nuevoDestino.id}`, {
+            personaAutorizada: destino.personaAutorizada,
+            correoElectronico: destino.correoElectronico,
+            telefono: destino.telefono
+          });
+          
+          // Obtener el destino con contacto actualizado
+          const destinoConContacto = await axios.get(`${API_URL}/destino/${nuevoDestino.id}`);
+          return destinoConContacto.data;
+        } catch (contactoError) {
+          console.warn('Error al agregar contacto:', contactoError);
+          // Retornar el destino sin contacto si falla
+          return nuevoDestino;
+        }
+      }
     } catch (error) {
       console.error('Error al crear destino con contacto:', error);
       throw error;
@@ -306,9 +279,32 @@ export const destinosService = {
         return mockDestinos[index];
       }
 
-      // Remover contactos antes de enviar al backend
-      const { contactos, ...destinoSinContactos } = destino;
-      const response = await axios.put(`${API_URL}/destino/${id}`, destinoSinContactos);
+      // Preparar datos para actualización
+      // Filtrar contactos para enviar solo los campos que acepta el backend (si se proporcionan)
+      let contactosParaEnvio;
+      if (destino.contactos) {
+        contactosParaEnvio = destino.contactos.map((contacto: any) => ({
+          personaAutorizada: contacto.personaAutorizada,
+          correoElectronico: contacto.correoElectronico,
+          telefono: contacto.telefono
+          // NO incluir: id, createdAt, updatedAt, clienteId, destinoId
+        }));
+      }
+
+      const updateData: any = {
+        nombre: destino.nombre,
+        pais: destino.pais,
+        provincia: destino.provincia,
+        localidad: destino.localidad,
+        direccion: destino.direccion
+      };
+      
+      // Solo incluir contactos si se proporcionaron
+      if (contactosParaEnvio !== undefined) {
+        updateData.contactos = contactosParaEnvio;
+      }
+
+            const response = await axios.put(`${API_URL}/destino/${id}`, updateData);
       return response.data;
     } catch (error) {
       console.error(`Error al actualizar destino con ID ${id}:`, error);

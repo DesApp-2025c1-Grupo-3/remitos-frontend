@@ -13,7 +13,7 @@ export default function NuevoDestino() {
   const navigate = useNavigate()
   const { showNotification } = useNotification()
   const [formData, setFormData] = useState<DestinoFormData>({
-    name: "",
+    nombre: "", // Opcional si no hay contactos según backend
     pais: "",
     provincia: "",
     localidad: "",
@@ -45,10 +45,8 @@ export default function NuevoDestino() {
       navigate("/destinos")
     } catch (err) {
       console.error("Error al crear destino:", err)
-      showNotification(
-        "Error al crear el destino. Por favor, intente nuevamente.",
-        "error"
-      )
+      const errorMessage = err instanceof Error ? err.message : 'Error al crear el destino. Por favor, intente nuevamente.'
+      showNotification(errorMessage, "error")
     }
   }
 

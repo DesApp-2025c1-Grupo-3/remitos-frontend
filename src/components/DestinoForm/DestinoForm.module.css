@@ -45,6 +45,17 @@
   width: 100%;
 }
 
+.required {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.optional {
+  color: #6b7280;
+  font-weight: 400;
+  font-size: 0.875rem;
+}
+
 .input, select.input {
   width: 100%;
   min-width: 0;

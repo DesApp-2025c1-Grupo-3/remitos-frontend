@@ -2,7 +2,7 @@ export interface Contacto {
     id?: number;
     personaAutorizada: string;
     correoElectronico: string;
-    telefono: number;
+    telefono: string; // Backend espera string con patrón /^\+?\d{10,15}$/
     clienteId?: number;
     destinoId?: number;
     createdAt?: Date;

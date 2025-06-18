@@ -14,7 +14,7 @@ export default function EditarDestino() {
   const { id } = useParams()
   const { showNotification } = useNotification()
   const [formData, setFormData] = useState<DestinoFormData>({
-    name: "",
+    nombre: "",
     pais: "",
     provincia: "",
     localidad: "",
@@ -30,8 +30,8 @@ export default function EditarDestino() {
       try {
         const destino = await destinosService.getDestinoById(parseInt(id))
         setFormData({
-          name: destino.name,
-          pais: destino.pais,
+          nombre: destino.nombre,
+          pais: destino.pais || "",
           provincia: destino.provincia,
           localidad: destino.localidad,
           direccion: destino.direccion,

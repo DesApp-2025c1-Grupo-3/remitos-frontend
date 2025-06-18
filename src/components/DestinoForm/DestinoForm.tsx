@@ -7,7 +7,7 @@ import { isFeatureEnabled } from '../../config/features';
 import { georefService } from '../../services/destinosService';
 
 export interface DestinoFormData {
-  name: string;
+  nombre: string;
   pais: string;
   provincia: string;
   localidad: string;
@@ -182,24 +182,30 @@ export const DestinoForm: React.FC<DestinoFormProps> = ({
     onChange({ target: { name: 'localidad', value: loc.nombre } } as any);
   };
 
-  // Forzar el valor de país en el submit
+  // Validar según las reglas del backend antes del submit
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-      onSubmit(e);
+    
+    // Validación: El nombre ahora siempre puede ser enviado (opcional en ambos casos)
+    // No hay validación especial necesaria para el nombre
+    
+    onSubmit(e);
   };
 
   return (
     <div className={styles.wrapper}>
       <form onSubmit={handleSubmit} className={styles.formulario}>
         <div className={styles.campo}>
-          <label className={styles.label}>Nombre del destino</label>
+          <label className={styles.label}>
+            Nombre del destino
+            <span className={styles.optional}> (opcional)</span>
+          </label>
           <input
-            name="name"
-            value={formData.name}
+            name="nombre"
+            value={formData.nombre}
             onChange={onChange}
-            placeholder="Ingresar nombre del destino"
+            placeholder="Ingresar nombre del destino (opcional)"
             className={styles.input}
-            required
           />
         </div>
         <div className={styles.campo}>
