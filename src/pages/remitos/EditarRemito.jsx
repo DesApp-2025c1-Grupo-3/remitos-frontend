@@ -13,22 +13,26 @@ export default function EditarRemito() {
   const { id } = useParams();
   const { showNotification } = useNotification();
   const [formData, setFormData] = useState({
-    numero: "",
-    cliente: "",
-    destino: "",
-    peso: "",
-    volumen: "",
-    valor: "",
-    tipo: "",
-    requisitos: "",
+    numeroAsignado: "",
     observaciones: "",
-    cantidadPallets: "",
-    cantidadBultos: "",
-    cantidadRacks: "",
+    prioridad: "normal",
+    clienteId: "",
+    destinoId: "",
+    // Campos de mercadería
+    tipoMercaderia: "",
+    valorDeclarado: "",
+    volumenMetrosCubico: "",
+    pesoMercaderia: "",
     cantidadBobinas: "",
-    cantidadTambores: "",
+    cantidadRacks: "",
+    cantidadBultos: "",
+    cantidadPallets: "",
+    requisitosEspeciales: "",
+    // Archivo adjunto
+    archivoAdjunto: null,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [clientes, setClientes] = useState([]);
   const [destinos, setDestinos] = useState([]);
 
@@ -41,13 +45,36 @@ export default function EditarRemito() {
           destinosService.getDestinos()
         ]);
         
-        setFormData(remitoData);
+        // Mapear los datos del remito al formato del formulario
+        const mappedData = {
+          numeroAsignado: remitoData.numeroAsignado || "",
+          observaciones: remitoData.observaciones || "",
+          prioridad: remitoData.prioridad || "normal",
+          clienteId: remitoData.clienteId?.toString() || "",
+          destinoId: remitoData.destinoId?.toString() || "",
+          // Campos de mercadería desde el objeto mercaderia
+          tipoMercaderia: remitoData.mercaderia?.tipoMercaderia || "",
+          valorDeclarado: remitoData.mercaderia?.valorDeclarado?.toString() || "",
+          volumenMetrosCubico: remitoData.mercaderia?.volumenMetrosCubico?.toString() || "",
+          pesoMercaderia: remitoData.mercaderia?.pesoMercaderia?.toString() || "",
+          cantidadBobinas: remitoData.mercaderia?.cantidadBobinas?.toString() || "",
+          cantidadRacks: remitoData.mercaderia?.cantidadRacks?.toString() || "",
+          cantidadBultos: remitoData.mercaderia?.cantidadBultos?.toString() || "",
+          cantidadPallets: remitoData.mercaderia?.cantidadPallets?.toString() || "",
+          requisitosEspeciales: remitoData.mercaderia?.requisitosEspeciales || "",
+          // No podemos editar el archivo adjunto existente
+          archivoAdjunto: null,
+        };
+        
+        setFormData(mappedData);
+        
         // Asegurar que sean arrays
         setClientes(Array.isArray(clientesResponse.data) ? clientesResponse.data : []);
         setDestinos(Array.isArray(destinosResponse.data) ? destinosResponse.data : []);
       } catch (err) {
         console.error('Error en fetchData:', err);
         console.error('Error details:', err.response?.data || err.message);
+        setError('Error al cargar los datos del remito');
         showNotification('Error al cargar los datos del remito', 'error');
         // En caso de error, establecer arrays vacíos
         setClientes([]);
@@ -57,23 +84,87 @@ export default function EditarRemito() {
       }
     };
 
+    if (id) {
     fetchData();
+    }
   }, [id, showNotification]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    // Limpiar errores cuando el usuario comience a escribir
+    if (error) setError(null);
+  };
+
+  const handleFileChange = (file) => {
+    setFormData(prev => ({ ...prev, archivoAdjunto: file }));
+  };
+
+  const validateForm = () => {
+    if (!formData.numeroAsignado.trim()) {
+      setError('El número de remito es requerido');
+      return false;
+    }
+    if (!formData.prioridad) {
+      setError('Debe seleccionar una prioridad');
+      return false;
+    }
+    if (!formData.clienteId) {
+      setError('Debe seleccionar un cliente');
+      return false;
+    }
+    if (!formData.destinoId) {
+      setError('Debe seleccionar un destino');
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     try {
-      await remitosService.updateRemito(Number(id), formData);
-      showNotification('Remito actualizado exitosamente', 'success');
+      setError(null);
+      
+      // Actualizar datos básicos del remito
+      const updateData = {
+        numeroAsignado: formData.numeroAsignado.trim(),
+        observaciones: formData.observaciones.trim(),
+        prioridad: formData.prioridad,
+        clienteId: parseInt(formData.clienteId),
+        destinoId: parseInt(formData.destinoId),
+      };
+
+      // Actualizar datos de mercadería
+      const mercaderiaData = {
+        tipoMercaderia: formData.tipoMercaderia.trim(),
+        valorDeclarado: parseFloat(formData.valorDeclarado) || 0,
+        volumenMetrosCubico: parseFloat(formData.volumenMetrosCubico) || 0,
+        pesoMercaderia: parseFloat(formData.pesoMercaderia) || 0,
+        cantidadBobinas: parseInt(formData.cantidadBobinas) || 0,
+        cantidadRacks: parseInt(formData.cantidadRacks) || 0,
+        cantidadBultos: parseInt(formData.cantidadBultos) || 0,
+        cantidadPallets: parseInt(formData.cantidadPallets) || 0,
+        requisitosEspeciales: formData.requisitosEspeciales.trim(),
+      };
+
+      // Ejecutar ambas actualizaciones en paralelo
+      await Promise.all([
+        remitosService.updateRemito(Number(id), updateData),
+        remitosService.updateMercaderia(Number(id), mercaderiaData)
+      ]);
+
+      showNotification('Remito y mercadería actualizados exitosamente', 'success');
       navigate("/remitos");
     } catch (err) {
-      console.error(err);
-      showNotification('Error al actualizar el remito. Por favor, intente nuevamente.', 'error');
+      console.error('Error al actualizar remito:', err);
+      const errorMessage = err.response?.data?.message || err.message || 'Error al actualizar el remito. Por favor, intente nuevamente.';
+      setError(errorMessage);
+      showNotification(errorMessage, 'error');
     }
   };
 
@@ -90,7 +181,9 @@ export default function EditarRemito() {
         formData={formData}
         onSubmit={handleSubmit}
         onChange={handleChange}
+        onFileChange={handleFileChange}
         submitButtonText="Actualizar Remito"
+        error={error}
         clientes={clientes}
         destinos={destinos}
         onNuevoCliente={() => navigate("/clientes/nuevo")}

@@ -99,6 +99,28 @@ select.input {
   transform: translateY(-2px) scale(1.03);
 }
 
+.submitBtn {
+  background: #1F7A3D;
+  color: #fff;
+  border: none;
+  border-radius: 1.5rem;
+  padding: 0.7rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px 0 #0002;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  margin: 0 auto;
+  display: block;
+  letter-spacing: 0.5px;
+}
+
+.submitBtn:hover {
+  background: #17602e;
+  box-shadow: 0 6px 16px 0 #0003;
+  transform: translateY(-2px) scale(1.03);
+}
+
 .dropdownWrapper {
   position: relative;
 }
