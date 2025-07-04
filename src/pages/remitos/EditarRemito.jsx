@@ -127,38 +127,27 @@ export default function EditarRemito() {
       return;
     }
 
+    // Convertir los valores del formulario a los tipos correctos
+    const updateData = {
+      ...formData,
+      clienteId: parseInt(formData.clienteId, 10),
+      destinoId: parseInt(formData.destinoId, 10),
+      valorDeclarado: parseFloat(formData.valorDeclarado) || 0,
+      volumenMetrosCubico: parseFloat(formData.volumenMetrosCubico) || 0,
+      pesoMercaderia: parseFloat(formData.pesoMercaderia) || 0,
+      cantidadBobinas: parseInt(formData.cantidadBobinas, 10) || 0,
+      cantidadRacks: parseInt(formData.cantidadRacks, 10) || 0,
+      cantidadBultos: parseInt(formData.cantidadBultos, 10) || 0,
+      cantidadPallets: parseInt(formData.cantidadPallets, 10) || 0,
+    };
+
     try {
       setError(null);
       
-      // Actualizar datos básicos del remito
-      const updateData = {
-        numeroAsignado: formData.numeroAsignado.trim(),
-        observaciones: formData.observaciones.trim(),
-        prioridad: formData.prioridad,
-        clienteId: parseInt(formData.clienteId),
-        destinoId: parseInt(formData.destinoId),
-      };
+      // Llamada única al servicio de actualización
+      await remitosService.updateRemito(Number(id), updateData);
 
-      // Actualizar datos de mercadería
-      const mercaderiaData = {
-        tipoMercaderia: formData.tipoMercaderia.trim(),
-        valorDeclarado: parseFloat(formData.valorDeclarado) || 0,
-        volumenMetrosCubico: parseFloat(formData.volumenMetrosCubico) || 0,
-        pesoMercaderia: parseFloat(formData.pesoMercaderia) || 0,
-        cantidadBobinas: parseInt(formData.cantidadBobinas) || 0,
-        cantidadRacks: parseInt(formData.cantidadRacks) || 0,
-        cantidadBultos: parseInt(formData.cantidadBultos) || 0,
-        cantidadPallets: parseInt(formData.cantidadPallets) || 0,
-        requisitosEspeciales: formData.requisitosEspeciales.trim(),
-      };
-
-      // Ejecutar ambas actualizaciones en paralelo
-      await Promise.all([
-        remitosService.updateRemito(Number(id), updateData),
-        remitosService.updateMercaderia(Number(id), mercaderiaData)
-      ]);
-
-      showNotification('Remito y mercadería actualizados exitosamente', 'success');
+      showNotification('Remito actualizado exitosamente', 'success');
       navigate("/remitos");
     } catch (err) {
       console.error('Error al actualizar remito:', err);

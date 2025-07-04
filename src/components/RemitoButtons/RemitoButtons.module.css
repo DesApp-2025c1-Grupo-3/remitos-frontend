@@ -1,0 +1,58 @@
+.crearBtn {
+  background: #1F7A3D;
+  color: #fff;
+  border: none;
+  border-radius: 2rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px 0 #0001;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  margin: 0;
+  display: inline-block;
+  letter-spacing: 0.5px;
+  min-width: 120px;
+}
+
+.crearBtn:hover:not(:disabled) {
+  background: #17602e;
+  box-shadow: 0 4px 10px 0 #0002;
+  transform: translateY(-1px) scale(1.02);
+}
+
+.crearBtn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.crearBtn:disabled:hover {
+  transform: none;
+  box-shadow: 0 2px 6px 0 #0001;
+}
+
+.noEntregadoBtn {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 2rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px 0 #0001;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  min-width: 120px;
+}
+
+.noEntregadoBtn:hover:not(:disabled) {
+  background: #b91c1c;
+  box-shadow: 0 4px 10px 0 #0002;
+  transform: translateY(-1px) scale(1.02);
+}
+
+.botonesEnCamino {
+  display: flex;
+  gap: 1rem;
+} 

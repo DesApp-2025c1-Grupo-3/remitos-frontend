@@ -5,6 +5,8 @@ import styles from "./remitos.module.css";
 import { useNotification } from "../../contexts/NotificationContext";
 import { ConfirmModal } from '../../components/ConfirmModal/ConfirmModal';
 import { Pencil, Trash2, ArrowLeft } from "lucide-react";
+import { formatDate, getPrioridadClass } from "../../utils/remitosUtils";
+import { Pagination } from "../../components/Pagination/Pagination";
 
 export default function Remitos() {
   const [remitos, setRemitos] = useState({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
@@ -18,8 +20,14 @@ export default function Remitos() {
     try {
       setLoading(true);
       const response = await remitosService.getRemitos(page, 20);
-      setRemitos(response);
-      setCurrentPage(response.currentPage);
+      if (response && response.data) {
+        setRemitos(response);
+        setCurrentPage(response.currentPage);
+      } else {
+        // Si no hay respuesta o no tiene `data`, reseteamos al estado inicial.
+        setRemitos({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
+        setCurrentPage(1);
+      }
     } catch (err) {
       console.error(err);
       showNotification('Error al cargar los remitos', 'error');
@@ -54,46 +62,9 @@ export default function Remitos() {
     setRemitoToDelete(null);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES');
-  };
 
-  const getPrioridadColor = (prioridad) => {
-    switch (prioridad) {
-      case 'urgente':
-        return '#dc2626';
-      case 'alta':
-        return '#f59e0b';
-      case 'normal':
-      default:
-        return '#059669';
-    }
-  };
 
-  // Renderiza los controles de paginación
-  const renderPagination = () => (
-    <div className={styles.pagination} style={{ marginTop: "1rem", display: "flex", gap: "1rem", justifyContent: "center" }}>
-      <button
-        className={styles.crearBtn}
-        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-        disabled={currentPage === 1}
-        style={{ opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
-      >
-        Anterior
-      </button>
-      <span style={{ alignSelf: 'center' }}>Página {remitos.currentPage} de {remitos.totalPages}</span>
-      <button
-        className={styles.crearBtn}
-        onClick={() => setCurrentPage(p => Math.min(remitos.totalPages, p + 1))}
-        disabled={currentPage === remitos.totalPages}
-        style={{ opacity: currentPage === remitos.totalPages ? 0.5 : 1, cursor: currentPage === remitos.totalPages ? 'not-allowed' : 'pointer' }}
-      >
-        Siguiente
-      </button>
-    </div>
-  );
+
 
   if (loading) return <div className={styles.container}>Cargando...</div>;
 
@@ -105,7 +76,7 @@ export default function Remitos() {
           Volver
         </button>
         <h1 className={styles.titulo}>Remitos</h1>
-        <div style={{ width: '120px' }}></div> {/* Spacer para centrar el título */}
+        <div className={styles.headerSpacer}></div> {/* Spacer para centrar el título */}
       </div>
       
       <div className={styles.wrapper}>
@@ -125,19 +96,23 @@ export default function Remitos() {
                 <th>Estado</th>
                 <th>Prioridad</th>
                 <th>Fecha</th>
-                <th style={{ textAlign: "center" }}>Acciones</th>
+                <th className={styles.actionsCenterAlign}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {remitos.data.length === 0 ? (
                 <tr>
-                  <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>
+                  <td colSpan="7" className={styles.emptyTableMessage}>
                     Aún no hay remitos registrados
                   </td>
                 </tr>
               ) : (
                 remitos.data.map(remito => (
-                  <tr key={remito.id}>
+                  <tr 
+                    key={remito.id} 
+                    className={styles.clickableRow}
+                    onClick={() => navigate(`/remitos/detalle/${remito.id}`)}
+                  >
                     <td>{remito.numeroAsignado}</td>
                     <td>{remito.cliente?.razonSocial || 'Sin cliente'}</td>
                     <td>
@@ -148,11 +123,7 @@ export default function Remitos() {
                     </td>
                     <td>{remito.estado?.nombre || 'Sin estado'}</td>
                     <td>
-                      <span style={{ 
-                        color: getPrioridadColor(remito.prioridad),
-                        fontWeight: 'bold',
-                        textTransform: 'capitalize'
-                      }}>
+                      <span className={getPrioridadClass(remito.prioridad, styles)}>
                         {remito.prioridad}
                       </span>
                     </td>
@@ -163,12 +134,16 @@ export default function Remitos() {
                           to={`/remitos/editar/${remito.id}`}
                           className={styles.accionesBtn}
                           title="Editar"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <Pencil />
                         </Link>
                         <button 
                           className={`${styles.accionesBtn} ${styles.delete}`} 
-                          onClick={() => handleDeleteClick(remito)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(remito);
+                          }}
                           title="Eliminar"
                         >
                           <Trash2 />
@@ -182,7 +157,11 @@ export default function Remitos() {
           </table>
         </div>
         
-        {remitos.totalPages > 1 && renderPagination()}
+        <Pagination 
+          currentPage={remitos.currentPage}
+          totalPages={remitos.totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {remitoToDelete && (
@@ -190,9 +169,9 @@ export default function Remitos() {
           isOpen={!!remitoToDelete}
           title="Confirmar eliminación"
           message={
-            <div style={{ textAlign: 'center' }}>
+            <div className={styles.modalMessage}>
               <div>¿Estás seguro que deseas eliminar el remito número "{remitoToDelete.numeroAsignado}"?</div>
-              <div style={{ marginTop: '0.5rem' }}>
+              <div className={styles.modalSubMessage}>
                 Esta acción no se puede deshacer
               </div>
             </div>

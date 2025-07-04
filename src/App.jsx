@@ -10,6 +10,7 @@ import EditarDestino from "./pages/destinos/EditarDestino"
 import Remitos from "./pages/remitos/Remitos"
 import NuevoRemito from "./pages/remitos/NuevoRemito"
 import EditarRemito from "./pages/remitos/EditarRemito"
+import DetalleRemito from "./pages/remitos/DetalleRemito"
 import { Routes, Route } from "react-router-dom"
 import Reportes from "./pages/Reportes.tsx"
 
@@ -27,6 +28,7 @@ export function App() {
         <Route path="remitos" element={<Remitos />} />
         <Route path="remitos/nuevo" element={<NuevoRemito />} />
         <Route path="remitos/editar/:id" element={<EditarRemito />} />
+        <Route path="remitos/detalle/:id" element={<DetalleRemito />} />
         <Route path="reportes" element={<Reportes />} />
       </Route>
     </Routes>

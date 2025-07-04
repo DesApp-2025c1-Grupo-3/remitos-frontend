@@ -240,32 +240,13 @@ export const remitosService = {
     }
   },
 
-  async updateRemito(id: number, remito: Partial<RemitoFormData>): Promise<Remito> {
+  async updateRemito(id: number, remitoData: Partial<RemitoFormData>): Promise<Remito> {
     try {
       if (USE_MOCK_DATA) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const index = mockRemitos.findIndex(r => r.id === id);
-        if (index === -1) throw new Error('Remito no encontrado');
-        mockRemitos[index] = {
-          ...mockRemitos[index],
-          numeroAsignado: remito.numeroAsignado || mockRemitos[index].numeroAsignado,
-          observaciones: remito.observaciones || mockRemitos[index].observaciones,
-          prioridad: remito.prioridad || mockRemitos[index].prioridad,
-          updatedAt: new Date().toISOString()
-        };
-        return mockRemitos[index];
+        console.log("Mock update:", id, remitoData);
+        return {} as Remito;
       }
-
-      // Para actualización, enviamos los campos básicos del remito incluyendo cliente y destino
-      const updateData = {
-        numeroAsignado: remito.numeroAsignado,
-        observaciones: remito.observaciones,
-        prioridad: remito.prioridad,
-        clienteId: remito.clienteId,
-        destinoId: remito.destinoId
-      };
-
-      const response = await axios.put(`${API_URL}/remito/${id}`, updateData);
+      const response = await axios.put(`${API_URL}/remito/${id}`, remitoData);
       return response.data;
     } catch (error) {
       console.error(`Error al actualizar remito con ID ${id}:`, error);
@@ -276,17 +257,9 @@ export const remitosService = {
   async updateEstadoRemito(remitoId: number, estadoId: number): Promise<Remito> {
     try {
       if (USE_MOCK_DATA) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const index = mockRemitos.findIndex(r => r.id === remitoId);
-        if (index === -1) throw new Error('Remito no encontrado');
-        mockRemitos[index] = {
-          ...mockRemitos[index],
-          estadoId,
-          updatedAt: new Date().toISOString()
-        };
-        return mockRemitos[index];
+        console.log("Mock update estado:", remitoId, estadoId);
+        return {} as Remito;
       }
-
       const response = await axios.put(`${API_URL}/remito/${remitoId}/estado/${estadoId}`);
       return response.data;
     } catch (error) {
@@ -298,10 +271,7 @@ export const remitosService = {
   async deleteRemito(id: number): Promise<void> {
     try {
       if (USE_MOCK_DATA) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const index = mockRemitos.findIndex(r => r.id === id);
-        if (index === -1) throw new Error('Remito no encontrado');
-        mockRemitos.splice(index, 1);
+        console.log("Mock delete:", id);
         return;
       }
       await axios.delete(`${API_URL}/remito/${id}`);
@@ -310,68 +280,4 @@ export const remitosService = {
       throw error;
     }
   },
-
-  async activateRemito(id: number): Promise<Remito> {
-    try {
-      if (USE_MOCK_DATA) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const index = mockRemitos.findIndex(r => r.id === id);
-        if (index === -1) throw new Error('Remito no encontrado');
-        mockRemitos[index] = {
-          ...mockRemitos[index],
-          activo: true,
-          updatedAt: new Date().toISOString()
-        };
-        return mockRemitos[index];
-      }
-      const response = await axios.put(`${API_URL}/remito/${id}/darAlta`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error al activar remito con ID ${id}:`, error);
-      throw error;
-    }
-  },
-
-  async updateMercaderia(remitoId: number, mercaderia: Partial<RemitoFormData>): Promise<Mercaderia> {
-    try {
-      if (USE_MOCK_DATA) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const remito = mockRemitos.find(r => r.id === remitoId);
-        if (!remito || !remito.mercaderia) throw new Error('Remito o mercadería no encontrada');
-        
-        remito.mercaderia = {
-          ...remito.mercaderia,
-          tipoMercaderia: mercaderia.tipoMercaderia || remito.mercaderia.tipoMercaderia,
-          valorDeclarado: mercaderia.valorDeclarado || remito.mercaderia.valorDeclarado,
-          volumenMetrosCubico: mercaderia.volumenMetrosCubico || remito.mercaderia.volumenMetrosCubico,
-          pesoMercaderia: mercaderia.pesoMercaderia || remito.mercaderia.pesoMercaderia,
-          cantidadBobinas: mercaderia.cantidadBobinas ?? remito.mercaderia.cantidadBobinas,
-          cantidadRacks: mercaderia.cantidadRacks ?? remito.mercaderia.cantidadRacks,
-          cantidadBultos: mercaderia.cantidadBultos ?? remito.mercaderia.cantidadBultos,
-          cantidadPallets: mercaderia.cantidadPallets ?? remito.mercaderia.cantidadPallets,
-          requisitosEspeciales: mercaderia.requisitosEspeciales ?? remito.mercaderia.requisitosEspeciales,
-        };
-        return remito.mercaderia;
-      }
-
-      // Crear objeto solo con los campos de mercadería
-      const mercaderiaData = {
-        tipoMercaderia: mercaderia.tipoMercaderia,
-        valorDeclarado: mercaderia.valorDeclarado,
-        volumenMetrosCubico: mercaderia.volumenMetrosCubico,
-        pesoMercaderia: mercaderia.pesoMercaderia,
-        cantidadBobinas: mercaderia.cantidadBobinas,
-        cantidadRacks: mercaderia.cantidadRacks,
-        cantidadBultos: mercaderia.cantidadBultos,
-        cantidadPallets: mercaderia.cantidadPallets,
-        requisitosEspeciales: mercaderia.requisitosEspeciales,
-      };
-
-      const response = await axios.put(`${API_URL}/remito/${remitoId}/mercaderia`, mercaderiaData);
-      return response.data;
-    } catch (error) {
-      console.error(`Error al actualizar mercadería del remito ${remitoId}:`, error);
-      throw error;
-    }
-  }
 };

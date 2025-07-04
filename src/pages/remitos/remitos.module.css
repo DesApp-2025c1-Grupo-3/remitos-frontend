@@ -49,8 +49,8 @@
   background: #1F7A3D;
   color: #fff;
   border: none;
-  border-radius: 0.4rem;
-  padding: 0.4rem 1rem;
+  border-radius: 2rem;
+  padding: 0.6rem 1.5rem;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -59,12 +59,231 @@
   margin: 0;
   display: inline-block;
   letter-spacing: 0.5px;
+  min-width: 120px;
 }
 
-.crearBtn:hover {
+.crearBtn:hover:not(:disabled) {
   background: #17602e;
   box-shadow: 0 4px 10px 0 #0002;
   transform: translateY(-1px) scale(1.02);
+}
+
+.crearBtn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.crearBtn:disabled:hover {
+  transform: none;
+  box-shadow: 0 2px 6px 0 #0001;
+}
+
+.cancelBtn {
+  background: white;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+  border-radius: 2rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+
+.cancelBtn:hover {
+  border-color: #d1d5db;
+  background: #f9fafb;
+}
+
+.retenerBtn {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 2rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px 0 #0001;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  margin: 0;
+  display: inline-block;
+  letter-spacing: 0.5px;
+  min-width: 120px;
+}
+
+.retenerBtn:hover:not(:disabled) {
+  background: #b91c1c;
+  box-shadow: 0 4px 10px 0 #0002;
+  transform: translateY(-1px) scale(1.02);
+}
+
+/* Clases para mercadería */
+.mercaderiaContainer {
+  padding: 1rem;
+}
+
+.mercaderiaRow {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f9fafb;
+}
+
+.mercaderiaRow.preparada {
+  background: #f0fdf4;
+  border: 2px solid #16a34a;
+}
+
+.mercaderiaRow:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.mercaderiaRow.noClickeable {
+  cursor: default;
+}
+
+.mercaderiaRow.noClickeable:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.mercaderiaInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.mercaderiaTitulo {
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+  color: #374151;
+}
+
+.mercaderiaTitulo.preparada {
+  color: #16a34a;
+}
+
+.mercaderiaCantidad {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.mercaderiaCantidad.preparada {
+  color: #059669;
+}
+
+.mercaderiaEstado {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mercaderiaEstadoPreparada {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.mercaderiaEstadoIcon {
+  font-size: 1.2rem;
+}
+
+.mercaderiaEstadoTexto {
+  font-size: 0.85rem;
+}
+
+.mercaderiaEstadoTextoClick {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Clases para botones de acción */
+.botonesAccion {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.mensajePreparacion {
+  font-size: 0.85rem;
+  color: #f59e0b;
+  font-style: italic;
+  text-align: center;
+}
+
+.grupoBotonPrincipal {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Clases para modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modalContent {
+  background: white;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modalTitulo {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #374151;
+}
+
+.modalTextarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.modalTextarea:focus {
+  border-color: #1F7A3D;
+}
+
+.modalBotones {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
 }
 
 .volverBtn {
@@ -95,7 +314,7 @@
 .tablaContenedor {
   background: #e5e7eb;
   border-radius: 1rem;
-  padding: 2rem 1rem 1rem 1rem;
+  padding: 1rem 0.6rem 0.8rem 0.6rem;
   max-width: 900px;
   margin: 0 auto;
 }
@@ -103,7 +322,7 @@
 @media (min-width: 1920px) {
   .tablaContenedor {
     max-width: 1400px;
-    padding: 2rem 2rem 1rem 2rem;
+    padding: 1rem 1.2rem 0.8rem 1.2rem;
   }
 }
 
@@ -133,6 +352,131 @@
 
 .tabla tr {
   box-shadow: 0 1px 4px 0 #0001;
+}
+
+.clickableRow {
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+
+.clickableRow:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px 0 #0002;
+}
+
+.mercaderiaItem {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.mercaderiaItem:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.mercaderiaPreparada {
+  background: #f0fdf4 !important;
+  border: 2px solid #16a34a !important;
+}
+
+.estadoBadge {
+  position: relative;
+  z-index: 1;
+  border-radius: 1.5rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.4rem;
+  padding: 0.6rem;
+}
+
+@media (max-width: 768px) {
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.infoCard {
+  background: #f3f4f6;
+  padding: 0.35rem 0.4rem;
+  border-radius: 0.375rem;
+  min-height: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.infoLabel {
+  font-size: 0.6rem;
+  color: #6b7280;
+  margin-bottom: 0.1rem;
+  display: block;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.infoValue {
+  font-weight: bold;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: #374151;
+}
+
+.infoCard.fullWidth {
+  grid-column: span 6;
+}
+
+.infoCard.mediumWidth {
+  grid-column: span 2;
+}
+
+@media (max-width: 1200px) {
+  .infoGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .infoCard.fullWidth {
+    grid-column: span 3;
+  }
+  
+  .infoCard.mediumWidth {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .infoGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .infoCard.fullWidth {
+    grid-column: span 2;
+  }
+  
+  .infoCard.mediumWidth {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .infoCard.fullWidth {
+    grid-column: span 1;
+  }
+  
+  .infoCard.mediumWidth {
+    grid-column: span 1;
+  }
 }
 
 .tabla .acciones {
@@ -169,4 +513,125 @@
 
 .accionesBtn.delete svg {
   color: #dc2626;
+}
+
+/* Clases para paginación */
+.paginationContainer {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.paginationInfo {
+  align-self: center;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.paginationBtn {
+  background: #1F7A3D;
+  color: #fff;
+  border: none;
+  border-radius: 2rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px 0 #0001;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  min-width: 120px;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: #17602e;
+  box-shadow: 0 4px 10px 0 #0002;
+  transform: translateY(-1px) scale(1.02);
+}
+
+.paginationBtn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.paginationBtn:disabled:hover {
+  transform: none;
+  box-shadow: 0 2px 6px 0 #0001;
+}
+
+/* Clases para prioridad */
+.prioridadUrgente {
+  color: #dc2626;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.prioridadAlta {
+  color: #f59e0b;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.prioridadNormal {
+  color: #059669;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+/* Clases para espaciado */
+.headerSpacer {
+  width: 120px;
+}
+
+.emptyTableMessage {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.actionsCenterAlign {
+  text-align: center;
+}
+
+/* Clases para modal */
+.modalMessage {
+  text-align: center;
+}
+
+.modalSubMessage {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+/* Clases para detalle remito */
+.infoContainer {
+  margin-bottom: 2rem;
+}
+
+.noEntregadoBtn {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 2rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px 0 #0001;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  min-width: 120px;
+}
+
+.noEntregadoBtn:hover:not(:disabled) {
+  background: #b91c1c;
+  box-shadow: 0 4px 10px 0 #0002;
+  transform: translateY(-1px) scale(1.02);
+}
+
+.botonesEnCamino {
+  display: flex;
+  gap: 1rem;
 } 
