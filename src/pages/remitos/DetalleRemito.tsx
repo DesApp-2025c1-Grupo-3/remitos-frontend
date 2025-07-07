@@ -1,29 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, CheckCircle, Pencil } from 'lucide-react';
 import { remitosService, Remito } from '../../services/remitosService';
+import { estadosService, Estado } from '../../services/estadosService';
 import { useNotification } from '../../contexts/NotificationContext';
 import styles from './remitos.module.css';
 
 // Interfaz para la mercadería con estado de preparación
 interface MercaderiaConEstado {
-  id: number;
+  id: string; // Cambiado a string para usar 'bobinas', 'racks', etc.
   tipoMercaderia: string;
-  valorDeclarado: number;
-  volumenMetrosCubico: number;
-  pesoMercaderia: number;
-  cantidadBobinas?: number;
-  cantidadRacks?: number;
-  cantidadBultos?: number;
-  cantidadPallets?: number;
-  requisitosEspeciales?: string;
+  cantidad?: number;
   preparada: boolean;
 }
 
 // Estados posibles del remito
 type EstadoRemito = 'Autorizado' | 'En preparación' | 'En carga' | 'En camino' | 'Entregado' | 'No entregado' | 'Retenido';
 
-// Estado anterior para el botón "Liberar"
 interface EstadoAnterior {
   estado: EstadoRemito;
   mercaderia: MercaderiaConEstado[];
@@ -36,6 +29,7 @@ export default function DetalleRemito() {
   
   const [remito, setRemito] = useState<Remito | null>(null);
   const [loading, setLoading] = useState(true);
+  const [estados, setEstados] = useState<Estado[]>([]);
   const [estadoActual, setEstadoActual] = useState<EstadoRemito>('Autorizado');
   const [estadoAnterior, setEstadoAnterior] = useState<EstadoAnterior | null>(null);
   const [mercaderiaConEstado, setMercaderiaConEstado] = useState<MercaderiaConEstado[]>([]);
@@ -43,8 +37,24 @@ export default function DetalleRemito() {
   const [razonNoEntrega, setRazonNoEntrega] = useState('');
 
   useEffect(() => {
+    fetchEstados();
     fetchRemito();
   }, [id]);
+
+  const fetchEstados = async () => {
+    try {
+      const data = await estadosService.getEstados();
+      // El backend devuelve {data: [...]}
+      if (Array.isArray(data)) {
+        setEstados(data);
+      } else if (Array.isArray((data as any).data)) {
+        setEstados((data as any).data);
+      }
+    } catch (error) {
+      console.error('Error al cargar los estados:', error);
+      showNotification('Error al cargar los estados', 'error');
+    }
+  };
 
   const fetchRemito = async () => {
     if (!id) return;
@@ -54,112 +64,24 @@ export default function DetalleRemito() {
       const data = await remitosService.getRemitoById(parseInt(id));
       setRemito(data);
       
-      // Inicializar estado basado en el estado del remito
       const estadoInicial: EstadoRemito = data.estado?.nombre as EstadoRemito || 'Autorizado';
       setEstadoActual(estadoInicial);
       
-      // Convertir mercadería a formato con estado
       if (data.mercaderia) {
         const mercaderiaItems: MercaderiaConEstado[] = [];
+        const m = data.mercaderia;
         
-        // Crear elementos de mercadería basados en las cantidades
-        if (data.mercaderia.cantidadBobinas && data.mercaderia.cantidadBobinas > 0) {
-          mercaderiaItems.push({
-            id: 1,
-            tipoMercaderia: 'Caja de herramientas',
-            valorDeclarado: data.mercaderia.valorDeclarado,
-            volumenMetrosCubico: data.mercaderia.volumenMetrosCubico,
-            pesoMercaderia: data.mercaderia.pesoMercaderia,
-            cantidadBobinas: data.mercaderia.cantidadBobinas,
-            preparada: false
-          });
+        if (m.cantidadBobinas && m.cantidadBobinas > 0) {
+          mercaderiaItems.push({ id: 'bobinas', tipoMercaderia: 'Bobinas', cantidad: m.cantidadBobinas, preparada: false });
         }
-        
-        if (data.mercaderia.cantidadRacks && data.mercaderia.cantidadRacks > 0) {
-          mercaderiaItems.push({
-            id: 2,
-            tipoMercaderia: 'Repuestos de motor',
-            valorDeclarado: data.mercaderia.valorDeclarado,
-            volumenMetrosCubico: data.mercaderia.volumenMetrosCubico,
-            pesoMercaderia: data.mercaderia.pesoMercaderia,
-            cantidadRacks: data.mercaderia.cantidadRacks,
-            preparada: false
-          });
+        if (m.cantidadRacks && m.cantidadRacks > 0) {
+          mercaderiaItems.push({ id: 'racks', tipoMercaderia: 'Racks', cantidad: m.cantidadRacks, preparada: false });
         }
-        
-        if (data.mercaderia.cantidadBultos && data.mercaderia.cantidadBultos > 0) {
-          mercaderiaItems.push({
-            id: 3,
-            tipoMercaderia: 'Materiales de construcción',
-            valorDeclarado: data.mercaderia.valorDeclarado,
-            volumenMetrosCubico: data.mercaderia.volumenMetrosCubico,
-            pesoMercaderia: data.mercaderia.pesoMercaderia,
-            cantidadBultos: data.mercaderia.cantidadBultos,
-            preparada: false
-          });
+        if (m.cantidadBultos && m.cantidadBultos > 0) {
+          mercaderiaItems.push({ id: 'bultos', tipoMercaderia: 'Bultos', cantidad: m.cantidadBultos, preparada: false });
         }
-        
-        if (data.mercaderia.cantidadPallets && data.mercaderia.cantidadPallets > 0) {
-          mercaderiaItems.push({
-            id: 4,
-            tipoMercaderia: 'Equipos electrónicos',
-            valorDeclarado: data.mercaderia.valorDeclarado,
-            volumenMetrosCubico: data.mercaderia.volumenMetrosCubico,
-            pesoMercaderia: data.mercaderia.pesoMercaderia,
-            cantidadPallets: data.mercaderia.cantidadPallets,
-            preparada: false
-          });
-        }
-        
-        // Si no hay mercadería específica, crear elementos de ejemplo
-        if (mercaderiaItems.length === 0) {
-          mercaderiaItems.push(
-            {
-              id: 1,
-              tipoMercaderia: 'Caja de herramientas',
-              valorDeclarado: data.mercaderia.valorDeclarado,
-              volumenMetrosCubico: data.mercaderia.volumenMetrosCubico,
-              pesoMercaderia: data.mercaderia.pesoMercaderia,
-              cantidadBobinas: 5,
-              preparada: false
-            },
-            {
-              id: 2,
-              tipoMercaderia: 'Repuestos de motor',
-              valorDeclarado: data.mercaderia.valorDeclarado,
-              volumenMetrosCubico: data.mercaderia.volumenMetrosCubico,
-              pesoMercaderia: data.mercaderia.pesoMercaderia,
-              cantidadRacks: 10,
-              preparada: false
-            },
-            {
-              id: 3,
-              tipoMercaderia: 'Materiales de construcción',
-              valorDeclarado: data.mercaderia.valorDeclarado,
-              volumenMetrosCubico: data.mercaderia.volumenMetrosCubico,
-              pesoMercaderia: data.mercaderia.pesoMercaderia,
-              cantidadBultos: 20,
-              preparada: false
-            },
-            {
-              id: 4,
-              tipoMercaderia: 'Equipos electrónicos',
-              valorDeclarado: data.mercaderia.valorDeclarado,
-              volumenMetrosCubico: data.mercaderia.volumenMetrosCubico,
-              pesoMercaderia: data.mercaderia.pesoMercaderia,
-              cantidadPallets: 8,
-              preparada: false
-            },
-            {
-              id: 5,
-              tipoMercaderia: 'Muebles de oficina',
-              valorDeclarado: data.mercaderia.valorDeclarado,
-              volumenMetrosCubico: data.mercaderia.volumenMetrosCubico,
-              pesoMercaderia: data.mercaderia.pesoMercaderia,
-              cantidadBultos: 3,
-              preparada: false
-            }
-          );
+        if (m.cantidadPallets && m.cantidadPallets > 0) {
+          mercaderiaItems.push({ id: 'pallets', tipoMercaderia: 'Pallets', cantidad: m.cantidadPallets, preparada: false });
         }
         
         setMercaderiaConEstado(mercaderiaItems);
@@ -172,7 +94,7 @@ export default function DetalleRemito() {
     }
   };
 
-  const handleMercaderiaCheck = (id: number) => {
+  const handleMercaderiaCheck = (id: string) => {
     if (estadoActual !== 'En preparación') return;
     
     setMercaderiaConEstado(prev => 
@@ -203,64 +125,84 @@ export default function DetalleRemito() {
     }
   };
 
-  const handleCambiarEstado = () => {
+  const cambiarEstadoRemito = async (nuevoEstadoNombre: EstadoRemito) => {
+    if (!remito || !estados.length) return;
+
+    const nuevoEstado = estados.find(e => e.nombre === nuevoEstadoNombre);
+    if (!nuevoEstado) {
+      showNotification(`Estado "${nuevoEstadoNombre}" no encontrado`, 'error');
+      return;
+    }
+
+    try {
+      const remitoActualizado = await remitosService.updateEstadoRemito(remito.id, nuevoEstado.id);
+      setRemito(remitoActualizado);
+      setEstadoActual(remitoActualizado.estado?.nombre as EstadoRemito);
+      showNotification(`Remito actualizado a "${nuevoEstadoNombre}"`, 'success');
+      return remitoActualizado;
+    } catch (error) {
+      console.error('Error al cambiar el estado del remito:', error);
+      showNotification('Error al cambiar el estado del remito', 'error');
+    }
+  };
+
+  const handleCambiarEstado = async () => {
+    let nuevoEstado: EstadoRemito | null = null;
     switch (estadoActual) {
       case 'Autorizado':
-        setEstadoActual('En preparación');
-        showNotification('Remito en preparación', 'success');
+        nuevoEstado = 'En preparación';
         break;
       case 'En preparación':
-        setEstadoActual('En carga');
-        showNotification('Preparación terminada', 'success');
+        nuevoEstado = 'En carga';
         break;
+
       case 'En carga':
-        setEstadoActual('En camino');
-        showNotification('Viaje asignado', 'success');
-        break;
-      case 'En camino':
-        // Este caso se maneja con los botones "Entregado" y "No entregado"
+        nuevoEstado = 'En camino';
         break;
       default:
         break;
     }
+
+    if (nuevoEstado) {
+      await cambiarEstadoRemito(nuevoEstado);
+    }
   };
 
-  const handleEntregado = () => {
-    setEstadoActual('Entregado');
-    showNotification('Remito entregado exitosamente', 'success');
+  const handleEntregado = async () => {
+    await cambiarEstadoRemito('Entregado');
   };
 
   const handleNoEntregado = () => {
     setShowModal(true);
   };
 
-  const handleConfirmarNoEntrega = () => {
+  const handleConfirmarNoEntrega = async () => {
     if (razonNoEntrega.trim()) {
-      setEstadoActual('No entregado');
-      showNotification('Remito marcado como no entregado', 'info');
-      setShowModal(false);
-      setRazonNoEntrega('');
+      const remitoActualizado = await cambiarEstadoRemito('No entregado');
+      if (remitoActualizado) {
+        setShowModal(false);
+        setRazonNoEntrega('');
+      }
     }
   };
 
-  const handleRetener = () => {
-    // Guardar el estado anterior
+  const handleRetener = async () => {
     setEstadoAnterior({
       estado: estadoActual,
       mercaderia: [...mercaderiaConEstado]
     });
-    setEstadoActual('Retenido');
-    showNotification('Remito retenido', 'warning');
+    await cambiarEstadoRemito('Retenido');
   };
 
-  const handleLiberar = () => {
+  const handleLiberar = async () => {
     if (estadoAnterior) {
-      setEstadoActual(estadoAnterior.estado);
+      await cambiarEstadoRemito(estadoAnterior.estado);
       setMercaderiaConEstado(estadoAnterior.mercaderia);
       setEstadoAnterior(null);
-      showNotification('Remito liberado', 'success');
     }
   };
+
+  const todaMercaderiaPreparada = mercaderiaConEstado.every(item => item.preparada);
 
   const getBotonPrincipal = () => {
     switch (estadoActual) {
@@ -272,7 +214,12 @@ export default function DetalleRemito() {
         );
       case 'En preparación':
         return (
-          <button className={styles.crearBtn} onClick={handleCambiarEstado}>
+          <button 
+            className={styles.crearBtn} 
+            onClick={handleCambiarEstado}
+            disabled={!todaMercaderiaPreparada}
+            title={!todaMercaderiaPreparada ? 'Debes preparar toda la mercadería' : ''}
+          >
             TERMINAR PREPARACIÓN
           </button>
         );
@@ -318,11 +265,7 @@ export default function DetalleRemito() {
   };
 
   const getCantidadText = (item: MercaderiaConEstado) => {
-    if (item.cantidadBobinas) return `Cantidad: ${item.cantidadBobinas}`;
-    if (item.cantidadRacks) return `Cantidad: ${item.cantidadRacks}`;
-    if (item.cantidadBultos) return `Cantidad: ${item.cantidadBultos}`;
-    if (item.cantidadPallets) return `Cantidad: ${item.cantidadPallets}`;
-    return 'Cantidad: 1';
+    return `Cantidad: ${item.cantidad || 0}`;
   };
 
   if (loading) {
@@ -335,231 +278,122 @@ export default function DetalleRemito() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <button className={styles.volverBtn} onClick={() => navigate('/remitos')}>
-          <ArrowLeft />
-          Volver
-        </button>
-        <h1 className={styles.titulo}>Remito N° {remito.numeroAsignado}</h1>
-        <div 
-          style={{ 
-            background: getEstadoColor(estadoActual),
-            color: 'white',
-            padding: '0.5rem 1rem',
-            borderRadius: '0.5rem',
-            fontWeight: 'bold',
-            fontSize: '0.9rem'
-          }}
-        >
+      <div className={`${styles.header} ${styles.detalleHeader}`}>
+        <div className={styles.headerLeft}>
+          <button className={styles.volverBtn} onClick={() => navigate('/remitos')}>
+            <ArrowLeft />
+            Volver
+          </button>
+          <h1 className={styles.titulo}>Remito N° {remito.numeroAsignado}</h1>
+        </div>
+
+        <div className={styles.estadoBadge} style={{ background: getEstadoColor(estadoActual) }}>
           {estadoActual}
         </div>
       </div>
 
       <div className={styles.wrapper}>
         {/* Información del remito */}
-        <div className={styles.tablaContenedor} style={{ marginBottom: '2rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', padding: '1rem' }}>
-            <div style={{ background: '#f3f4f6', padding: '1rem', borderRadius: '0.5rem' }}>
-              <label style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.25rem', display: 'block' }}>
-                Cliente:
-              </label>
-              <span style={{ fontWeight: 'bold' }}>
-                {remito.cliente?.razonSocial || 'Sin cliente'}
-              </span>
+        <div className={`${styles.tablaContenedor} ${styles.infoContainer}`}>
+          <div className={styles.infoGrid}>
+            <div className={styles.infoCard}>
+              <label className={styles.infoLabel}>Cliente:</label>
+              <span className={styles.infoValue}>{remito.cliente?.razonSocial || 'Sin cliente'}</span>
             </div>
 
-            <div style={{ background: '#f3f4f6', padding: '1rem', borderRadius: '0.5rem' }}>
-              <label style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.25rem', display: 'block' }}>
-                Volumen:
-              </label>
-              <span style={{ fontWeight: 'bold' }}>
-                {remito.mercaderia?.volumenMetrosCubico || 0} m³
-              </span>
+            <div className={styles.infoCard}>
+              <label className={styles.infoLabel}>Volumen:</label>
+              <span className={styles.infoValue}>{remito.mercaderia?.volumenMetrosCubico || 0} m³</span>
             </div>
 
-            <div style={{ background: '#f3f4f6', padding: '1rem', borderRadius: '0.5rem' }}>
-              <label style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.25rem', display: 'block' }}>
-                Destino:
-              </label>
-              <span style={{ fontWeight: 'bold' }}>
-                {remito.destino ? `${remito.destino.nombre}, ${remito.destino.provincia}` : 'Sin destino'}
-              </span>
+            <div className={styles.infoCard}>
+              <label className={styles.infoLabel}>Destino:</label>
+              <span className={styles.infoValue}>{remito.destino ? `${remito.destino.nombre}, ${remito.destino.provincia}` : 'Sin destino'}</span>
             </div>
 
-            <div style={{ background: '#f3f4f6', padding: '1rem', borderRadius: '0.5rem' }}>
-              <label style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.25rem', display: 'block' }}>
-                Valor:
-              </label>
-              <span style={{ fontWeight: 'bold' }}>
-                ${remito.mercaderia?.valorDeclarado?.toLocaleString() || 0}
-              </span>
+            <div className={styles.infoCard}>
+              <label className={styles.infoLabel}>Valor:</label>
+              <span className={styles.infoValue}>${remito.mercaderia?.valorDeclarado?.toLocaleString() || 0}</span>
             </div>
 
-            <div style={{ background: '#f3f4f6', padding: '1rem', borderRadius: '0.5rem' }}>
-              <label style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.25rem', display: 'block' }}>
-                Fecha:
-              </label>
-              <span style={{ fontWeight: 'bold' }}>
-                {formatDate(remito.fechaEmision)}
-              </span>
+            <div className={styles.infoCard}>
+              <label className={styles.infoLabel}>Fecha:</label>
+              <span className={styles.infoValue}>{formatDate(remito.fechaEmision)}</span>
             </div>
 
-            <div style={{ background: '#f3f4f6', padding: '1rem', borderRadius: '0.5rem' }}>
-              <label style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.25rem', display: 'block' }}>
-                Observaciones:
-              </label>
-              <span style={{ fontWeight: 'bold' }}>
-                {remito.observaciones || 'Sin observaciones'}
-              </span>
+            <div className={styles.infoCard}>
+              <label className={styles.infoLabel}>Observaciones:</label>
+              <span className={styles.infoValue}>{remito.observaciones || 'Sin observaciones'}</span>
             </div>
 
-            <div style={{ background: '#f3f4f6', padding: '1rem', borderRadius: '0.5rem' }}>
-              <label style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.25rem', display: 'block' }}>
-                Peso:
-              </label>
-              <span style={{ fontWeight: 'bold' }}>
-                {remito.mercaderia?.pesoMercaderia || 0} kg
-              </span>
+            <div className={styles.infoCard}>
+              <label className={styles.infoLabel}>Peso:</label>
+              <span className={styles.infoValue}>{remito.mercaderia?.pesoMercaderia || 0} kg</span>
             </div>
           </div>
+          <Link to={`/remitos/editar/${remito.id}`} title="Editar Remito" className={styles.editarRemitoBtn}>
+            Editar remito
+          </Link>
         </div>
 
         {/* Lista de mercadería */}
         <div className={styles.tablaContenedor}>
-          <div style={{ padding: '1rem' }}>
-            {mercaderiaConEstado.map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  background: '#f9fafb',
-                  margin: '1rem 0',
-                  padding: '1rem',
-                  borderRadius: '0.5rem',
-                  border: '1px solid #e5e7eb',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}
-              >
-                <div>
-                  <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>
-                    {item.tipoMercaderia}
+          <div className={styles.mercaderiaContainer}>
+            <h2 className={styles.mercaderiaTitle}>Mercadería</h2>
+            <div className={styles.mercaderiaGrid}>
+              {mercaderiaConEstado.map(item => (
+                <div
+                  key={item.id}
+                  onClick={() => estadoActual === 'En preparación' && handleMercaderiaCheck(item.id)}
+                  className={`
+                    ${styles.mercaderiaItem}
+                    ${estadoActual === 'En preparación' ? styles.mercaderiaItemPreparable : ''}
+                    ${item.preparada ? styles.mercaderiaItemPreparada : ''}
+                  `}
+                >
+                  <div className={styles.mercaderiaItemContent}>
+                    <div>
+                      <div className={styles.infoValue}>{item.tipoMercaderia}</div>
+                      <div className={styles.mercaderiaItemCantidad}>{getCantidadText(item)}</div>
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>
-                    {getCantidadText(item)}
-                  </div>
+                  {item.preparada && <CheckCircle className={styles.checkIcon} />}
                 </div>
-                
-                {estadoActual === 'En preparación' && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '0.85rem', color: item.preparada ? '#16a34a' : '#6b7280' }}>
-                      {item.preparada ? 'Preparada' : 'Preparadas'}
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={item.preparada}
-                      onChange={() => handleMercaderiaCheck(item.id)}
-                      style={{ 
-                        width: '1.2rem', 
-                        height: '1.2rem',
-                        accentColor: '#16a34a',
-                        cursor: 'pointer'
-                      }}
-                    />
-                  </div>
-                )}
-                
-                {estadoActual !== 'En preparación' && estadoActual !== 'Autorizado' && (
-                  <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>
-                    {item.preparada ? '✓ Preparada' : 'Preparada'}
-                  </div>
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-
           {/* Botones de acción */}
-          <div style={{ 
-            padding: '1rem', 
-            display: 'flex', 
-            justifyContent: 'center', 
-            gap: '1rem',
-            borderTop: '1px solid #e5e7eb'
-          }}>
-            {getBotonPrincipal()}
-            
-            {estadoActual !== 'Retenido' && estadoActual !== 'Entregado' && estadoActual !== 'No entregado' && (
-              <button 
-                className={styles.crearBtn}
-                style={{ background: '#dc2626' }}
-                onClick={handleRetener}
-              >
-                RETENER
-              </button>
+          <div className={styles.accionesContainer}>
+            {estadoActual === 'En preparación' && !todaMercaderiaPreparada && (
+              <div className={styles.mensajePreparacion}>Prepara toda la mercadería para continuar</div>
             )}
+            <div className={styles.botonesGrupo}>
+              {getBotonPrincipal()}
+              {estadoActual !== 'Retenido' && estadoActual !== 'Entregado' && estadoActual !== 'No entregado' && (
+                <button className={`${styles.crearBtn} ${styles.retenerBtn}`} onClick={handleRetener}>RETENER</button>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Modal para razón de no entrega */}
       {showModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            background: 'white',
-            padding: '2rem',
-            borderRadius: '0.5rem',
-            maxWidth: '400px',
-            width: '90%'
-          }}>
-            <h3 style={{ marginBottom: '1rem', textAlign: 'center' }}>
-              Razón de no entrega
-            </h3>
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h3 className={styles.modalTitle}>Razón de no entrega</h3>
             <textarea
               value={razonNoEntrega}
               onChange={(e) => setRazonNoEntrega(e.target.value)}
               placeholder="Ingrese la razón por la que no se pudo entregar el remito"
-              style={{
-                width: '100%',
-                minHeight: '100px',
-                padding: '0.5rem',
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.25rem',
-                marginBottom: '1rem',
-                resize: 'vertical'
-              }}
+              className={styles.modalTextarea}
             />
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-              <button 
-                onClick={() => setShowModal(false)}
-                style={{
-                  padding: '0.5rem 1rem',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '0.25rem',
-                  background: 'white',
-                  cursor: 'pointer'
-                }}
-              >
-                Cancelar
-              </button>
-              <button 
+            <div className={styles.modalBotones}>
+              <button onClick={() => setShowModal(false)} className={styles.cancelBtn}>Cancelar</button>
+              <button
                 onClick={handleConfirmarNoEntrega}
                 className={styles.crearBtn}
                 disabled={!razonNoEntrega.trim()}
-                style={{
-                  opacity: !razonNoEntrega.trim() ? 0.5 : 1,
-                  cursor: !razonNoEntrega.trim() ? 'not-allowed' : 'pointer'
-                }}
               >
                 Confirmar
               </button>

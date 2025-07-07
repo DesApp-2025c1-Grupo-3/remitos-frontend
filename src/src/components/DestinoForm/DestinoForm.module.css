@@ -1,0 +1,97 @@
+.wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.error {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 2rem 2rem 1rem 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+  width: 100%;
+  max-width: 400px;
+  align-self: center;
+}
+
+.label {
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  color: #222;
+  font-size: 1rem;
+  text-align: left;
+  width: 100%;
+}
+
+.input {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  display: block;
+  background: #e5e7eb;
+  border: none;
+  border-radius: 0.35rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  color: #222;
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-shadow: none;
+}
+
+.input:focus {
+  border: 1.5px solid #1F7A3D;
+  box-shadow: 0 0 0 2px #1F7A3D22;
+  background: #fff;
+}
+
+.botonera {
+  display: flex;
+  justify-content: center;
+  margin-top: 2.5rem;
+  width: 100%;
+}
+
+.formBtn {
+  background: #1F7A3D;
+  color: #fff;
+  border: none;
+  border-radius: 1.5rem;
+  padding: 0.7rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px 0 #0002;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  margin: 0 auto;
+  display: block;
+  letter-spacing: 0.5px;
+}
+
+.formBtn:hover {
+  background: #17602e;
+  box-shadow: 0 6px 16px 0 #0003;
+  transform: translateY(-2px) scale(1.03);
+} 
