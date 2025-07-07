@@ -87,6 +87,14 @@ export interface RemitosResponse {
   data: Remito[];
 }
 
+export interface RemitosFilters {
+  numeroAsignado?: string;
+  clienteId?: number;
+  estadoId?: number;
+  prioridad?: 'normal' | 'alta' | 'urgente';
+  fechaEmision?: string;
+}
+
 // Datos mock para desarrollo
 const mockRemitos: Remito[] = [
   {
@@ -136,7 +144,7 @@ const mockRemitos: Remito[] = [
 ];
 
 export const remitosService = {
-  async getRemitos(page: number = 1, limit: number = 20): Promise<RemitosResponse> {
+  async getRemitos(page: number = 1, limit: number = 20, filters?: RemitosFilters): Promise<RemitosResponse> {
     try {
       if (USE_MOCK_DATA) {
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -147,7 +155,20 @@ export const remitosService = {
           data: mockRemitos
         };
       }
-      const response = await axios.get(`${API_URL}/remito?page=${page}&limit=${limit}`);
+      
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
+      
+      if (filters) {
+        if (filters.numeroAsignado) params.append('numeroAsignado', filters.numeroAsignado);
+        if (filters.clienteId) params.append('clienteId', filters.clienteId.toString());
+        if (filters.estadoId) params.append('estadoId', filters.estadoId.toString());
+        if (filters.prioridad) params.append('prioridad', filters.prioridad);
+        if (filters.fechaEmision) params.append('fechaEmision', filters.fechaEmision);
+      }
+      
+      const response = await axios.get(`${API_URL}/remito?${params.toString()}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener remitos:', error);

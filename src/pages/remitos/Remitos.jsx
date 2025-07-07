@@ -7,11 +7,13 @@ import { ConfirmModal } from '../../components/ConfirmModal/ConfirmModal';
 import { Pencil, Trash2, ArrowLeft } from "lucide-react";
 import { formatDate, getPrioridadClass } from "../../utils/remitosUtils";
 import { Pagination } from "../../components/Pagination/Pagination";
+import { RemitosFilters } from "../../components/RemitosFilters/RemitosFilters";
 
 export default function Remitos() {
   const [remitos, setRemitos] = useState({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState({});
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [remitoToDelete, setRemitoToDelete] = useState(null);
@@ -19,7 +21,7 @@ export default function Remitos() {
   const fetchRemitos = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await remitosService.getRemitos(page, 20);
+      const response = await remitosService.getRemitos(page, 20, filters);
       if (response && response.data) {
         setRemitos(response);
         setCurrentPage(response.currentPage);
@@ -38,7 +40,17 @@ export default function Remitos() {
 
   useEffect(() => {
     fetchRemitos(currentPage);
-  }, [currentPage]);
+  }, [currentPage, filters]);
+
+  const handleFiltersChange = (newFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Resetear a la primera página cuando cambian los filtros
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+    setCurrentPage(1);
+  };
 
   const handleDeleteClick = (remito) => {
     setRemitoToDelete(remito);
@@ -80,6 +92,12 @@ export default function Remitos() {
       </div>
       
       <div className={styles.wrapper}>
+        <RemitosFilters
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          onClearFilters={handleClearFilters}
+        />
+        
         <div className={styles.crearBtnContainer}>
           <Link to="/remitos/nuevo" className={styles.crearBtn}>
             Crear Remito
