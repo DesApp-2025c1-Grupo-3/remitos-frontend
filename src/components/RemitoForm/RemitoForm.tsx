@@ -216,14 +216,21 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
             
             <div className={styles.campo}>
               <label className={styles.label}>Tipo de mercadería *</label>
-              <input
+              <select
                 name="tipoMercaderia"
                 value={formData.tipoMercaderia}
                 onChange={onChange}
-                placeholder="Ingresar tipo de mercadería"
                 className={styles.input}
                 required
-              />
+              >
+                <option value="">Seleccionar tipo</option>
+                <option value="Electrónica">Electrónica</option>
+                <option value="Frágil">Frágil</option>
+                <option value="Materia Prima">Materia Prima</option>
+                <option value="Textil">Textil</option>
+                <option value="Amoblamientos">Amoblamientos</option>
+                <option value="Otros">Otros</option>
+              </select>
             </div>
             
             <div className={styles.campo}>

@@ -12,7 +12,7 @@ import NuevoRemito from "./pages/remitos/NuevoRemito"
 import EditarRemito from "./pages/remitos/EditarRemito"
 import DetalleRemito from "./pages/remitos/DetalleRemito.tsx"
 import { Routes, Route } from "react-router-dom"
-import Reportes from "./pages/Reportes.tsx"
+import Reportes from "./pages/reportes/Reportes"
 
 export function App() {
   return (
