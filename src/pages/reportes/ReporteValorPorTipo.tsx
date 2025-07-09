@@ -85,10 +85,7 @@ const ReporteValorPorTipo: React.FC = () => {
       return (
         <div style={{ background: 'white', border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
           <div style={{ fontWeight: 600, color: payload[0].color }}>{d.tipo}</div>
-          <div>Cantidad: {d.cantidad || '-'}</div>
           <div>Valor Total: ${d.valorTotal?.toLocaleString('es-AR') || '-'}</div>
-          <div>Valor Promedio: ${d.valorPromedio?.toLocaleString('es-AR') || '-'}</div>
-          <div>Volumen Total: {d.volumenTotal ? `${d.volumenTotal} m³` : '-'}</div>
         </div>
       );
     }
