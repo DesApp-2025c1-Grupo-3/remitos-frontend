@@ -224,11 +224,13 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
                 required
               >
                 <option value="">Seleccionar tipo</option>
-                <option value="Electrónica">Electrónica</option>
-                <option value="Frágil">Frágil</option>
-                <option value="Materia Prima">Materia Prima</option>
-                <option value="Textil">Textil</option>
+                <option value="Automotriz">Automotriz</option>
                 <option value="Amoblamientos">Amoblamientos</option>
+                <option value="Alimentos">Alimentos</option>
+                <option value="Textil">Textil</option>
+                <option value="Materiales Construcción">Materiales Construcción</option>
+                <option value="Electrónica">Electrónica</option>
+                <option value="Químicos">Químicos</option>
                 <option value="Otros">Otros</option>
               </select>
             </div>
