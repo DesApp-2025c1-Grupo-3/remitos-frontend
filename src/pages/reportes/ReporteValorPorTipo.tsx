@@ -57,8 +57,16 @@ const ReporteValorPorTipo: React.FC = () => {
   const handleBuscar = async () => {
     setLoading(true);
     try {
-      const params = { ...filtros };
-      if (filtros.tipos.length > 0) params['tipos'] = filtros.tipos;
+      const { tipos, ...otherParams } = filtros;
+      const params = { ...otherParams };
+      
+      // Agregar cada tipo como un parámetro separado para que Express los procese correctamente
+      if (tipos.length > 0) {
+        tipos.forEach((tipo, index) => {
+          params[`tipos[${index}]`] = tipo;
+        });
+      }
+      
       const res = await getValorPorTipoMercaderia(params);
       setData(res.data);
     } catch (err) {
