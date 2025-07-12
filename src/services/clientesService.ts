@@ -285,18 +285,16 @@ export const clientesService = {
         mockClientes.push(newCliente);
         return newCliente;
       }
-      // Preparar los datos para el backend, removiendo IDs de relación
+      
+      // Para el endpoint /clienteContacto, enviar los datos del contacto directamente en el objeto raíz
       const clienteData = {
         razonSocial: cliente.razonSocial,
         cuit_rut: cliente.cuit_rut,
         tipoEmpresa: cliente.tipoEmpresa,
         direccion: cliente.direccion,
-        contactos: [{
-          personaAutorizada: cliente.personaAutorizada,
-          correoElectronico: cliente.correoElectronico,
-          telefono: cliente.telefono
-          // NO incluir: id, createdAt, updatedAt, clienteId, destinoId
-        }]
+        personaAutorizada: cliente.personaAutorizada,
+        correoElectronico: cliente.correoElectronico,
+        telefono: cliente.telefono
       };
       
       const response = await axios.post(`${API_URL}/clienteContacto`, clienteData);
@@ -488,4 +486,4 @@ export const clientesService = {
       throw error;
     }
   },
-}; 
+};
