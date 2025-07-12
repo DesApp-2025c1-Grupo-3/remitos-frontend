@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_REMITOS === 'true';
 
 // Interface que refleja la estructura real del backend
