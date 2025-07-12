@@ -5,6 +5,7 @@ import { remitosService, Remito } from '../../services/remitosService';
 import { estadosService, Estado } from '../../services/estadosService';
 import { useNotification } from '../../contexts/NotificationContext';
 import styles from './remitos.module.css';
+import detalleStyles from './DetalleRemito.module.css';
 
 // Interfaz para la mercadería con estado de preparación
 interface MercaderiaConEstado {
@@ -177,11 +178,20 @@ export default function DetalleRemito() {
   };
 
   const handleConfirmarNoEntrega = async () => {
-    if (razonNoEntrega.trim()) {
-      const remitoActualizado = await cambiarEstadoRemito('No entregado');
-      if (remitoActualizado) {
+    if (razonNoEntrega.trim() && remito) {
+      try {
+        // Cambiar estado y guardar razón de no entrega
+        const remitoActualizado = await remitosService.updateRemito(remito.id, {
+          razonNoEntrega: razonNoEntrega.trim(),
+          estadoId: estados.find(e => e.nombre === 'No entregado')?.id
+        });
+        setRemito(remitoActualizado);
+        setEstadoActual(remitoActualizado.estado?.nombre as EstadoRemito);
         setShowModal(false);
         setRazonNoEntrega('');
+        showNotification('Remito actualizado como No entregado', 'success');
+      } catch (error) {
+        showNotification('Error al actualizar la razón de no entrega', 'error');
       }
     }
   };
@@ -231,13 +241,12 @@ export default function DetalleRemito() {
         );
       case 'En camino':
         return (
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div className={detalleStyles.botonesViaje}>
             <button className={styles.crearBtn} onClick={handleEntregado}>
               ENTREGADO
             </button>
             <button 
-              className={styles.crearBtn} 
-              style={{ background: '#dc2626' }}
+              className={`${styles.crearBtn} ${detalleStyles.botonNoEntregado}`}
               onClick={handleNoEntregado}
             >
               NO ENTREGADO
@@ -268,6 +277,38 @@ export default function DetalleRemito() {
     return `Cantidad: ${item.cantidad || 0}`;
   };
 
+  function ArchivoAdjunto({ archivoAdjunto }: { archivoAdjunto?: string }) {
+    if (!archivoAdjunto) {
+      return <span className={`${styles.infoValue} ${detalleStyles.sinArchivo}`}>No hay archivo adjunto</span>;
+    }
+    let path = archivoAdjunto.startsWith('/') ? archivoAdjunto.slice(1) : archivoAdjunto;
+    const url = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/${path}`.replace(/([^:]\/)\/+/, '$1');
+    const nombre = path.split('/').pop() || 'Archivo adjunto';
+    const esImagen = /\.(jpg|jpeg|png|gif)$/i.test(nombre);
+    const esPDF = /\.pdf$/i.test(nombre);
+    if (esImagen) {
+      return (
+        <a href={url} target="_blank" rel="noopener noreferrer" className={detalleStyles.archivoAdjuntoLink}>
+          <img src={url} alt={nombre} className={detalleStyles.archivoAdjuntoImagen} />
+          <span>{nombre}</span>
+        </a>
+      );
+    } else if (esPDF) {
+      return (
+        <a href={url} target="_blank" rel="noopener noreferrer" className={detalleStyles.archivoAdjuntoLink}>
+          <span className={detalleStyles.archivoAdjuntoIcono}>📄</span>
+          <span>{nombre}</span>
+        </a>
+      );
+    } else {
+      return (
+        <a href={url} target="_blank" rel="noopener noreferrer" className={detalleStyles.archivoAdjuntoTexto}>
+          {nombre}
+        </a>
+      );
+    }
+  }
+
   if (loading) {
     return <div className={styles.container}>Cargando...</div>;
   }
@@ -278,187 +319,97 @@ export default function DetalleRemito() {
 
   return (
     <div className={styles.container}>
-      <div className={`${styles.header} ${styles.detalleHeader}`}>
-        <div className={styles.headerLeft}>
+      <div className={`${styles.header} ${styles.detalleHeader}`}> 
+        <div className={detalleStyles.headerContainer}>
           <button className={styles.volverBtn} onClick={() => navigate('/remitos')}>
             <ArrowLeft />
             Volver
           </button>
-          <h1 className={styles.titulo}>Remito N° {remito.numeroAsignado}</h1>
-        </div>
-
-        <div className={styles.estadoBadge} style={{ background: getEstadoColor(estadoActual) }}>
-          {estadoActual}
+          <h1 className={`${styles.titulo} ${detalleStyles.tituloConBoton}`}>Remito N° {remito.numeroAsignado}</h1>
+          <Link to={`/remitos/editar/${remito.id}`} title="Editar remito" className={`${styles.editarRemitoBtn} ${detalleStyles.editarRemitoBtn}`}>
+            <Pencil size={20} />
+          </Link>
+          <div className={styles.estadoBadge} style={{ background: getEstadoColor(estadoActual) }}>
+            {estadoActual}
+          </div>
         </div>
       </div>
 
       <div className={styles.wrapper}>
         {/* Información del remito */}
-        <div className={`${styles.tablaContenedor} ${styles.infoContainer}`}>
-          <div className={styles.infoGrid}>
+        <div className={detalleStyles.infoGridContainer}>
+          <div className={detalleStyles.infoGrid}>
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Cliente:</label>
               <span className={styles.infoValue}>{remito.cliente?.razonSocial || 'Sin cliente'}</span>
             </div>
-
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>CUIT/RUT:</label>
               <span className={styles.infoValue}>{remito.cliente?.cuit_rut || 'Sin CUIT'}</span>
             </div>
-
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Dirección Cliente:</label>
               <span className={styles.infoValue}>{remito.cliente?.direccion || 'Sin dirección'}</span>
             </div>
-
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Destino:</label>
               <span className={styles.infoValue}>{remito.destino ? `${remito.destino.nombre}, ${remito.destino.provincia}` : 'Sin destino'}</span>
             </div>
-
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Localidad:</label>
               <span className={styles.infoValue}>{remito.destino?.localidad || 'Sin localidad'}</span>
             </div>
-
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Dirección Destino:</label>
               <span className={styles.infoValue}>{remito.destino?.direccion || 'Sin dirección'}</span>
             </div>
-
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Volumen:</label>
               <span className={styles.infoValue}>{remito.mercaderia?.volumenMetrosCubico || 0} m³</span>
             </div>
-
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Valor:</label>
               <span className={styles.infoValue}>${remito.mercaderia?.valorDeclarado?.toLocaleString() || 0}</span>
             </div>
-
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Peso:</label>
               <span className={styles.infoValue}>{remito.mercaderia?.pesoMercaderia || 0} kg</span>
             </div>
-
-            {remito.mercaderia?.cantidadBobinas && remito.mercaderia.cantidadBobinas > 0 && (
-              <div className={styles.infoCard}>
-                <label className={styles.infoLabel}>Bobinas:</label>
-                <span className={styles.infoValue}>{remito.mercaderia.cantidadBobinas}</span>
-              </div>
-            )}
-
-            {remito.mercaderia?.cantidadRacks && remito.mercaderia.cantidadRacks > 0 && (
-              <div className={styles.infoCard}>
-                <label className={styles.infoLabel}>Racks:</label>
-                <span className={styles.infoValue}>{remito.mercaderia.cantidadRacks}</span>
-              </div>
-            )}
-
-            {remito.mercaderia?.cantidadBultos && remito.mercaderia.cantidadBultos > 0 && (
-              <div className={styles.infoCard}>
-                <label className={styles.infoLabel}>Bultos:</label>
-                <span className={styles.infoValue}>{remito.mercaderia.cantidadBultos}</span>
-              </div>
-            )}
-
-            {remito.mercaderia?.cantidadPallets && remito.mercaderia.cantidadPallets > 0 && (
-              <div className={styles.infoCard}>
-                <label className={styles.infoLabel}>Pallets:</label>
-                <span className={styles.infoValue}>{remito.mercaderia.cantidadPallets}</span>
-              </div>
-            )}
-
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Prioridad:</label>
-              <span className={styles.infoValue} style={{ 
-                color: remito.prioridad === 'urgente' ? '#dc2626' : 
-                       remito.prioridad === 'alta' ? '#f59e0b' : '#059669',
-                fontWeight: 'bold',
-                textTransform: 'capitalize'
-              }}>
+              <span className={`${styles.infoValue} ${
+                remito.prioridad === 'urgente' ? detalleStyles.prioridadUrgente :
+                remito.prioridad === 'alta' ? detalleStyles.prioridadAlta :
+                detalleStyles.prioridadNormal
+              }`}>
                 {remito.prioridad}
               </span>
             </div>
-
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Fecha Emisión:</label>
               <span className={styles.infoValue}>{formatDate(remito.fechaEmision)}</span>
             </div>
-
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Observaciones:</label>
               <span className={styles.infoValue}>{remito.observaciones || 'Sin observaciones'}</span>
             </div>
-
             {remito.mercaderia?.requisitosEspeciales && (
               <div className={styles.infoCard}>
                 <label className={styles.infoLabel}>Requisitos Especiales:</label>
                 <span className={styles.infoValue}>{remito.mercaderia.requisitosEspeciales}</span>
               </div>
             )}
-
-            {/* Archivo adjunto como tarjeta infoCard */}
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Archivo Adjunto:</label>
-              {remito.archivoAdjunto ? (
-                (() => {
-                  // Quitar barra inicial si la hay
-                  let path = remito.archivoAdjunto.startsWith('/') ? remito.archivoAdjunto.slice(1) : remito.archivoAdjunto;
-                  const url = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/${path}`.replace(/([^:]\/)\/+/, '$1');
-                  const nombre = path.split('/').pop() || 'Archivo adjunto';
-                  const esImagen = /\.(jpg|jpeg|png|gif)$/i.test(nombre);
-                  const esPDF = /\.pdf$/i.test(nombre);
-                  if (esImagen) {
-                    return (
-                      <a href={url} target="_blank" rel="noopener noreferrer" style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        color: '#1F7A3D',
-                        textDecoration: 'none',
-                        fontWeight: '500'
-                      }}>
-                        <img src={url} alt={nombre} style={{maxWidth:'60px',maxHeight:'60px',borderRadius:'4px',border:'1px solid #e5e7eb'}} />
-                        <span>{nombre}</span>
-                      </a>
-                    );
-                  } else if (esPDF) {
-                    return (
-                      <a href={url} target="_blank" rel="noopener noreferrer" style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        color: '#1F7A3D',
-                        textDecoration: 'none',
-                        fontWeight: '500'
-                      }}>
-                        <span style={{fontSize:'1.5rem',marginRight:'0.5rem'}}>📄</span>
-                        <span>{nombre}</span>
-                      </a>
-                    );
-                  } else {
-                    return (
-                      <a href={url} target="_blank" rel="noopener noreferrer" style={{
-                        color: '#1F7A3D',
-                        textDecoration: 'none',
-                        fontWeight: '500'
-                      }}>
-                        {nombre}
-                      </a>
-                    );
-                  }
-                })()
-              ) : (
-                <span className={styles.infoValue} style={{ color: '#6b7280', fontStyle: 'italic' }}>
-                  No hay archivo adjunto
-                </span>
-              )}
+              <ArchivoAdjunto archivoAdjunto={remito.archivoAdjunto} />
             </div>
+            {remito.razonNoEntrega && (
+              <div className={styles.infoCard}>
+                <label className={styles.infoLabel}>Razón de no entrega:</label>
+                <span className={styles.infoValue}>{remito.razonNoEntrega}</span>
+              </div>
+            )}
           </div>
-          <Link to={`/remitos/editar/${remito.id}`} title="Editar Remito" className={styles.editarRemitoBtn}>
-            Editar remito
-          </Link>
         </div>
 
         {/* Lista de mercadería */}

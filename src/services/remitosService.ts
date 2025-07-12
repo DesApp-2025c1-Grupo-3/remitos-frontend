@@ -58,6 +58,7 @@ export interface Remito {
   mercaderia?: Mercaderia;
   createdAt: string;
   updatedAt: string;
+  razonNoEntrega?: string;
 }
 
 export interface RemitoFormData {
@@ -93,6 +94,11 @@ export interface RemitosFilters {
   estadoId?: number;
   prioridad?: 'normal' | 'alta' | 'urgente';
   fechaEmision?: string;
+}
+
+export interface RemitoUpdateData extends Partial<RemitoFormData> {
+  razonNoEntrega?: string;
+  estadoId?: number;
 }
 
 // Datos mock para desarrollo
@@ -261,7 +267,7 @@ export const remitosService = {
     }
   },
 
-  async updateRemito(id: number, remitoData: Partial<RemitoFormData>): Promise<Remito> {
+  async updateRemito(id: number, remitoData: RemitoUpdateData): Promise<Remito> {
     try {
       if (USE_MOCK_DATA) {
         console.log("Mock update:", id, remitoData);

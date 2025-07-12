@@ -1,0 +1,127 @@
+/* Estilos para el componente DetalleRemito */
+
+.headerContainer {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.tituloConBoton {
+  margin-right: 1.5rem;
+}
+
+.editarRemitoBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.infoGridContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  width: 100%;
+  max-width: 1400px;
+  background: #e5e7eb;
+  border-radius: 1rem;
+  padding: 1.5rem 1rem 2.5rem 1rem;
+  margin-bottom: 2rem;
+}
+
+.prioridadUrgente {
+  color: #dc2626;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.prioridadAlta {
+  color: #f59e0b;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.prioridadNormal {
+  color: #059669;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.archivoAdjuntoLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #1F7A3D;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.archivoAdjuntoImagen {
+  max-width: 60px;
+  max-height: 60px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+.archivoAdjuntoIcono {
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+}
+
+.archivoAdjuntoTexto {
+  color: #1F7A3D;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.sinArchivo {
+  color: #6b7280;
+  font-style: italic;
+}
+
+.botonesViaje {
+  display: flex;
+  gap: 1rem;
+}
+
+.botonNoEntregado {
+  background: #dc2626;
+}
+
+/* Media queries para responsividad */
+@media (max-width: 1200px) {
+  .infoGrid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 900px;
+  }
+}
+
+@media (max-width: 768px) {
+  .infoGrid {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+    padding: 1rem 0.5rem 1.5rem 0.5rem;
+  }
+  
+  .headerContainer {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .tituloConBoton {
+    margin-right: 0;
+  }
+  
+  .botonesViaje {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+} 
