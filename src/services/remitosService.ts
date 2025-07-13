@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_REMITOS === 'true';
+const API_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001';
+const USE_MOCK_DATA = (import.meta as any).env?.VITE_USE_MOCK_REMITOS === 'true';
 
 // Interface que refleja la estructura real del backend
 export interface Cliente {
@@ -91,6 +91,7 @@ export interface RemitosResponse {
 export interface RemitosFilters {
   numeroAsignado?: string;
   clienteId?: number;
+  destinoId?: number;
   estadoId?: number;
   prioridad?: 'normal' | 'alta' | 'urgente';
   fechaEmision?: string;
@@ -169,6 +170,7 @@ export const remitosService = {
       if (filters) {
         if (filters.numeroAsignado) params.append('numeroAsignado', filters.numeroAsignado);
         if (filters.clienteId) params.append('clienteId', filters.clienteId.toString());
+        if (filters.destinoId) params.append('destinoId', filters.destinoId.toString());
         if (filters.estadoId) params.append('estadoId', filters.estadoId.toString());
         if (filters.prioridad) params.append('prioridad', filters.prioridad);
         if (filters.fechaEmision) params.append('fechaEmision', filters.fechaEmision);

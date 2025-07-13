@@ -1,13 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X, ChevronDown, ChevronUp } from 'lucide-react';
 import styles from './RemitosFilters.module.css';
 import { clientesService } from '../../services/clientesService';
+import { destinosService } from '../../services/destinosService';
 import { estadosService } from '../../services/estadosService';
 import { RemitosFilters as RemitosFiltersType } from '../../services/remitosService';
+import { ClienteSelectModal } from '../ClienteSelectModal';
+import { DestinoSelectModal } from '../DestinoSelectModal';
 
 interface Cliente {
   id: number;
-  razonSocial: string | null;
+  razonSocial: string;
+  cuit_rut: string;
+  direccion: string;
+}
+
+interface Destino {
+  id: number;
+  nombre: string;
+  provincia: string;
+  localidad: string;
+  direccion: string;
 }
 
 interface Estado {
@@ -27,26 +40,65 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
   onClearFilters
 }) => {
   const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [destinos, setDestinos] = useState<Destino[]>([]);
   const [estados, setEstados] = useState<Estado[]>([]);
-  const [loadingClientes, setLoadingClientes] = useState(false);
   const [loadingEstados, setLoadingEstados] = useState(false);
-  const [showClienteDropdown, setShowClienteDropdown] = useState(false);
-  const [clienteSearchTerm, setClienteSearchTerm] = useState('');
+  const [modalCliente, setModalCliente] = useState(false);
+  const [modalDestino, setModalDestino] = useState(false);
   const [numeroAsignadoInput, setNumeroAsignadoInput] = useState(filters.numeroAsignado || '');
-  const dropdownRef = React.useRef<HTMLDivElement>(null);
-  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+  const [selectedDestino, setSelectedDestino] = useState<Destino | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Cargar clientes y estados al montar el componente
   useEffect(() => {
     const loadData = async () => {
       try {
-        setLoadingClientes(true);
+        // Cargar clientes
         const clientesResponse = await clientesService.getClientes();
-        setClientes(clientesResponse.data);
+        // Adaptar los clientes del servicio al tipo local
+        const clientesAdaptados = clientesResponse.data.map(cliente => ({
+          id: cliente.id,
+          razonSocial: cliente.razonSocial || '',
+          cuit_rut: cliente.cuit_rut || '',
+          direccion: cliente.direccion || ''
+        }));
+        setClientes(clientesAdaptados);
+        
+        // Si hay un clienteId en los filtros, buscar y establecer el cliente seleccionado
+        if (filters.clienteId) {
+          const cliente = clientesAdaptados.find(c => c.id === filters.clienteId);
+          if (cliente) {
+            setSelectedCliente(cliente);
+          }
+        }
       } catch (error) {
         console.error('Error al cargar clientes:', error);
-      } finally {
-        setLoadingClientes(false);
+      }
+
+      try {
+        // Cargar destinos
+        const destinosResponse = await destinosService.getDestinos();
+        // Adaptar los destinos del servicio al tipo local
+        const destinosAdaptados = destinosResponse.data.map(destino => ({
+          id: destino.id,
+          nombre: destino.nombre || '',
+          provincia: destino.provincia || '',
+          localidad: destino.localidad || '',
+          direccion: destino.direccion || ''
+        }));
+        setDestinos(destinosAdaptados);
+        
+        // Si hay un destinoId en los filtros, buscar y establecer el destino seleccionado
+        if (filters.destinoId) {
+          const destino = destinosAdaptados.find(d => d.id === filters.destinoId);
+          if (destino) {
+            setSelectedDestino(destino);
+          }
+        }
+      } catch (error) {
+        console.error('Error al cargar destinos:', error);
       }
 
       try {
@@ -61,26 +113,7 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
     };
 
     loadData();
-  }, []);
-
-  // Cerrar dropdown cuando se hace clic fuera
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowClienteDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  // Sincronizar el input de número de remito con los filtros
-  useEffect(() => {
-    setNumeroAsignadoInput(filters.numeroAsignado || '');
-  }, [filters.numeroAsignado]);
+  }, [filters.clienteId]);
 
   // Limpiar timeout al desmontar
   useEffect(() => {
@@ -115,43 +148,64 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
     }, 500); // 500ms de delay
   };
 
-  const handleClearFilters = () => {
-    onClearFilters();
-    setClienteSearchTerm('');
-    setNumeroAsignadoInput('');
-  };
-
   const handleClienteSelect = (cliente: Cliente) => {
     handleInputChange('clienteId', cliente.id);
-    setClienteSearchTerm(cliente.razonSocial || '');
-    setShowClienteDropdown(false);
+    setSelectedCliente(cliente);
+    setModalCliente(false);
   };
 
-  const filteredClientes = clientes.filter(cliente =>
-    cliente.razonSocial?.toLowerCase().includes(clienteSearchTerm.toLowerCase()) || false
-  );
+  const handleDestinoSelect = (destino: Destino) => {
+    handleInputChange('destinoId', destino.id);
+    setSelectedDestino(destino);
+    setModalDestino(false);
+  };
 
-  const selectedCliente = clientes.find(c => c.id === filters.clienteId);
+  const handleClearFilters = () => {
+    onClearFilters();
+    setModalCliente(false);
+    setModalDestino(false);
+    setNumeroAsignadoInput('');
+    setSelectedCliente(null);
+    setSelectedDestino(null);
+  };
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
+  // Eliminar la lógica de selectedCliente basada en clientes.find
   const selectedEstado = estados.find(e => e.id === filters.estadoId);
 
   return (
-    <div className={styles.filtersContainer}>
+    <div className={isCollapsed ? `${styles.filtersContainer} ${styles.collapsed}` : styles.filtersContainer}>
       <div className={styles.filtersHeader}>
         <div className={styles.filtersTitle}>
           <Search size={20} />
-          <span>Filtros de búsqueda</span>
+          {isCollapsed ? <span style={{marginLeft: 6, fontWeight: 500, fontSize: '1rem'}}>Filtros</span> : <span>Filtros de búsqueda</span>}
+          <button 
+            className={styles.toggleBtn}
+            onClick={toggleCollapse}
+            title={isCollapsed ? "Expandir filtros" : "Colapsar filtros"}
+            style={{marginLeft: 8}}
+          >
+            {isCollapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+          </button>
         </div>
-        <button 
-          className={styles.clearFiltersBtn}
-          onClick={handleClearFilters}
-          title="Limpiar filtros"
-        >
-          <X size={16} />
-          Limpiar
-        </button>
+        {!isCollapsed && (
+          <div className={styles.headerActions}>
+            <button 
+              className={styles.clearFiltersBtn}
+              onClick={handleClearFilters}
+              title="Limpiar filtros"
+            >
+              <X size={16} />
+              Limpiar
+            </button>
+          </div>
+        )}
       </div>
 
-      <div className={styles.filtersGrid}>
+      <div className={`${styles.filtersGrid} ${isCollapsed ? styles.collapsed : ''}`}>
         {/* Filtro por número de remito */}
         <div className={styles.filterField}>
           <label className={styles.label}>Número de remito</label>
@@ -167,40 +221,44 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
         {/* Filtro por cliente */}
         <div className={styles.filterField}>
           <label className={styles.label}>Cliente</label>
-          <div className={styles.dropdownContainer} ref={dropdownRef}>
+          <div>
             <input
               type="text"
-              value={clienteSearchTerm}
-              onChange={(e) => {
-                setClienteSearchTerm(e.target.value);
-                if (!e.target.value) {
-                  handleInputChange('clienteId', undefined);
-                }
-                setShowClienteDropdown(true);
-              }}
-              onFocus={() => setShowClienteDropdown(true)}
-              placeholder="Buscar cliente..."
+              value={selectedCliente ? selectedCliente.razonSocial : ''}
+              readOnly
+              onClick={() => setModalCliente(true)}
+              placeholder="Seleccionar cliente..."
               className={styles.input}
+              style={{ cursor: 'pointer', background: '#e5e7eb' }}
             />
-            {showClienteDropdown && (
-              <div className={styles.dropdown}>
-                {loadingClientes ? (
-                  <div className={styles.dropdownItem}>Cargando...</div>
-                ) : filteredClientes.length > 0 ? (
-                  filteredClientes.map(cliente => (
-                    <div
-                      key={cliente.id}
-                      className={styles.dropdownItem}
-                      onClick={() => handleClienteSelect(cliente)}
-                    >
-                      {cliente.razonSocial || 'Sin razón social'}
-                    </div>
-                  ))
-                ) : (
-                  <div className={styles.dropdownItem}>No se encontraron clientes</div>
-                )}
-              </div>
-            )}
+            <ClienteSelectModal
+              open={modalCliente}
+              onClose={() => setModalCliente(false)}
+              onSelect={handleClienteSelect}
+              clienteSeleccionado={selectedCliente}
+            />
+          </div>
+        </div>
+
+        {/* Filtro por destino */}
+        <div className={styles.filterField}>
+          <label className={styles.label}>Destino</label>
+          <div>
+            <input
+              type="text"
+              value={selectedDestino ? `${selectedDestino.nombre}, ${selectedDestino.provincia}` : ''}
+              readOnly
+              onClick={() => setModalDestino(true)}
+              placeholder="Seleccionar destino..."
+              className={styles.input}
+              style={{ cursor: 'pointer', background: '#e5e7eb' }}
+            />
+            <DestinoSelectModal
+              open={modalDestino}
+              onClose={() => setModalDestino(false)}
+              onSelect={handleDestinoSelect}
+              destinoSeleccionado={selectedDestino}
+            />
           </div>
         </div>
 

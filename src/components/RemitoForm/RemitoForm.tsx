@@ -1,7 +1,88 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import styles from '../Form.module.css';
 import { Upload, ArrowLeft, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Pagination } from '../Pagination/Pagination';
+import { ClienteSelectModal } from '../ClienteSelectModal';
+import { DestinoSelectModal } from '../DestinoSelectModal';
+
+// Funciones de formato para campos numéricos
+const formatCurrency = (value: string | number): string => {
+  if (!value || value === '') return '';
+  const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
+  if (numValue === 0) return '';
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(numValue);
+};
+
+const formatNumber = (value: string | number): string => {
+  if (!value || value === '') return '';
+  const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
+  if (numValue === 0) return '';
+  return new Intl.NumberFormat('es-AR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(numValue);
+};
+
+const formatInteger = (value: string | number): string => {
+  if (!value || value === '') return '';
+  const numValue = typeof value === 'string' ? parseInt(value) || 0 : Math.floor(Number(value)) || 0;
+  if (numValue === 0) return '';
+  return new Intl.NumberFormat('es-AR').format(numValue);
+};
+
+const parseFormattedValue = (formattedValue: string): string => {
+  // Si está vacío, retornar cadena vacía
+  if (!formattedValue || formattedValue.trim() === '') return '';
+  
+  // Remover símbolos de moneda, puntos y espacios, mantener solo números y coma decimal
+  const cleaned = formattedValue.replace(/[^\d,]/g, '').replace(',', '.');
+  
+  // Si después de limpiar está vacío, retornar cadena vacía
+  if (!cleaned || cleaned === '') return '';
+  
+  // Validar que sea un número válido
+  const numValue = parseFloat(cleaned);
+  if (isNaN(numValue)) return '';
+  
+  // Convertir a entero para BIGINT
+  return Math.floor(numValue).toString();
+};
+
+// Función para validar límites según el tipo de campo
+const validateFieldLimit = (fieldName: string, value: string): string => {
+  const numValue = parseInt(value);
+  if (isNaN(numValue)) return value;
+  
+  switch (fieldName) {
+    case 'valorDeclarado':
+      // Máximo 999.999.999.999 (12 dígitos enteros)
+      if (numValue > 999999999999) return '999999999999';
+      break;
+    case 'pesoMercaderia':
+      // Máximo 999.999.999 kg (9 dígitos enteros)
+      if (numValue > 999999999) return '999999999';
+      break;
+    case 'volumenMetrosCubico':
+      // Máximo 999.999 m³ (6 dígitos enteros)
+      if (numValue > 999999) return '999999';
+      break;
+    case 'cantidadPallets':
+    case 'cantidadBultos':
+    case 'cantidadRacks':
+    case 'cantidadBobinas':
+      // Máximo 999.999.999 (9 dígitos enteros)
+      if (numValue > 999999999) return '999999999';
+      break;
+  }
+  
+  return value;
+};
 
 export interface RemitoFormData {
   numeroAsignado: string;
@@ -74,14 +155,118 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
   const [campoDestino, setCampoDestino] = useState<'provincia' | 'localidad' | 'direccion'>('provincia');
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  
+  // Estados para paginación del servidor
+  const [currentPageCliente, setCurrentPageCliente] = useState(1);
+  const [currentPageDestino, setCurrentPageDestino] = useState(1);
+  const [clientesPaginados, setClientesPaginados] = useState<{ data: Cliente[], totalItems: number, totalPages: number, currentPage: number }>({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
+  const [destinosPaginados, setDestinosPaginados] = useState<{ data: Destino[], totalItems: number, totalPages: number, currentPage: number }>({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
+  const [loadingClientes, setLoadingClientes] = useState(false);
+  const [loadingDestinos, setLoadingDestinos] = useState(false);
+  const itemsPerPage = 5;
 
-  // Validar que clientes y destinos sean arrays antes de usar filter
-  const clientesFiltrados = Array.isArray(clientes) 
-    ? clientes.filter(c => (c[campoCliente] || '').toLowerCase().includes(busquedaCliente.toLowerCase()))
-    : [];
-  const destinosFiltrados = Array.isArray(destinos)
-    ? destinos.filter(d => (d[campoDestino] || '').toLowerCase().includes(busquedaDestino.toLowerCase()))
-    : [];
+  // Función helper para manejar cambios de campos con formato
+  const handleFormattedChange = (fieldName: string, formattedValue: string, originalEvent: React.ChangeEvent<HTMLInputElement>) => {
+    // Si el usuario está borrando y el campo queda vacío, permitir que se borre completamente
+    if (formattedValue === '') {
+      const event = {
+        target: {
+          name: fieldName,
+          value: ''
+        }
+      } as React.ChangeEvent<HTMLInputElement>;
+      onChange(event);
+      return;
+    }
+    
+    const parsedValue = parseFormattedValue(formattedValue);
+    const validatedValue = validateFieldLimit(fieldName, parsedValue);
+    const event = {
+      target: {
+        name: fieldName,
+        value: validatedValue
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    onChange(event);
+  };
+
+  // Función para cargar clientes paginados del servidor
+  const cargarClientes = useCallback(async () => {
+    if (!modalCliente) return;
+    
+    setLoadingClientes(true);
+    try {
+      const params: any = {
+        page: currentPageCliente,
+        limit: itemsPerPage
+      };
+      
+      // Agregar filtro según el campo seleccionado
+      if (busquedaCliente.trim()) {
+        params[campoCliente] = busquedaCliente.trim();
+      }
+      
+      const response = await fetch(`${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001'}/cliente?${new URLSearchParams(params)}`);
+      const data = await response.json();
+      setClientesPaginados(data);
+    } catch (error) {
+      console.error('Error al cargar clientes:', error);
+    } finally {
+      setLoadingClientes(false);
+    }
+  }, [modalCliente, currentPageCliente, busquedaCliente, campoCliente, itemsPerPage]);
+
+  // Función para cargar destinos paginados del servidor
+  const cargarDestinos = useCallback(async () => {
+    if (!modalDestino) return;
+    
+    setLoadingDestinos(true);
+    try {
+      const params: any = {
+        page: currentPageDestino,
+        limit: itemsPerPage
+      };
+      
+      // Agregar filtro según el campo seleccionado
+      if (busquedaDestino.trim()) {
+        params[campoDestino] = busquedaDestino.trim();
+      }
+      
+      const response = await fetch(`${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001'}/destino?${new URLSearchParams(params)}`);
+      const data = await response.json();
+      setDestinosPaginados(data);
+    } catch (error) {
+      console.error('Error al cargar destinos:', error);
+    } finally {
+      setLoadingDestinos(false);
+    }
+  }, [modalDestino, currentPageDestino, busquedaDestino, campoDestino, itemsPerPage]);
+
+  // Cargar datos cuando se abre el modal o cambia la búsqueda
+  useMemo(() => {
+    if (modalCliente) {
+      cargarClientes();
+    }
+  }, [modalCliente, currentPageCliente, busquedaCliente, campoCliente, cargarClientes]);
+
+  useMemo(() => {
+    if (modalDestino) {
+      cargarDestinos();
+    }
+  }, [modalDestino, currentPageDestino, busquedaDestino, campoDestino, cargarDestinos]);
+
+  // Resetear página cuando cambia la búsqueda
+  useMemo(() => {
+    if (modalCliente) {
+      setCurrentPageCliente(1);
+    }
+  }, [busquedaCliente, campoCliente]);
+
+  useMemo(() => {
+    if (modalDestino) {
+      setCurrentPageDestino(1);
+    }
+  }, [busquedaDestino, campoDestino]);
 
   const clienteSeleccionado = clientes?.find(c => c.id.toString() === formData.clienteId.toString());
   const destinoSeleccionado = destinos?.find(d => d.id.toString() === formData.destinoId.toString());
@@ -130,6 +315,7 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
     onChange(event);
     setModalCliente(false);
     setBusquedaCliente('');
+    setCurrentPageCliente(1);
   };
 
   const handleDestinoSelect = (destino: Destino) => {
@@ -142,6 +328,7 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
     onChange(event);
     setModalDestino(false);
     setBusquedaDestino('');
+    setCurrentPageDestino(1);
   };
 
   return (
@@ -239,14 +426,12 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
               <label className={styles.label}>Valor declarado ($) *</label>
               <input
                 name="valorDeclarado"
-                type="number"
-                min="0"
-                max="999999999999999.99"
-                step="0.01"
-                value={formData.valorDeclarado}
-                onChange={onChange}
-                placeholder="Ingresar valor declarado"
+                type="text"
+                value={formatNumber(formData.valorDeclarado)}
+                onChange={(e) => handleFormattedChange('valorDeclarado', e.target.value, e)}
+                placeholder="Ingresar valor declarado (solo números enteros)"
                 className={styles.input}
+                maxLength={20}
                 required
               />
             </div>
@@ -255,14 +440,12 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
               <label className={styles.label}>Peso total (kg) *</label>
               <input
                 name="pesoMercaderia"
-                type="number"
-                min="0"
-                max="999999999999.999"
-                step="0.001"
-                value={formData.pesoMercaderia}
-                onChange={onChange}
-                placeholder="Ingresar peso total"
+                type="text"
+                value={formatNumber(formData.pesoMercaderia)}
+                onChange={(e) => handleFormattedChange('pesoMercaderia', e.target.value, e)}
+                placeholder="Ingresar peso total (solo números enteros)"
                 className={styles.input}
+                maxLength={15}
                 required
               />
             </div>
@@ -271,14 +454,12 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
               <label className={styles.label}>Volumen (m³) *</label>
               <input
                 name="volumenMetrosCubico"
-                type="number"
-                min="0"
-                max="999999999.999"
-                step="0.001"
-                value={formData.volumenMetrosCubico}
-                onChange={onChange}
-                placeholder="Ingresar volumen"
+                type="text"
+                value={formatNumber(formData.volumenMetrosCubico)}
+                onChange={(e) => handleFormattedChange('volumenMetrosCubico', e.target.value, e)}
+                placeholder="Ingresar volumen (solo números enteros)"
                 className={styles.input}
+                maxLength={12}
                 required
               />
             </div>
@@ -290,13 +471,12 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
               <label className={styles.label}>Cantidad de Pallets</label>
               <input
                 name="cantidadPallets"
-                type="number"
-                min="0"
-                max="9223372036854775807"
-                value={formData.cantidadPallets}
-                onChange={onChange}
+                type="text"
+                value={formatInteger(formData.cantidadPallets)}
+                onChange={(e) => handleFormattedChange('cantidadPallets', e.target.value, e)}
                 placeholder="0"
                 className={styles.input}
+                maxLength={12}
               />
             </div>
             
@@ -304,13 +484,12 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
               <label className={styles.label}>Cantidad de Bultos</label>
               <input
                 name="cantidadBultos"
-                type="number"
-                min="0"
-                max="9223372036854775807"
-                value={formData.cantidadBultos}
-                onChange={onChange}
+                type="text"
+                value={formatInteger(formData.cantidadBultos)}
+                onChange={(e) => handleFormattedChange('cantidadBultos', e.target.value, e)}
                 placeholder="0"
                 className={styles.input}
+                maxLength={12}
               />
             </div>
             
@@ -318,13 +497,12 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
               <label className={styles.label}>Cantidad de Racks</label>
               <input
                 name="cantidadRacks"
-                type="number"
-                min="0"
-                max="9223372036854775807"
-                value={formData.cantidadRacks}
-                onChange={onChange}
+                type="text"
+                value={formatInteger(formData.cantidadRacks)}
+                onChange={(e) => handleFormattedChange('cantidadRacks', e.target.value, e)}
                 placeholder="0"
                 className={styles.input}
+                maxLength={12}
               />
             </div>
             
@@ -332,13 +510,12 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
               <label className={styles.label}>Cantidad de Bobinas</label>
               <input
                 name="cantidadBobinas"
-                type="number"
-                min="0"
-                max="9223372036854775807"
-                value={formData.cantidadBobinas}
-                onChange={onChange}
+                type="text"
+                value={formatInteger(formData.cantidadBobinas)}
+                onChange={(e) => handleFormattedChange('cantidadBobinas', e.target.value, e)}
                 placeholder="0"
                 className={styles.input}
+                maxLength={12}
               />
             </div>
             
@@ -420,90 +597,22 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
 
       {/* Modal Cliente */}
       {modalCliente && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', width: '90%', maxWidth: '600px', maxHeight: '80vh', overflow: 'auto' }}>
-            <h3>Seleccionar Cliente</h3>
-            <div style={{ marginBottom: '1rem' }}>
-              <select
-                value={campoCliente}
-                onChange={(e) => setCampoCliente(e.target.value as 'razonSocial' | 'cuit_rut' | 'direccion')}
-                style={{ marginRight: '1rem', padding: '0.5rem' }}
-              >
-                <option value="razonSocial">Razón Social</option>
-                <option value="cuit_rut">CUIT/RUT</option>
-                <option value="direccion">Dirección</option>
-              </select>
-              <input
-                type="text"
-                placeholder={`Buscar por ${campoCliente}...`}
-                value={busquedaCliente}
-                onChange={(e) => setBusquedaCliente(e.target.value)}
-                style={{ padding: '0.5rem', flex: 1 }}
-              />
-            </div>
-            <div style={{ maxHeight: '300px', overflow: 'auto' }}>
-              {clientesFiltrados.map(cliente => (
-                <div
-                  key={cliente.id}
-                  onClick={() => handleClienteSelect(cliente)}
-                  style={{ padding: '0.75rem', border: '1px solid #ddd', marginBottom: '0.5rem', cursor: 'pointer', borderRadius: '4px' }}
-                >
-                  <strong>{cliente.razonSocial}</strong><br />
-                  <small>{cliente.cuit_rut} - {cliente.direccion}</small>
-                </div>
-              ))}
-            </div>
-            <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
-              <button onClick={() => setModalCliente(false)} style={{ padding: '0.5rem 1rem', background: '#ccc', border: 'none', borderRadius: '4px' }}>
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
+        <ClienteSelectModal
+          open={modalCliente}
+          onClose={() => setModalCliente(false)}
+          onSelect={handleClienteSelect}
+          clienteSeleccionado={clienteSeleccionado}
+        />
       )}
 
       {/* Modal Destino */}
       {modalDestino && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', width: '90%', maxWidth: '600px', maxHeight: '80vh', overflow: 'auto' }}>
-            <h3>Seleccionar Destino</h3>
-            <div style={{ marginBottom: '1rem' }}>
-              <select
-                value={campoDestino}
-                onChange={(e) => setCampoDestino(e.target.value as 'provincia' | 'localidad' | 'direccion')}
-                style={{ marginRight: '1rem', padding: '0.5rem' }}
-              >
-                <option value="provincia">Provincia</option>
-                <option value="localidad">Localidad</option>
-                <option value="direccion">Dirección</option>
-              </select>
-              <input
-                type="text"
-                placeholder={`Buscar por ${campoDestino}...`}
-                value={busquedaDestino}
-                onChange={(e) => setBusquedaDestino(e.target.value)}
-                style={{ padding: '0.5rem', flex: 1 }}
-              />
-            </div>
-            <div style={{ maxHeight: '300px', overflow: 'auto' }}>
-              {destinosFiltrados.map(destino => (
-                <div
-                  key={destino.id}
-                  onClick={() => handleDestinoSelect(destino)}
-                  style={{ padding: '0.75rem', border: '1px solid #ddd', marginBottom: '0.5rem', cursor: 'pointer', borderRadius: '4px' }}
-                >
-                  <strong>{destino.nombre}</strong><br />
-                  <small>{destino.provincia}, {destino.localidad} - {destino.direccion}</small>
-                </div>
-              ))}
-            </div>
-            <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
-              <button onClick={() => setModalDestino(false)} style={{ padding: '0.5rem 1rem', background: '#ccc', border: 'none', borderRadius: '4px' }}>
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
+        <DestinoSelectModal
+          open={modalDestino}
+          onClose={() => setModalDestino(false)}
+          onSelect={handleDestinoSelect}
+          destinoSeleccionado={destinoSeleccionado}
+        />
       )}
     </div>
   );

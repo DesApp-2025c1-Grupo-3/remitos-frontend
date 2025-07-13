@@ -17,11 +17,12 @@ export default function Remitos() {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [remitoToDelete, setRemitoToDelete] = useState(null);
+  const itemsPerPage = 10;
 
   const fetchRemitos = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await remitosService.getRemitos(page, 20, filters);
+      const response = await remitosService.getRemitos(page, itemsPerPage, filters);
       if (response && response.data) {
         setRemitos(response);
         setCurrentPage(response.currentPage);
@@ -179,6 +180,8 @@ export default function Remitos() {
           currentPage={remitos.currentPage}
           totalPages={remitos.totalPages}
           onPageChange={setCurrentPage}
+          totalItems={remitos.totalItems}
+          itemsPerPage={itemsPerPage}
         />
       </div>
 

@@ -23,6 +23,25 @@ interface EstadoAnterior {
   mercaderia: MercaderiaConEstado[];
 }
 
+function truncateNumber(num: number | string, maxDigits = 10): string {
+  const str = String(num);
+  if (str.length > maxDigits) {
+    return str.slice(0, maxDigits) + '...';
+  }
+  return str;
+}
+
+function formatAndTruncateNumber(num: number | string, maxChars = 18): string {
+  if (num === null || num === undefined) return '';
+  const n = typeof num === 'string' ? parseInt(num) : num;
+  if (isNaN(n)) return String(num);
+  const formatted = n.toLocaleString('es-AR');
+  if (formatted.length > maxChars) {
+    return formatted.slice(0, maxChars) + '...';
+  }
+  return formatted;
+}
+
 export default function DetalleRemito() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -365,15 +384,15 @@ export default function DetalleRemito() {
             </div>
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Volumen:</label>
-              <span className={styles.infoValue}>{remito.mercaderia?.volumenMetrosCubico || 0} m³</span>
+              <span className={styles.infoValue}>{formatAndTruncateNumber(remito.mercaderia?.volumenMetrosCubico || 0)} m³</span>
             </div>
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Valor:</label>
-              <span className={styles.infoValue}>${remito.mercaderia?.valorDeclarado?.toLocaleString() || 0}</span>
+              <span className={styles.infoValue}>${formatAndTruncateNumber(remito.mercaderia?.valorDeclarado || 0)}</span>
             </div>
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Peso:</label>
-              <span className={styles.infoValue}>{remito.mercaderia?.pesoMercaderia || 0} kg</span>
+              <span className={styles.infoValue}>{formatAndTruncateNumber(remito.mercaderia?.pesoMercaderia || 0)} kg</span>
             </div>
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Prioridad:</label>
@@ -415,7 +434,12 @@ export default function DetalleRemito() {
         {/* Lista de mercadería */}
         <div className={styles.tablaContenedor}>
           <div className={styles.mercaderiaContainer}>
-            <h2 className={styles.mercaderiaTitle}>Mercadería</h2>
+            <h2 className={styles.mercaderiaTitle}>
+              Mercadería
+              {remito.mercaderia?.tipoMercaderia && (
+                <span className={styles.badgeTipoMercaderia}>{remito.mercaderia.tipoMercaderia}</span>
+              )}
+            </h2>
             <div className={styles.mercaderiaGrid}>
               {mercaderiaConEstado.map(item => (
                 <div
