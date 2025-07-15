@@ -4,6 +4,7 @@ import { useNotification } from '../../contexts/NotificationContext';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import styles from '../../components/RemitosFilters/RemitosFilters.module.css';
 import { clientesService } from '../../services/clientesService';
+import { ClienteSelectModal } from '../../components/ClienteSelectModal';
 
 const ReporteVolumenClientePeriodo: React.FC = () => {
   const [filtros, setFiltros] = useState({ clienteId: '', fechaDesde: '', fechaHasta: '' });
@@ -14,6 +15,8 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
   const [showClienteDropdown, setShowClienteDropdown] = useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const { showNotification } = useNotification();
+  const [modalCliente, setModalCliente] = useState(false);
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<any>(null);
 
   useEffect(() => {
     const loadClientes = async () => {
@@ -41,10 +44,10 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
     setFiltros({ ...filtros, [e.target.name]: e.target.value });
   };
 
-  const handleClienteSelect = (cliente: { id: number; razonSocial: string | null }) => {
+  const handleClienteSelect = (cliente: any) => {
     setFiltros({ ...filtros, clienteId: cliente.id.toString() });
-    setClienteSearchTerm(cliente.razonSocial || '');
-    setShowClienteDropdown(false);
+    setClienteSeleccionado(cliente);
+    setModalCliente(false);
   };
 
   const handleBuscar = async () => {
@@ -107,36 +110,22 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
           {/* Filtro por cliente */}
           <div className={styles.filterField}>
             <label className={styles.label}>Cliente</label>
-            <div className={styles.dropdownContainer} ref={dropdownRef}>
+            <div>
               <input
                 type="text"
-                value={clienteSearchTerm}
-                onChange={e => {
-                  setClienteSearchTerm(e.target.value);
-                  setShowClienteDropdown(true);
-                  if (!e.target.value) setFiltros({ ...filtros, clienteId: '' });
-                }}
-                onFocus={() => setShowClienteDropdown(true)}
-                placeholder="Buscar cliente..."
+                value={clienteSeleccionado ? clienteSeleccionado.razonSocial : ''}
+                readOnly
+                onClick={() => setModalCliente(true)}
+                placeholder="Seleccionar cliente..."
                 className={styles.input}
+                style={{ cursor: 'pointer', background: '#e5e7eb' }}
               />
-              {showClienteDropdown && (
-                <div className={styles.dropdown}>
-                  {filteredClientes.length > 0 ? (
-                    filteredClientes.map(cliente => (
-                      <div
-                        key={cliente.id}
-                        className={styles.dropdownItem}
-                        onClick={() => handleClienteSelect(cliente)}
-                      >
-                        {cliente.razonSocial || 'Sin razón social'}
-                      </div>
-                    ))
-                  ) : (
-                    <div className={styles.dropdownItem}>No se encontraron clientes</div>
-                  )}
-                </div>
-              )}
+              <ClienteSelectModal
+                open={modalCliente}
+                onClose={() => setModalCliente(false)}
+                onSelect={handleClienteSelect}
+                clienteSeleccionado={clienteSeleccionado}
+              />
             </div>
           </div>
         </div>
