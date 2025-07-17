@@ -31,6 +31,7 @@ export default function EditarRemito() {
     // Archivo adjunto
     archivoAdjunto: null,
   });
+  const [existingFile, setExistingFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [clientes, setClientes] = useState([]);
@@ -62,11 +63,20 @@ export default function EditarRemito() {
           cantidadBultos: remitoData.mercaderia?.cantidadBultos?.toString() || "",
           cantidadPallets: remitoData.mercaderia?.cantidadPallets?.toString() || "",
           requisitosEspeciales: remitoData.mercaderia?.requisitosEspeciales || "",
-          // No podemos editar el archivo adjunto existente
+          // Archivo adjunto existente
           archivoAdjunto: null,
         };
         
         setFormData(mappedData);
+        
+        // Guardar información del archivo existente
+        if (remitoData.archivoAdjunto) {
+          setExistingFile({
+            name: remitoData.archivoAdjunto.split('/').pop() || 'Archivo adjunto',
+            path: remitoData.archivoAdjunto,
+            url: `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/${remitoData.archivoAdjunto.startsWith('/') ? remitoData.archivoAdjunto.slice(1) : remitoData.archivoAdjunto}`.replace(/([^:]\/)\/+/, '$1')
+          });
+        }
         
         // Asegurar que sean arrays
         setClientes(Array.isArray(clientesResponse.data) ? clientesResponse.data : []);
@@ -85,7 +95,7 @@ export default function EditarRemito() {
     };
 
     if (id) {
-    fetchData();
+      fetchData();
     }
   }, [id, showNotification]);
 
@@ -177,6 +187,7 @@ export default function EditarRemito() {
         destinos={destinos}
         onNuevoCliente={() => navigate("/clientes/nuevo")}
         onNuevoDestino={() => navigate("/destinos/nuevo")}
+        existingFile={existingFile}
       />
     </div>
   );

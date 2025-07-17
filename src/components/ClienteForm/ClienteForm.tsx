@@ -130,9 +130,9 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
             style={{ width: '100%', maxWidth: 400, minWidth: 0, padding: '0.5rem 1rem', boxSizing: 'border-box', height: 44 }}
           >
             <option value="">Seleccionar tipo de cliente</option>
-            <option value="empresa">Empresa privada</option>
-            <option value="organismo estatal">Organismo estatal</option>
-            <option value="particular">Particular</option>
+            <option value="Empresa privada">Empresa privada</option>
+            <option value="Organismo estatal">Organismo estatal</option>
+            <option value="Particular">Particular</option>
           </select>
           {fieldErrors.tipoEmpresa && <div className={styles.inputErrorMsg}>El tipo de cliente es requerido</div>}
         </div>

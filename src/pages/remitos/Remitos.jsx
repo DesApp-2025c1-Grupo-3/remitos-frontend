@@ -114,14 +114,13 @@ export default function Remitos() {
                 <th>Destino</th>
                 <th>Estado</th>
                 <th>Prioridad</th>
-                <th>Fecha</th>
                 <th className={styles.actionsCenterAlign}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {remitos.data.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className={styles.emptyTableMessage}>
+                  <td colSpan="6" className={styles.emptyTableMessage}>
                     Aún no hay remitos registrados
                   </td>
                 </tr>
@@ -146,7 +145,6 @@ export default function Remitos() {
                         {remito.prioridad}
                       </span>
                     </td>
-                    <td>{formatDate(remito.fechaEmision)}</td>
                     <td>
                       <div className={styles.acciones}>
                         <Link 

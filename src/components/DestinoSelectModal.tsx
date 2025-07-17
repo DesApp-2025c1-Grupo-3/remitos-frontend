@@ -1,14 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Pagination } from './Pagination/Pagination';
 import { X } from 'lucide-react';
-
-interface Destino {
-  id: number;
-  nombre: string;
-  provincia: string;
-  localidad: string;
-  direccion: string;
-}
+import { destinosService, Destino } from '../services/destinosService';
 
 interface DestinoSelectModalProps {
   open: boolean;
@@ -23,10 +16,20 @@ export const DestinoSelectModal: React.FC<DestinoSelectModalProps> = ({ open, on
   const [currentPageDestino, setCurrentPageDestino] = useState(1);
   const [destinosPaginados, setDestinosPaginados] = useState<{ data: Destino[], totalItems: number, totalPages: number, currentPage: number }>({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
   const [loadingDestinos, setLoadingDestinos] = useState(false);
+  const [debouncedBusqueda, setDebouncedBusqueda] = useState('');
   const itemsPerPage = 5;
 
+  // Debounce para la búsqueda
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedBusqueda(busquedaDestino);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [busquedaDestino]);
+
   // Cargar destinos paginados del servidor
-  const cargarDestinos = useCallback(async () => {
+  const cargarDestinos = React.useCallback(async () => {
     if (!open) return;
     setLoadingDestinos(true);
     try {
@@ -34,26 +37,35 @@ export const DestinoSelectModal: React.FC<DestinoSelectModalProps> = ({ open, on
         page: currentPageDestino,
         limit: itemsPerPage
       };
-      if (busquedaDestino.trim()) {
-        params[campoDestino] = busquedaDestino.trim();
+      if (debouncedBusqueda.trim()) {
+        params[campoDestino] = debouncedBusqueda.trim();
       }
-      const response = await fetch(`${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001'}/destino?${new URLSearchParams(params)}`);
-      const data = await response.json();
+      
+      const data = await destinosService.getDestinos(params);
+      
       setDestinosPaginados(data);
     } catch (error) {
       console.error('Error al cargar destinos:', error);
+      // En caso de error, establecer datos vacíos
+      setDestinosPaginados({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
     } finally {
       setLoadingDestinos(false);
     }
-  }, [open, currentPageDestino, busquedaDestino, campoDestino, itemsPerPage]);
+  }, [open, currentPageDestino, debouncedBusqueda, campoDestino]);
 
-  useMemo(() => {
-    if (open) cargarDestinos();
-  }, [open, currentPageDestino, busquedaDestino, campoDestino, cargarDestinos]);
+  // Cargar destinos cuando cambien los parámetros
+  React.useEffect(() => {
+    if (open) {
+      cargarDestinos();
+    }
+  }, [open, currentPageDestino, debouncedBusqueda, campoDestino]);
 
-  useMemo(() => {
-    if (open) setCurrentPageDestino(1);
-  }, [busquedaDestino, campoDestino, open]);
+  // Resetear página cuando cambie la búsqueda
+  React.useEffect(() => {
+    if (open && (debouncedBusqueda || campoDestino !== 'provincia')) {
+      setCurrentPageDestino(1);
+    }
+  }, [debouncedBusqueda, campoDestino, open]);
 
   if (!open) return null;
 
@@ -76,7 +88,7 @@ export const DestinoSelectModal: React.FC<DestinoSelectModalProps> = ({ open, on
         borderRadius: '12px', 
         width: '100%', 
         maxWidth: '500px',
-        height: '530px',
+        height: '550px',
         maxHeight: '90vh',
         boxShadow: '0 8px 32px #0002',
         display: 'flex',
@@ -257,7 +269,7 @@ export const DestinoSelectModal: React.FC<DestinoSelectModalProps> = ({ open, on
 
               {/* Pagination solo, centrado */}
               <div style={{ 
-                padding: '0.3rem 1rem 0.3rem 1rem',
+                padding: '0.8rem 1rem 0.8rem 1rem',
                 borderTop: '1px solid #f3f4f6',
                 display: 'flex',
                 flexDirection: 'column',

@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { Contacto } from '../types/contacto';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_CLIENTES === 'true';
+const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:3001';
+const USE_MOCK_DATA = (import.meta as any).env.VITE_USE_MOCK_CLIENTES === 'true';
 
 // Función auxiliar para manejar errores de validación del backend
 const handleValidationErrors = (error: any): string => {
@@ -114,8 +114,8 @@ const validarClienteBasico = (cliente: ClienteBackendData): boolean => {
   if (!cliente.direccion || cliente.direccion.length < 3) {
     throw new Error('La dirección es requerida y debe tener al menos 3 caracteres');
   }
-  if (!cliente.tipoEmpresa || !['particular', 'empresa', 'organismo estatal'].includes(cliente.tipoEmpresa)) {
-    throw new Error('El tipo de empresa debe ser: particular, empresa u organismo estatal');
+  if (!cliente.tipoEmpresa || !['Empresa privada', 'Organismo estatal', 'Particular'].includes(cliente.tipoEmpresa)) {
+    throw new Error('El tipo de empresa debe ser: Empresa privada, Organismo estatal o Particular');
   }
   if (cliente.cuit_rut && cliente.cuit_rut.toString().length !== 11) {
     throw new Error('El CUIT debe tener exactamente 11 dígitos');
@@ -159,8 +159,10 @@ export const clientesService = {
       const response = await axios.get(`${API_URL}/cliente`, { params });
       // El backend devuelve una respuesta paginada
       const responseData = response.data;
+      
+      let result;
       if (responseData && responseData.data && Array.isArray(responseData.data)) {
-        return {
+        result = {
           data: responseData.data,
           totalItems: responseData.totalItems || responseData.data.length,
           totalPages: responseData.totalPages || 1,
@@ -168,7 +170,7 @@ export const clientesService = {
         };
       } else if (Array.isArray(responseData)) {
         // Fallback: si la respuesta es directamente un array
-        return {
+        result = {
           data: responseData,
           totalItems: responseData.length,
           totalPages: 1,
@@ -176,13 +178,23 @@ export const clientesService = {
         };
       } else {
         console.error('Respuesta inesperada del backend:', responseData);
-        return {
+        result = {
           data: [],
           totalItems: 0,
           totalPages: 1,
           currentPage: 1
         };
       }
+      
+      // Validar y corregir los datos de paginación
+      const finalResult = {
+        data: result.data,
+        totalItems: Math.max(0, result.totalItems),
+        totalPages: result.totalItems === 0 ? 1 : Math.max(1, result.totalPages),
+        currentPage: result.totalItems === 0 ? 1 : Math.min(Math.max(1, result.currentPage), Math.max(1, result.totalPages))
+      };
+      
+      return finalResult;
     } catch (error) {
       console.error('Error al obtener clientes:', error);
       throw error;

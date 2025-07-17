@@ -440,27 +440,44 @@ export default function DetalleRemito() {
                 <span className={styles.badgeTipoMercaderia}>{remito.mercaderia.tipoMercaderia}</span>
               )}
             </h2>
-            <div className={styles.mercaderiaGrid}>
-              {mercaderiaConEstado.map(item => (
-                <div
-                  key={item.id}
-                  onClick={() => estadoActual === 'En preparación' && handleMercaderiaCheck(item.id)}
-                  className={`
-                    ${styles.mercaderiaItem}
-                    ${estadoActual === 'En preparación' ? styles.mercaderiaItemPreparable : ''}
-                    ${item.preparada ? styles.mercaderiaItemPreparada : ''}
-                  `}
-                >
-                  <div className={styles.mercaderiaItemContent}>
-                    <div>
-                      <div className={styles.infoValue}>{item.tipoMercaderia}</div>
-                      <div className={styles.mercaderiaItemCantidad}>{getCantidadText(item)}</div>
+            {mercaderiaConEstado.length > 0 ? (
+              <div className={styles.mercaderiaGrid}>
+                {mercaderiaConEstado.map(item => (
+                  <div
+                    key={item.id}
+                    onClick={() => estadoActual === 'En preparación' && handleMercaderiaCheck(item.id)}
+                    className={`
+                      ${styles.mercaderiaItem}
+                      ${estadoActual === 'En preparación' ? styles.mercaderiaItemPreparable : ''}
+                      ${item.preparada ? styles.mercaderiaItemPreparada : ''}
+                    `}
+                  >
+                    <div className={styles.mercaderiaItemContent}>
+                      <div>
+                        <div className={styles.infoValue}>{item.tipoMercaderia}</div>
+                        <div className={styles.mercaderiaItemCantidad}>{getCantidadText(item)}</div>
+                      </div>
                     </div>
+                    {item.preparada && <CheckCircle className={styles.checkIcon} />}
                   </div>
-                  {item.preparada && <CheckCircle className={styles.checkIcon} />}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2rem',
+                backgroundColor: '#f9fafb',
+                borderRadius: '8px',
+                border: '2px dashed #d1d5db',
+                color: '#6b7280',
+                fontSize: '1.1rem',
+                fontWeight: '500'
+              }}>
+                📦 No hay mercadería para preparar
+              </div>
+            )}
           </div>
           {/* Botones de acción */}
           <div className={styles.accionesContainer}>

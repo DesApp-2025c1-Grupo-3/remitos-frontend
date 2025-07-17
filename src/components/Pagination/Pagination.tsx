@@ -17,59 +17,73 @@ export const Pagination: React.FC<PaginationProps> = ({
   totalItems,
   itemsPerPage
 }) => {
-  const startItem = (currentPage - 1) * itemsPerPage + 1;
-  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+  // Asegurar que totalPages sea al menos 1 y que currentPage no exceda totalPages
+  const safeTotalPages = Math.max(1, totalPages);
+  const safeCurrentPage = Math.min(currentPage, safeTotalPages);
+  
+  const startItem = totalItems > 0 ? (safeCurrentPage - 1) * itemsPerPage + 1 : 0;
+  const endItem = Math.min(safeCurrentPage * itemsPerPage, totalItems);
 
   const getPageNumbers = (): (number | string)[] => {
     const pages: (number | string)[] = [];
     const maxVisiblePages = 5;
     
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
+    // Si no hay páginas o solo hay una página, no mostrar paginación
+    if (safeTotalPages <= 1) {
+      return [];
+    }
+    
+    if (safeTotalPages <= maxVisiblePages) {
+      // Mostrar todas las páginas si hay 5 o menos
+      for (let i = 1; i <= safeTotalPages; i++) {
         pages.push(i);
       }
     } else {
-      if (currentPage <= 3) {
+      // Lógica para mostrar páginas con elipsis
+      if (safeCurrentPage <= 3) {
+        // Estamos cerca del inicio
         for (let i = 1; i <= 4; i++) {
           pages.push(i);
         }
         pages.push('...');
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
+        pages.push(safeTotalPages);
+      } else if (safeCurrentPage >= safeTotalPages - 2) {
+        // Estamos cerca del final
         pages.push(1);
         pages.push('...');
-        for (let i = totalPages - 3; i <= totalPages; i++) {
+        for (let i = safeTotalPages - 3; i <= safeTotalPages; i++) {
           pages.push(i);
         }
       } else {
+        // Estamos en el medio
         pages.push(1);
         pages.push('...');
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+        for (let i = safeCurrentPage - 1; i <= safeCurrentPage + 1; i++) {
           pages.push(i);
         }
         pages.push('...');
-        pages.push(totalPages);
+        pages.push(safeTotalPages);
       }
     }
     return pages;
   };
 
-  if (totalPages <= 1) return null;
+  // No mostrar paginación si no hay elementos o solo hay una página
+  if (totalItems === 0 || safeTotalPages <= 1) return null;
 
   return (
     <div className={styles.paginationContainer}>
       <div className={styles.paginationInfo}>
-        Mostrando {startItem}-{endItem} de {totalItems} elementos
+        {totalItems > 0 ? `Mostrando ${startItem}-${endItem} de ${totalItems} elementos` : 'No hay elementos'}
       </div>
       <div className={styles.paginationControls}>
         <button
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
+          onClick={() => onPageChange(safeCurrentPage - 1)}
+          disabled={safeCurrentPage === 1}
           className={`${styles.paginationButton} ${styles.navButton}`}
           title="Página anterior"
         >
-          <ChevronLeft size={20} style={{ marginRight: 6 }} />
-          <span style={{ fontWeight: 500 }}>Anterior</span>
+          <ChevronLeft size={20} />
         </button>
         {getPageNumbers().map((page, index) => (
           <React.Fragment key={index}>
@@ -78,7 +92,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             ) : (
               <button
                 onClick={() => onPageChange(page as number)}
-                className={`${styles.paginationButton} ${currentPage === page ? styles.activePage : ''}`}
+                className={`${styles.paginationButton} ${safeCurrentPage === page ? styles.activePage : ''}`}
                 style={{ minWidth: 40 }}
               >
                 {page}
@@ -87,13 +101,12 @@ export const Pagination: React.FC<PaginationProps> = ({
           </React.Fragment>
         ))}
         <button
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
+          onClick={() => onPageChange(safeCurrentPage + 1)}
+          disabled={safeCurrentPage === safeTotalPages}
           className={`${styles.paginationButton} ${styles.navButton}`}
           title="Página siguiente"
         >
-          <span style={{ fontWeight: 500 }}>Siguiente</span>
-          <ChevronRight size={20} style={{ marginLeft: 6 }} />
+          <ChevronRight size={20} />
         </button>
       </div>
     </div>

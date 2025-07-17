@@ -1,13 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Pagination } from './Pagination/Pagination';
 import { X } from 'lucide-react';
-
-interface Cliente {
-  id: number;
-  razonSocial: string;
-  cuit_rut: string;
-  direccion: string;
-}
+import { clientesService, Cliente } from '../services/clientesService';
 
 interface ClienteSelectModalProps {
   open: boolean;
@@ -22,10 +16,20 @@ export const ClienteSelectModal: React.FC<ClienteSelectModalProps> = ({ open, on
   const [currentPageCliente, setCurrentPageCliente] = useState(1);
   const [clientesPaginados, setClientesPaginados] = useState<{ data: Cliente[], totalItems: number, totalPages: number, currentPage: number }>({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
   const [loadingClientes, setLoadingClientes] = useState(false);
+  const [debouncedBusqueda, setDebouncedBusqueda] = useState('');
   const itemsPerPage = 5;
 
+  // Debounce para la búsqueda
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedBusqueda(busquedaCliente);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [busquedaCliente]);
+
   // Cargar clientes paginados del servidor
-  const cargarClientes = useCallback(async () => {
+  const cargarClientes = React.useCallback(async () => {
     if (!open) return;
     setLoadingClientes(true);
     try {
@@ -33,26 +37,35 @@ export const ClienteSelectModal: React.FC<ClienteSelectModalProps> = ({ open, on
         page: currentPageCliente,
         limit: itemsPerPage
       };
-      if (busquedaCliente.trim()) {
-        params[campoCliente] = busquedaCliente.trim();
+      if (debouncedBusqueda.trim()) {
+        params[campoCliente] = debouncedBusqueda.trim();
       }
-      const response = await fetch(`${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001'}/cliente?${new URLSearchParams(params)}`);
-      const data = await response.json();
+      
+      const data = await clientesService.getClientes(params);
+      
       setClientesPaginados(data);
     } catch (error) {
       console.error('Error al cargar clientes:', error);
+      // En caso de error, establecer datos vacíos
+      setClientesPaginados({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
     } finally {
       setLoadingClientes(false);
     }
-  }, [open, currentPageCliente, busquedaCliente, campoCliente, itemsPerPage]);
+  }, [open, currentPageCliente, debouncedBusqueda, campoCliente]);
 
-  useMemo(() => {
-    if (open) cargarClientes();
-  }, [open, currentPageCliente, busquedaCliente, campoCliente, cargarClientes]);
+  // Cargar clientes cuando cambien los parámetros
+  React.useEffect(() => {
+    if (open) {
+      cargarClientes();
+    }
+  }, [open, currentPageCliente, debouncedBusqueda, campoCliente]);
 
-  useMemo(() => {
-    if (open) setCurrentPageCliente(1);
-  }, [busquedaCliente, campoCliente, open]);
+  // Resetear página cuando cambie la búsqueda
+  React.useEffect(() => {
+    if (open && (debouncedBusqueda || campoCliente !== 'razonSocial')) {
+      setCurrentPageCliente(1);
+    }
+  }, [debouncedBusqueda, campoCliente, open]);
 
   if (!open) return null;
 
@@ -75,7 +88,7 @@ export const ClienteSelectModal: React.FC<ClienteSelectModalProps> = ({ open, on
         borderRadius: '12px', 
         width: '100%', 
         maxWidth: '500px',
-        height: '530px',
+        height: '550px',
         maxHeight: '90vh',
         boxShadow: '0 8px 32px #0002',
         display: 'flex',
@@ -256,7 +269,7 @@ export const ClienteSelectModal: React.FC<ClienteSelectModalProps> = ({ open, on
 
               {/* Pagination solo, centrado */}
               <div style={{ 
-                padding: '0.3rem 1rem 0.3rem 1rem',
+                padding: '0.8rem 1rem 0.8rem 1rem',
                 borderTop: '1px solid #f3f4f6',
                 display: 'flex',
                 flexDirection: 'column',

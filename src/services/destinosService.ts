@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { Contacto } from '../types/contacto';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DESTINOS === 'true';
+const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:3001';
+const USE_MOCK_DATA = (import.meta as any).env.VITE_USE_MOCK_DESTINOS === 'true';
 
 // Función auxiliar para manejar errores de validación del backend
 const handleValidationErrors = (error: any): string => {
@@ -89,8 +89,10 @@ export const destinosService = {
       const response = await axios.get(`${API_URL}/destino`, { params });
       // El backend devuelve una respuesta paginada, necesitamos extraer el array data
       const responseData = response.data;
+      
+      let result;
       if (responseData && responseData.data && Array.isArray(responseData.data)) {
-        return {
+        result = {
           data: responseData.data,
           totalItems: responseData.totalItems || responseData.data.length,
           totalPages: responseData.totalPages || 1,
@@ -98,7 +100,7 @@ export const destinosService = {
         };
       } else if (Array.isArray(responseData)) {
         // Fallback: si la respuesta es directamente un array
-        return {
+        result = {
           data: responseData,
           totalItems: responseData.length,
           totalPages: 1,
@@ -106,13 +108,23 @@ export const destinosService = {
         };
       } else {
         console.error('Respuesta inesperada del backend:', responseData);
-        return {
+        result = {
           data: [],
           totalItems: 0,
           totalPages: 1,
           currentPage: 1
         };
       }
+      
+      // Validar y corregir los datos de paginación
+      const finalResult = {
+        data: result.data,
+        totalItems: Math.max(0, result.totalItems),
+        totalPages: Math.max(1, result.totalPages),
+        currentPage: Math.min(Math.max(1, result.currentPage), Math.max(1, result.totalPages))
+      };
+      
+      return finalResult;
     } catch (error) {
       console.error('Error al obtener destinos:', error);
       throw error;

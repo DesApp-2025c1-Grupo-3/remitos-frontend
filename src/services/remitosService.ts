@@ -177,7 +177,24 @@ export const remitosService = {
       }
       
       const response = await axios.get(`${API_URL}/remito?${params.toString()}`);
-      return response.data;
+      const responseData = response.data;
+      
+      // Validar y corregir los datos de paginación
+      const result = {
+        data: responseData.data || [],
+        totalItems: responseData.totalItems || 0,
+        totalPages: responseData.totalPages || 1,
+        currentPage: responseData.currentPage || 1
+      };
+      
+      const finalResult = {
+        data: result.data,
+        totalItems: Math.max(0, result.totalItems),
+        totalPages: Math.max(1, result.totalPages),
+        currentPage: Math.min(Math.max(1, result.currentPage), Math.max(1, result.totalPages))
+      };
+      
+      return finalResult;
     } catch (error) {
       console.error('Error al obtener remitos:', error);
       throw error;
@@ -272,11 +289,47 @@ export const remitosService = {
   async updateRemito(id: number, remitoData: RemitoUpdateData): Promise<Remito> {
     try {
       if (USE_MOCK_DATA) {
-        console.log("Mock update:", id, remitoData);
         return {} as Remito;
       }
-      const response = await axios.put(`${API_URL}/remito/${id}`, remitoData);
-      return response.data;
+
+      // Si hay un archivo adjunto, usar FormData
+      if (remitoData.archivoAdjunto) {
+        const formData = new FormData();
+        
+        // Agregar todos los campos del remito
+        if (remitoData.numeroAsignado) formData.append('numeroAsignado', remitoData.numeroAsignado);
+        if (remitoData.observaciones !== undefined) formData.append('observaciones', remitoData.observaciones);
+        if (remitoData.prioridad) formData.append('prioridad', remitoData.prioridad);
+        if (remitoData.clienteId) formData.append('clienteId', remitoData.clienteId.toString());
+        if (remitoData.destinoId) formData.append('destinoId', remitoData.destinoId.toString());
+        if (remitoData.estadoId) formData.append('estadoId', remitoData.estadoId.toString());
+        if (remitoData.razonNoEntrega) formData.append('razonNoEntrega', remitoData.razonNoEntrega);
+        
+        // Campos de mercadería
+        if (remitoData.tipoMercaderia) formData.append('tipoMercaderia', remitoData.tipoMercaderia);
+        if (remitoData.valorDeclarado !== undefined) formData.append('valorDeclarado', remitoData.valorDeclarado.toString());
+        if (remitoData.volumenMetrosCubico !== undefined) formData.append('volumenMetrosCubico', remitoData.volumenMetrosCubico.toString());
+        if (remitoData.pesoMercaderia !== undefined) formData.append('pesoMercaderia', remitoData.pesoMercaderia.toString());
+        if (remitoData.cantidadBobinas !== undefined) formData.append('cantidadBobinas', remitoData.cantidadBobinas.toString());
+        if (remitoData.cantidadRacks !== undefined) formData.append('cantidadRacks', remitoData.cantidadRacks.toString());
+        if (remitoData.cantidadBultos !== undefined) formData.append('cantidadBultos', remitoData.cantidadBultos.toString());
+        if (remitoData.cantidadPallets !== undefined) formData.append('cantidadPallets', remitoData.cantidadPallets.toString());
+        if (remitoData.requisitosEspeciales) formData.append('requisitosEspeciales', remitoData.requisitosEspeciales);
+        
+        // Archivo adjunto
+        formData.append('archivoAdjunto', remitoData.archivoAdjunto);
+
+        const response = await axios.put(`${API_URL}/remito/${id}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        return response.data;
+      } else {
+        // Si no hay archivo, enviar como JSON normal
+        const response = await axios.put(`${API_URL}/remito/${id}`, remitoData);
+        return response.data;
+      }
     } catch (error) {
       console.error(`Error al actualizar remito con ID ${id}:`, error);
       throw error;
@@ -286,7 +339,6 @@ export const remitosService = {
   async updateEstadoRemito(remitoId: number, estadoId: number): Promise<Remito> {
     try {
       if (USE_MOCK_DATA) {
-        console.log("Mock update estado:", remitoId, estadoId);
         return {} as Remito;
       }
       const response = await axios.put(`${API_URL}/remito/${remitoId}/estado/${estadoId}`);
@@ -300,13 +352,6 @@ export const remitosService = {
   async deleteRemito(id: number): Promise<void> {
     try {
       if (USE_MOCK_DATA) {
-        console.log("Mock delete:", id);
         return;
       }
-      await axios.delete(`${API_URL}/remito/${id}`);
-    } catch (error) {
-      console.error(`Error al eliminar remito con ID ${id}:`, error);
-      throw error;
-    }
-  },
-};
+      await axios.delete(`

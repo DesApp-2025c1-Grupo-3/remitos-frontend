@@ -131,6 +131,11 @@ interface RemitoFormProps {
   onNuevoCliente?: () => void;
   onNuevoDestino?: () => void;
   onVolver?: () => void;
+  existingFile?: {
+    name: string;
+    path: string;
+    url: string;
+  } | null;
 }
 
 export const RemitoForm: React.FC<RemitoFormProps> = ({
@@ -143,7 +148,8 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
   clientes,
   destinos,
   onNuevoCliente,
-  onNuevoDestino
+  onNuevoDestino,
+  existingFile
 }) => {
   const navigate = useNavigate();
   // Estados para modales
@@ -155,6 +161,7 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
   const [campoDestino, setCampoDestino] = useState<'provincia' | 'localidad' | 'direccion'>('provincia');
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showExistingFile, setShowExistingFile] = useState(true);
   
   // Estados para paginación del servidor
   const [currentPageCliente, setCurrentPageCliente] = useState(1);
@@ -546,44 +553,95 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
             {/* Área de carga de archivos */}
             <div className={styles.campo}>
               <label className={styles.label}>Archivo adjunto</label>
-              <div
-                className={`${styles.dropZone} ${isDragging ? styles.dragging : ''}`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                style={{
-                  border: '2px dashed #ccc',
+              
+              {/* Mostrar archivo existente si existe y no se ha seleccionado uno nuevo */}
+              {existingFile && showExistingFile && !selectedFile && (
+                <div style={{
+                  border: '2px solid #e5e7eb',
                   borderRadius: '8px',
                   padding: '1rem',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  backgroundColor: isDragging ? '#f0f8ff' : '#fafafa'
-                }}
-              >
-                {selectedFile ? (
+                  backgroundColor: '#f9fafb',
+                  marginBottom: '1rem'
+                }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span>{selectedFile.name}</span>
-                    <button type="button" onClick={removeFile} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                      <X size={20} />
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '1.2rem' }}>📄</span>
+                      <span>{existingFile.name}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <a 
+                        href={existingFile.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{ 
+                          color: '#1F7A3D', 
+                          textDecoration: 'underline',
+                          fontSize: '0.9rem'
+                        }}
+                      >
+                        Ver archivo
+                      </a>
+                      <button 
+                        type="button" 
+                        onClick={() => setShowExistingFile(false)}
+                        style={{ 
+                          background: 'none', 
+                          border: 'none', 
+                          cursor: 'pointer',
+                          color: '#dc2626',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
                   </div>
-                ) : (
-                  <>
-                    <Upload size={24} style={{ marginBottom: '0.5rem' }} />
-                    <p>Arrastra un archivo aquí o haz clic para seleccionar</p>
-                    <input
-                      type="file"
-                      onChange={handleFileInput}
-                      style={{ display: 'none' }}
-                      id="fileInput"
-                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                    />
-                    <label htmlFor="fileInput" style={{ cursor: 'pointer', color: '#1F7A3D', textDecoration: 'underline' }}>
-                      Seleccionar archivo
-                    </label>
-                  </>
-                )}
-              </div>
+                </div>
+              )}
+              
+              {/* Área de carga de archivos */}
+              {(!existingFile || !showExistingFile || selectedFile) && (
+                <div
+                  className={`${styles.dropZone} ${isDragging ? styles.dragging : ''}`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  style={{
+                    border: '2px dashed #ccc',
+                    borderRadius: '8px',
+                    padding: '1rem',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    backgroundColor: isDragging ? '#f0f8ff' : '#fafafa'
+                  }}
+                >
+                  {selectedFile ? (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span>{selectedFile.name}</span>
+                      <button type="button" onClick={removeFile} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                        <X size={20} />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload size={24} style={{ marginBottom: '0.5rem' }} />
+                      <p>Arrastra un archivo aquí o haz clic para seleccionar</p>
+                      <input
+                        type="file"
+                        onChange={handleFileInput}
+                        style={{ display: 'none' }}
+                        id="fileInput"
+                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                      />
+                      <label htmlFor="fileInput" style={{ cursor: 'pointer', color: '#1F7A3D', textDecoration: 'underline' }}>
+                        Seleccionar archivo
+                      </label>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

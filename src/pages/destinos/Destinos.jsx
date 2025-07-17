@@ -5,6 +5,7 @@ import { destinosService } from "../../services/destinosService";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { useNotification } from "../../contexts/NotificationContext";
 import { ConfirmModal } from '../../components/ConfirmModal/ConfirmModal';
+import { Pagination } from '../../components/Pagination/Pagination';
 
 export default function Destinos() {
   // Cambiar el estado inicial a objeto de paginación
@@ -61,25 +62,13 @@ export default function Destinos() {
 
   // Renderiza los controles de paginación
   const renderPagination = () => (
-    <div className={styles.pagination} style={{ marginTop: "1rem", display: "flex", gap: "1rem", justifyContent: "center" }}>
-      <button
-        className={styles.crearBtn}
-        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-        disabled={currentPage === 1}
-        style={{ opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
-      >
-        Anterior
-      </button>
-      <span style={{ alignSelf: 'center' }}>Página {destinos.currentPage} de {destinos.totalPages}</span>
-      <button
-        className={styles.crearBtn}
-        onClick={() => setCurrentPage(p => Math.min(destinos.totalPages, p + 1))}
-        disabled={currentPage === destinos.totalPages}
-        style={{ opacity: currentPage === destinos.totalPages ? 0.5 : 1, cursor: currentPage === destinos.totalPages ? 'not-allowed' : 'pointer' }}
-      >
-        Siguiente
-      </button>
-    </div>
+    <Pagination
+      currentPage={destinos.currentPage}
+      totalPages={destinos.totalPages}
+      onPageChange={setCurrentPage}
+      totalItems={destinos.totalItems}
+      itemsPerPage={10}
+    />
   );
 
   return (

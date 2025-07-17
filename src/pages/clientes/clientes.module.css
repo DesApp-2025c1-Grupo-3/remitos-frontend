@@ -112,6 +112,7 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0 0.2rem;
+  table-layout: fixed;
 }
 
 .tabla th {
@@ -123,6 +124,26 @@
   font-size: 0.88rem;
 }
 
+.tabla th:nth-child(1) {
+  width: 25%;
+}
+
+.tabla th:nth-child(2) {
+  width: 15%;
+}
+
+.tabla th:nth-child(3) {
+  width: 15%;
+}
+
+.tabla th:nth-child(4) {
+  width: 30%;
+}
+
+.tabla th:nth-child(5) {
+  width: 15%;
+}
+
 .tabla td {
   background: #fff;
   border-radius: 0.5rem;
@@ -130,6 +151,23 @@
   font-size: 0.88rem;
   color: #222;
   vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tabla td:nth-child(1) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0;
+}
+
+.tabla td:nth-child(4) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0;
 }
 
 .tabla tr {

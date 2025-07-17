@@ -5,6 +5,7 @@ import { clientesService } from "../../services/clientesService";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { useNotification } from "../../contexts/NotificationContext";
 import { ConfirmModal } from '../../components/ConfirmModal/ConfirmModal';
+import { Pagination } from '../../components/Pagination/Pagination';
 
 export default function Clientes() {
   // Cambiar el estado inicial a objeto de paginación
@@ -60,25 +61,13 @@ export default function Clientes() {
 
   // Renderiza los controles de paginación
   const renderPagination = () => (
-    <div className={styles.pagination} style={{ marginTop: "1rem", display: "flex", gap: "1rem", justifyContent: "center" }}>
-      <button
-        className={styles.crearBtn}
-        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-        disabled={currentPage === 1}
-        style={{ opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
-      >
-        Anterior
-      </button>
-      <span style={{ alignSelf: 'center' }}>Página {clientes.currentPage} de {clientes.totalPages}</span>
-      <button
-        className={styles.crearBtn}
-        onClick={() => setCurrentPage(p => Math.min(clientes.totalPages, p + 1))}
-        disabled={currentPage === clientes.totalPages}
-        style={{ opacity: currentPage === clientes.totalPages ? 0.5 : 1, cursor: currentPage === clientes.totalPages ? 'not-allowed' : 'pointer' }}
-      >
-        Siguiente
-      </button>
-    </div>
+    <Pagination
+      currentPage={clientes.currentPage}
+      totalPages={clientes.totalPages}
+      onPageChange={setCurrentPage}
+      totalItems={clientes.totalItems}
+      itemsPerPage={10}
+    />
   );
 
   return (
