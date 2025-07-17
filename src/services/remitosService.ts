@@ -339,7 +339,7 @@ export const remitosService = {
   async updateEstadoRemito(remitoId: number, estadoId: number): Promise<Remito> {
     try {
       if (USE_MOCK_DATA) {
-        return {} as Remito;
+      return {} as Remito;
       }
       const response = await axios.put(`${API_URL}/remito/${remitoId}/estado/${estadoId}`);
       return response.data;
@@ -354,4 +354,9 @@ export const remitosService = {
       if (USE_MOCK_DATA) {
         return;
       }
-      await axios.delete(`
+      await axios.delete(`${API_URL}/remito/${id}`);
+    } catch (error) {
+      throw error;
+    }
+  },
+};
