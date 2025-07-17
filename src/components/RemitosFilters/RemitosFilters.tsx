@@ -7,21 +7,11 @@ import { estadosService } from '../../services/estadosService';
 import { RemitosFilters as RemitosFiltersType } from '../../services/remitosService';
 import { ClienteSelectModal } from '../ClienteSelectModal';
 import { DestinoSelectModal } from '../DestinoSelectModal';
+import type { Cliente as ClienteService } from '../../services/clientesService';
+import type { Destino as DestinoService } from '../../services/destinosService';
 
-interface Cliente {
-  id: number;
-  razonSocial: string;
-  cuit_rut: string;
-  direccion: string;
-}
-
-interface Destino {
-  id: number;
-  nombre: string;
-  provincia: string;
-  localidad: string;
-  direccion: string;
-}
+type Cliente = ClienteService;
+type Destino = DestinoService;
 
 interface Estado {
   id: number;
@@ -48,8 +38,13 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
   const [numeroAsignadoInput, setNumeroAsignadoInput] = useState(filters.numeroAsignado || '');
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
   const [selectedDestino, setSelectedDestino] = useState<Destino | null>(null);
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    // Leer de localStorage si existe, si no, true
+    const stored = localStorage.getItem('remitosFiltersCollapsed');
+    return stored ? JSON.parse(stored) : true;
+  });
   const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [clienteExtra, setClienteExtra] = useState<Cliente | null>(null);
 
   // Cargar clientes y estados al montar el componente
   useEffect(() => {
@@ -62,16 +57,20 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
           id: cliente.id,
           razonSocial: cliente.razonSocial || '',
           cuit_rut: cliente.cuit_rut || '',
-          direccion: cliente.direccion || ''
+          direccion: cliente.direccion || '',
+          tipoEmpresa: cliente.tipoEmpresa || '',
+          activo: cliente.activo ?? true
         }));
         setClientes(clientesAdaptados);
         
-        // Si hay un clienteId en los filtros, buscar y establecer el cliente seleccionado
+        // Si hay un clienteId en los filtros y no coincide con el seleccionado, actualizar
         if (filters.clienteId) {
-          const cliente = clientesAdaptados.find(c => c.id === filters.clienteId);
-          if (cliente) {
-            setSelectedCliente(cliente);
+          if (!selectedCliente || selectedCliente.id !== filters.clienteId) {
+            const cliente = clientesAdaptados.find(c => c.id === filters.clienteId);
+            setSelectedCliente(cliente || null);
           }
+        } else {
+          setSelectedCliente(null);
         }
       } catch (error) {
         console.error('Error al cargar clientes:', error);
@@ -84,9 +83,14 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
         const destinosAdaptados = destinosResponse.data.map(destino => ({
           id: destino.id,
           nombre: destino.nombre || '',
+          pais: destino.pais || '',
           provincia: destino.provincia || '',
           localidad: destino.localidad || '',
-          direccion: destino.direccion || ''
+          direccion: destino.direccion || '',
+          activo: destino.activo ?? true,
+          contactos: destino.contactos || [],
+          createdAt: destino.createdAt,
+          updatedAt: destino.updatedAt
         }));
         setDestinos(destinosAdaptados);
         
@@ -115,6 +119,17 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
     loadData();
   }, [filters.clienteId]);
 
+  // Si no está en la lista y hay clienteId, buscarlo por ID
+  useEffect(() => {
+    if (filters.clienteId && !clientes.find(c => c.id === filters.clienteId)) {
+      clientesService.getClienteById(filters.clienteId)
+        .then(cliente => setClienteExtra(cliente))
+        .catch(() => setClienteExtra(null));
+    } else {
+      setClienteExtra(null);
+    }
+  }, [filters.clienteId, clientes]);
+
   // Limpiar timeout al desmontar
   useEffect(() => {
     return () => {
@@ -123,6 +138,16 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
       }
     };
   }, []);
+
+  // Calcular el cliente seleccionado a partir de filters.clienteId y clientes
+  const clienteSeleccionado = filters.clienteId
+    ? clientes.find(c => c.id === filters.clienteId) || clienteExtra
+    : null;
+
+  // Guardar el estado de colapsado en localStorage cuando cambie
+  useEffect(() => {
+    localStorage.setItem('remitosFiltersCollapsed', JSON.stringify(isCollapsed));
+  }, [isCollapsed]);
 
   const handleInputChange = (field: keyof RemitosFiltersType, value: string | number | undefined) => {
     onFiltersChange({
@@ -150,7 +175,6 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
 
   const handleClienteSelect = (cliente: Cliente) => {
     handleInputChange('clienteId', cliente.id);
-    setSelectedCliente(cliente);
     setModalCliente(false);
   };
 
@@ -224,7 +248,7 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
           <div>
             <input
               type="text"
-              value={selectedCliente ? selectedCliente.razonSocial : ''}
+              value={clienteSeleccionado ? String(clienteSeleccionado.razonSocial ?? '') : ''}
               readOnly
               onClick={() => setModalCliente(true)}
               placeholder="Seleccionar cliente..."
@@ -303,7 +327,7 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
           <label className={styles.label}>Fecha</label>
           <input
             type="date"
-            value={filters.fechaEmision || ''}
+            value={String(filters.fechaEmision ?? '')}
             onChange={(e) => handleInputChange('fechaEmision', e.target.value || undefined)}
             className={styles.input}
           />

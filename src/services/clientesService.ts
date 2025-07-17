@@ -236,7 +236,7 @@ export const clientesService = {
   },
 
   // Crear un nuevo cliente
-  async createCliente(cliente: CreateClienteData): Promise<Cliente> {
+  async createCliente(cliente: CreateClienteData & { contactos?: Contacto[] }): Promise<Cliente> {
     try {
       if (USE_MOCK_DATA) {
         await mockDelay();
@@ -245,17 +245,16 @@ export const clientesService = {
           ...cliente,
           id: nextId,
           activo: true,
-          contactos: [],
+          contactos: cliente.contactos || [],
           createdAt: new Date(),
           updatedAt: new Date()
         };
         mockClientes.push(newCliente);
         return newCliente;
       }
-      
-      // El backend requiere al menos un contacto, pero no tenemos datos del formulario
-      // Deberíamos usar createClienteWithContacto en su lugar
-      throw new Error('Para crear un cliente se requiere al menos un contacto. Use createClienteWithContacto.');
+      // Enviar todos los datos, incluyendo contactos si existen
+      const response = await axios.post(`${API_URL}/cliente`, cliente);
+      return response.data;
     } catch (error) {
       console.error('Error al crear cliente:', error);
       if (axios.isAxiosError(error) && error.response) {

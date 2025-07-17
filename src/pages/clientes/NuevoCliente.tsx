@@ -59,23 +59,14 @@ export default function NuevoCliente() {
     }
     
     try {
-      const primerContacto = formData.contactos[0];
-      if (!primerContacto.personaAutorizada || !primerContacto.correoElectronico || !primerContacto.telefono) {
-        showNotification('El contacto debe tener todos los campos completos: persona autorizada, correo electrónico y teléfono.', 'error')
-        return
-      }
-
-      // Usar createClienteWithContacto con los datos del formulario
-      await clientesService.createClienteWithContacto({
+      // Usar createCliente para enviar todos los contactos
+      await clientesService.createCliente({
         razonSocial: formData.razonSocial,
         cuit_rut: formData.cuit_rut,
         tipoEmpresa: formData.tipoEmpresa,
         direccion: formData.direccion,
-        personaAutorizada: primerContacto.personaAutorizada,
-        correoElectronico: primerContacto.correoElectronico,
-        telefono: primerContacto.telefono.toString()
+        contactos: formData.contactos
       });
-      
       showNotification('Cliente creado exitosamente', 'success')
       navigate("/clientes")
     } catch (err) {

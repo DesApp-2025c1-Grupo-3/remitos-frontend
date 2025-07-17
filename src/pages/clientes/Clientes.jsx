@@ -151,7 +151,7 @@ export default function Clientes() {
             </div>
           }
           onConfirm={handleDeleteConfirm}
-          onCancel={handleDeleteCancel}
+          onClose={handleDeleteCancel}
         />
       )}
     </div>

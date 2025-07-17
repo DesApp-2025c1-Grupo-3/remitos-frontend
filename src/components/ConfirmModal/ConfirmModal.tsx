@@ -3,7 +3,7 @@ import styles from './ConfirmModal.module.css';
 
 interface ConfirmModalProps {
   isOpen: boolean;
-  onCancel: () => void;
+  onClose: () => void;
   onConfirm: () => void;
   title: string;
   message: React.ReactNode;
@@ -13,7 +13,7 @@ interface ConfirmModalProps {
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   isOpen,
-  onCancel,
+  onClose,
   onConfirm,
   title,
   message,
@@ -33,7 +33,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           <button 
             type="button" 
             className={styles.cancelButton}
-            onClick={onCancel}
+            onClick={onClose}
           >
             {cancelText}
           </button>

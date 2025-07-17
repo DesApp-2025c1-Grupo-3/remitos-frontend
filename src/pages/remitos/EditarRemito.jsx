@@ -78,9 +78,33 @@ export default function EditarRemito() {
           });
         }
         
-        // Asegurar que sean arrays
-        setClientes(Array.isArray(clientesResponse.data) ? clientesResponse.data : []);
-        setDestinos(Array.isArray(destinosResponse.data) ? destinosResponse.data : []);
+        // Asegurar que el cliente del remito esté en la lista de clientes
+        let clientesList = Array.isArray(clientesResponse.data) ? clientesResponse.data : [];
+        if (remitoData.clienteId && !clientesList.find(c => c.id === remitoData.clienteId)) {
+          try {
+            const clienteExtra = await clientesService.getClienteById(remitoData.clienteId);
+            if (clienteExtra) {
+              clientesList = [...clientesList, clienteExtra];
+            }
+          } catch (e) {
+            // Si no se encuentra, no hacer nada
+          }
+        }
+        setClientes(clientesList);
+        
+        // Asegurar que el destino del remito esté en la lista de destinos
+        let destinosList = Array.isArray(destinosResponse.data) ? destinosResponse.data : [];
+        if (remitoData.destinoId && !destinosList.find(d => d.id === remitoData.destinoId)) {
+          try {
+            const destinoExtra = await destinosService.getDestinoById(remitoData.destinoId);
+            if (destinoExtra) {
+              destinosList = [...destinosList, destinoExtra];
+            }
+          } catch (e) {
+            // Si no se encuentra, no hacer nada
+          }
+        }
+        setDestinos(destinosList);
       } catch (err) {
         console.error('Error en fetchData:', err);
         console.error('Error details:', err.response?.data || err.message);

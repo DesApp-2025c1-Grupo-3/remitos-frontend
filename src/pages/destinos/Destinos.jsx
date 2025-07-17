@@ -154,7 +154,7 @@ export default function Destinos() {
             </div>
           }
           onConfirm={handleDeleteConfirm}
-          onCancel={handleDeleteCancel}
+          onClose={handleDeleteCancel}
         />
       )}
     </div>

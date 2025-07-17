@@ -196,7 +196,7 @@ export default function Remitos() {
             </div>
           }
           onConfirm={handleDeleteConfirm}
-          onCancel={handleDeleteCancel}
+          onClose={handleDeleteCancel}
         />
       )}
     </div>
