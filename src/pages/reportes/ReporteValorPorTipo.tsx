@@ -3,6 +3,7 @@ import { getValorPorTipoMercaderia } from '../../services/reportesService';
 import { clientesService } from '../../services/clientesService';
 import styles from '../../components/RemitosFilters/RemitosFilters.module.css';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ClienteSelectModal } from '../../components/ClienteSelectModal';
 
 const TIPOS_MERCADERIA = [
   'Automotriz',
@@ -24,9 +25,9 @@ const ReporteValorPorTipo: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [clientes, setClientes] = useState<{ id: number; razonSocial: string | null }[]>([]);
-  const [clienteSearchTerm, setClienteSearchTerm] = useState('');
-  const [showClienteDropdown, setShowClienteDropdown] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [modalCliente, setModalCliente] = useState(false);
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<any>(null);
+  // Eliminado: lógica de dropdown de cliente, ya no es necesaria
 
   useEffect(() => {
     const loadClientes = async () => {
@@ -36,15 +37,7 @@ const ReporteValorPorTipo: React.FC = () => {
     loadClientes();
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowClienteDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  // Eliminado: lógica de dropdown de cliente, ya no es necesaria
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFiltros({ ...filtros, [e.target.name]: e.target.value });
@@ -76,15 +69,19 @@ const ReporteValorPorTipo: React.FC = () => {
     }
   };
 
+  const handleClienteSelect = (cliente: any) => {
+    setFiltros({ ...filtros, clienteId: cliente.id.toString() });
+    setClienteSeleccionado(cliente);
+    setModalCliente(false);
+  };
+
   const handleLimpiar = () => {
     setFiltros({ clienteId: '', fechaDesde: '', fechaHasta: '', tipos: [] });
     setData([]);
-    setClienteSearchTerm('');
+    setClienteSeleccionado(null);
   };
 
-  const filteredClientes = clientes.filter(cliente =>
-    cliente.razonSocial?.toLowerCase().includes(clienteSearchTerm.toLowerCase()) || false
-  );
+  // Eliminado: lógica de filtrado de clientes para el dropdown
 
   // Tooltip personalizado
   const CustomTooltip = ({ active, payload }: any) => {
@@ -131,40 +128,22 @@ const ReporteValorPorTipo: React.FC = () => {
           </div>
           <div className={styles.filterField}>
             <label className={styles.label}>Cliente</label>
-            <div className={styles.dropdownContainer} ref={dropdownRef}>
+            <div>
               <input
                 type="text"
-                value={clienteSearchTerm}
-                onChange={e => {
-                  setClienteSearchTerm(e.target.value);
-                  setShowClienteDropdown(true);
-                  if (!e.target.value) setFiltros({ ...filtros, clienteId: '' });
-                }}
-                onFocus={() => setShowClienteDropdown(true)}
-                placeholder="Buscar cliente..."
+                value={clienteSeleccionado ? clienteSeleccionado.razonSocial : ''}
+                readOnly
+                onClick={() => setModalCliente(true)}
+                placeholder="Seleccionar cliente..."
                 className={styles.input}
+                style={{ cursor: 'pointer', background: '#e5e7eb' }}
               />
-              {showClienteDropdown && (
-                <div className={styles.dropdown}>
-                  {filteredClientes.length > 0 ? (
-                    filteredClientes.map(cliente => (
-                      <div
-                        key={cliente.id}
-                        className={styles.dropdownItem}
-                        onClick={() => {
-                          setFiltros({ ...filtros, clienteId: cliente.id.toString() });
-                          setClienteSearchTerm(cliente.razonSocial || '');
-                          setShowClienteDropdown(false);
-                        }}
-                      >
-                        {cliente.razonSocial || 'Sin razón social'}
-                      </div>
-                    ))
-                  ) : (
-                    <div className={styles.dropdownItem}>No se encontraron clientes</div>
-                  )}
-                </div>
-              )}
+              <ClienteSelectModal
+                open={modalCliente}
+                onClose={() => setModalCliente(false)}
+                onSelect={handleClienteSelect}
+                clienteSeleccionado={clienteSeleccionado}
+              />
             </div>
           </div>
         </div>
