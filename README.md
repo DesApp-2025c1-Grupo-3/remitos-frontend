@@ -1,16 +1,76 @@
-# Desarrollo de Aplicaciones - Universidad Nacional de Hurlingham - Template para armar un proyecto de FE basado en React
-La organización de este repo se creó usando Vite (https://vitejs.dev/). Integra los siguientes packages (además de React, claro):
-- Material UI.
-- Redux (usado a título demostrativo en un solo componente).
-- React Router.
-- Axios.
+# Remitos Frontend
 
-## Cómo trabajar con este template
-Loguearse con un usuario de Github. Entrar a este repo, pulsar el botón "Use this template" que van a ver arriba a la derecha. Se abre un menucito con dos opciones, elegir la primera, "Create a new repository". Llenar los datos que pide la página siguiente, y darle a "Create repository".  
-Eso va a crear un repo en el usuario o la orga que hayan elegido, con el contenido del template en un único commit inicial. 
+Aplicación frontend para gestión de remitos desarrollada con React y Vite.
 
-Clonarse el repo, en la carpeta principal de la copia local ejecutar `npm install` para instalar las dependencias. 
+## Tecnologías utilizadas
 
-Para levantar la app en modo desarrollo, `npm run dev`.
+- React 18
+- Vite
+- Tailwind CSS
+- Axios
+- React Router
 
-Obviamente las funcionalidades están solamente a modo de ejemplo. Se puede empezar agregando la funcionalidad de nuestro proyecto, y después a medida que este va creciendo, ir borrando el código de ejemplo.
+## Configuración
+
+### Variables de entorno
+
+La aplicación utiliza las siguientes variables de entorno:
+
+- `VITE_API_URL`: URL de la API para desarrollo local (por defecto: http://localhost:3001)
+- `VITE_RENDER_API_URL`: URL de la API desplegada en Render (configurada en tu archivo .env)
+
+### Configuración para Render
+
+Para usar la API de Render, asegúrate de tener en tu archivo `.env`:
+
+```bash
+VITE_RENDER_API_URL=https://remitos-backend.onrender.com
+```
+
+### Archivos de configuración
+
+- `.env`: Variables de entorno para desarrollo local
+- `.env.render`: Variables de entorno para el modo Render (se crea automáticamente cuando usas `--mode render`)
+
+## Comandos disponibles
+
+### Desarrollo
+```bash
+npm run dev          # Desarrollo local con API local
+npm run dev:render   # Desarrollo local con API de Render
+```
+
+### Build
+```bash
+npm run build        # Build para producción con API local
+npm run build:render # Build para producción con API de Render
+```
+
+### Otros
+```bash
+npm run lint         # Ejecuta el linter
+npm run preview      # Previsualiza el build de producción
+```
+
+## Uso
+
+1. Instalar dependencias:
+   ```bash
+   npm install
+   ```
+
+2. Configurar variables de entorno en tu archivo `.env`:
+   ```
+   VITE_RENDER_API_URL=https://remitos-backend.onrender.com
+   ```
+
+3. Ejecutar la aplicación:
+   - Para desarrollo con API local: `npm run dev`
+   - Para desarrollo con API de Render: `npm run dev:render`
+
+## Estructura del proyecto
+
+- `src/config/api.ts`: Configuración centralizada de la API
+- `src/services/`: Servicios para comunicación con la API
+- `src/components/`: Componentes reutilizables
+- `src/pages/`: Páginas de la aplicación

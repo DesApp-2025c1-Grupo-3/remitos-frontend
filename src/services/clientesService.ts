@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { Contacto } from '../types/contacto';
+import { getApiUrl } from '../config/api';
 
-const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = getApiUrl();
 const USE_MOCK_DATA = (import.meta as any).env.VITE_USE_MOCK_CLIENTES === 'true';
 
 // Función auxiliar para manejar errores de validación del backend

@@ -1,7 +1,8 @@
 /// <reference types="vite/client" />
 import axios from 'axios';
+import { getApiUrl } from '../config/api';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = getApiUrl();
 
 export const getVolumenPorClientePeriodo = (params: any) =>
   axios.get(`${API_URL}/reportes/volumen-por-cliente`, { params });

@@ -6,6 +6,7 @@ import { estadosService, Estado } from '../../services/estadosService';
 import { useNotification } from '../../contexts/NotificationContext';
 import styles from './remitos.module.css';
 import detalleStyles from './DetalleRemito.module.css';
+import { getApiUrl } from '../../config/api';
 
 // Interfaz para la mercadería con estado de preparación
 interface MercaderiaConEstado {
@@ -301,7 +302,7 @@ export default function DetalleRemito() {
       return <span className={`${styles.infoValue} ${detalleStyles.sinArchivo}`}>No hay archivo adjunto</span>;
     }
     let path = archivoAdjunto.startsWith('/') ? archivoAdjunto.slice(1) : archivoAdjunto;
-    const url = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/${path}`.replace(/([^:]\/)\/+/, '$1');
+    const url = `${getApiUrl()}/${path}`.replace(/([^:]\/)\/+/, '$1');
     const nombre = path.split('/').pop() || 'Archivo adjunto';
     const esImagen = /\.(jpg|jpeg|png|gif)$/i.test(nombre);
     const esPDF = /\.pdf$/i.test(nombre);

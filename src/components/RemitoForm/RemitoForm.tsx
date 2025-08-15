@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Pagination } from '../Pagination/Pagination';
 import { ClienteSelectModal } from '../ClienteSelectModal';
 import { DestinoSelectModal } from '../DestinoSelectModal';
+import { getApiUrl } from '../../config/api';
 
 // Funciones de formato para campos numéricos
 const formatCurrency = (value: string | number): string => {
@@ -213,7 +214,7 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
         params[campoCliente] = busquedaCliente.trim();
       }
       
-      const response = await fetch(`${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001'}/cliente?${new URLSearchParams(params)}`);
+      const response = await fetch(`${getApiUrl()}/cliente?${new URLSearchParams(params)}`);
       const data = await response.json();
       setClientesPaginados(data);
     } catch (error) {
@@ -239,7 +240,7 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
         params[campoDestino] = busquedaDestino.trim();
       }
       
-      const response = await fetch(`${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001'}/destino?${new URLSearchParams(params)}`);
+      const response = await fetch(`${getApiUrl()}/destino?${new URLSearchParams(params)}`);
       const data = await response.json();
       setDestinosPaginados(data);
     } catch (error) {

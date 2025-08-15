@@ -7,6 +7,7 @@ import { RemitoForm } from "../../components/RemitoForm/RemitoForm";
 import { useNotification } from "../../contexts/NotificationContext";
 import { ArrowLeft } from "lucide-react";
 import styles from "./remitos.module.css";
+import { getApiUrl } from "../../config/api";
 
 export default function EditarRemito() {
   const navigate = useNavigate();
@@ -74,7 +75,7 @@ export default function EditarRemito() {
           setExistingFile({
             name: remitoData.archivoAdjunto.split('/').pop() || 'Archivo adjunto',
             path: remitoData.archivoAdjunto,
-            url: `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/${remitoData.archivoAdjunto.startsWith('/') ? remitoData.archivoAdjunto.slice(1) : remitoData.archivoAdjunto}`.replace(/([^:]\/)\/+/, '$1')
+            url: `${getApiUrl()}/${remitoData.archivoAdjunto.startsWith('/') ? remitoData.archivoAdjunto.slice(1) : remitoData.archivoAdjunto}`.replace(/([^:]\/)\/+/, '$1')
           });
         }
         
