@@ -1,76 +1,44 @@
-# Remitos Frontend
+# Sistema de Remitos - Frontend
 
-Aplicación frontend para gestión de remitos desarrollada con React y Vite.
+Aplicación web para gestión de remitos desarrollada con React, Vite y Tailwind CSS.
 
-## Tecnologías utilizadas
+## 🚀 Inicio Rápido
 
-- React 18
-- Vite
-- Tailwind CSS
-- Axios
-- React Router
+### Prerrequisitos
+- [Node.js](https://nodejs.org/) (versión 16 o superior)
+- [npm](https://www.npmjs.com/) o [yarn](https://yarnpkg.com/)
 
-## Configuración
+### Instalación y Configuración
 
-### Variables de entorno
-
-La aplicación utiliza las siguientes variables de entorno:
-
-- `VITE_API_URL`: URL de la API para desarrollo local (por defecto: http://localhost:3001)
-- `VITE_RENDER_API_URL`: URL de la API desplegada en Render (configurada en tu archivo .env)
-
-### Configuración para Render
-
-Para usar la API de Render, asegúrate de tener en tu archivo `.env`:
-
+1. **Instalar dependencias:**
 ```bash
-VITE_RENDER_API_URL=https://remitos-backend.onrender.com
+npm install
 ```
 
-### Archivos de configuración
+2. **Configurar variables de entorno:**
+```bash
+cp .env.example .env
+```
 
-- `.env`: Variables de entorno para desarrollo local
-- `.env.render`: Variables de entorno para el modo Render (se crea automáticamente cuando usas `--mode render`)
+3. **Ejecutar en modo desarrollo:**
+```bash
+# Desarrollo con API local
+npm run dev
 
-## Comandos disponibles
+# Desarrollo con API de Render
+npm run dev:render
+```
+
+## 📋 Variables de Entorno
+
+Configura las siguientes variables en tu archivo `.env`:
+
+## 🛠️ Comandos Disponibles
 
 ### Desarrollo
 ```bash
-npm run dev          # Desarrollo local con API local
-npm run dev:render   # Desarrollo local con API de Render
-```
+# Servidor de desarrollo con API local
+npm run dev
 
-### Build
-```bash
-npm run build        # Build para producción con API local
-npm run build:render # Build para producción con API de Render
-```
-
-### Otros
-```bash
-npm run lint         # Ejecuta el linter
-npm run preview      # Previsualiza el build de producción
-```
-
-## Uso
-
-1. Instalar dependencias:
-   ```bash
-   npm install
-   ```
-
-2. Configurar variables de entorno en tu archivo `.env`:
-   ```
-   VITE_RENDER_API_URL=https://remitos-backend.onrender.com
-   ```
-
-3. Ejecutar la aplicación:
-   - Para desarrollo con API local: `npm run dev`
-   - Para desarrollo con API de Render: `npm run dev:render`
-
-## Estructura del proyecto
-
-- `src/config/api.ts`: Configuración centralizada de la API
-- `src/services/`: Servicios para comunicación con la API
-- `src/components/`: Componentes reutilizables
-- `src/pages/`: Páginas de la aplicación
+# Servidor de desarrollo con API de Render
+npm run dev:render
