@@ -3,7 +3,6 @@ import { Contacto } from '../types/contacto';
 import { getApiUrl } from '../config/api';
 
 const API_URL = getApiUrl();
-const USE_MOCK_DATA = (import.meta as any).env.VITE_USE_MOCK_CLIENTES === 'true';
 
 // Función auxiliar para manejar errores de validación del backend
 const handleValidationErrors = (error: any): string => {
@@ -37,7 +36,7 @@ const handleValidationErrors = (error: any): string => {
 export interface Cliente {
   id: number;
   razonSocial: string | null;
-  cuit_rut: string | null; // Cambiado a string para coincidir con el backend
+  cuit_rut: string | null;
   tipoEmpresa: string;
   direccion: string;
   activo: boolean;
@@ -46,10 +45,10 @@ export interface Cliente {
   updatedAt?: Date;
 }
 
-// Interfaz para crear/actualizar cliente (sin campos no permitidos por el backend)
+// Interfaz para crear/actualizar cliente
 export interface CreateClienteData {
   razonSocial: string | null;
-  cuit_rut: string | null; // Cambiado a string para coincidir con el backend
+  cuit_rut: string | null;
   tipoEmpresa: string;
   direccion: string;
 }
@@ -59,40 +58,12 @@ export interface UpdateClienteData extends CreateClienteData {
   contactos?: Contacto[];
 }
 
-// Interfaz para datos que se envían al backend (con tipos correctos)
-interface ClienteBackendData {
-  razonSocial: string | null;
-  cuit_rut: number | null;
-  tipoEmpresa: string;
-  direccion: string;
-}
-
-// Datos mock para desarrollo
-const mockClientes: Cliente[] = [];
-
-// Simular delay de red
-const mockDelay = () => new Promise(resolve => setTimeout(resolve, 500));
-
-// Función auxiliar para obtener el siguiente ID
-const getNextId = (items: { id: number }[]): number => {
-  return items.length > 0 ? Math.max(...items.map(item => item.id)) + 1 : 1;
-};
-
-// Función auxiliar para obtener el siguiente ID de contacto
-const getNextContactoId = (clientes: Cliente[]): number => {
-  const allContactos = clientes.flatMap(c => c.contactos || []);
-  if (allContactos.length === 0) return 1;
-  const maxId = Math.max(...allContactos.map(c => c.id || 0));
-  return maxId + 1;
-};
-
 // Función auxiliar para limpiar contactos (remover campos no permitidos por el backend)
 const limpiarContactos = (contactos: Contacto[]) => {
   return contactos.map(contacto => ({
     personaAutorizada: contacto.personaAutorizada,
     correoElectronico: contacto.correoElectronico,
     telefono: contacto.telefono
-    // NO incluir: id, createdAt, updatedAt, clienteId, destinoId
   }));
 };
 
@@ -103,7 +74,6 @@ const prepararContactoParaEndpoint = (contacto: Contacto, endpoint: 'update' | '
     telefono: contacto.telefono
   };
 
-  // Todos los endpoints usan 'personaAutorizada' según el esquema de validación
   return {
     ...baseData,
     personaAutorizada: contacto.personaAutorizada
@@ -111,7 +81,7 @@ const prepararContactoParaEndpoint = (contacto: Contacto, endpoint: 'update' | '
 };
 
 // Función auxiliar para validar datos básicos del cliente
-const validarClienteBasico = (cliente: ClienteBackendData): boolean => {
+const validarClienteBasico = (cliente: any): boolean => {
   if (!cliente.direccion || cliente.direccion.length < 3) {
     throw new Error('La dirección es requerida y debe tener al menos 3 caracteres');
   }
@@ -128,7 +98,7 @@ const validarClienteBasico = (cliente: ClienteBackendData): boolean => {
 const prepararDatosActualizacion = (cliente: UpdateClienteData): any => {
   const clienteBasico = {
     razonSocial: cliente.razonSocial,
-    cuit_rut: cliente.cuit_rut, // Mantener como string según el backend
+    cuit_rut: cliente.cuit_rut,
     tipoEmpresa: cliente.tipoEmpresa,
     direccion: cliente.direccion
   };
@@ -148,15 +118,6 @@ export const clientesService = {
   // Obtener todos los clientes
   async getClientes(params?: { page?: number, limit?: number }): Promise<{ data: Cliente[], totalItems: number, totalPages: number, currentPage: number }> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        return {
-          data: mockClientes,
-          totalItems: mockClientes.length,
-          totalPages: 1,
-          currentPage: 1
-        };
-      }
       const response = await axios.get(`${API_URL}/cliente`, { params });
       // El backend devuelve una respuesta paginada
       const responseData = response.data;
@@ -205,13 +166,6 @@ export const clientesService = {
   // Obtener un cliente por ID
   async getClienteById(id: number): Promise<Cliente> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        const cliente = mockClientes.find(c => c.id === id);
-        if (!cliente) throw new Error('Cliente no encontrado');
-        return cliente;
-      }
-      
       const response = await axios.get(`${API_URL}/cliente/${id}`);
       // El backend puede devolver una respuesta paginada o directa
       const responseData = response.data;
@@ -239,20 +193,6 @@ export const clientesService = {
   // Crear un nuevo cliente
   async createCliente(cliente: CreateClienteData & { contactos?: Contacto[] }): Promise<Cliente> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        const nextId = getNextId(mockClientes);
-        const newCliente: Cliente = {
-          ...cliente,
-          id: nextId,
-          activo: true,
-          contactos: cliente.contactos || [],
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
-        mockClientes.push(newCliente);
-        return newCliente;
-      }
       // Enviar todos los datos, incluyendo contactos si existen
       const response = await axios.post(`${API_URL}/cliente`, cliente);
       return response.data;
@@ -277,27 +217,6 @@ export const clientesService = {
     telefono: string;
   }): Promise<Cliente> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        const nextId = getNextId(mockClientes);
-        const newCliente: Cliente = {
-          ...cliente,
-          id: nextId,
-          activo: true,
-          contactos: [{
-            id: getNextContactoId(mockClientes),
-            personaAutorizada: cliente.personaAutorizada,
-            correoElectronico: cliente.correoElectronico,
-            telefono: cliente.telefono,
-            clienteId: nextId
-          }],
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
-        mockClientes.push(newCliente);
-        return newCliente;
-      }
-      
       // Para el endpoint /clienteContacto, enviar los datos del contacto directamente en el objeto raíz
       const clienteData = {
         razonSocial: cliente.razonSocial,
@@ -321,19 +240,6 @@ export const clientesService = {
   // Actualizar un cliente existente
   async updateCliente(id: number, cliente: UpdateClienteData): Promise<Cliente> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        const index = mockClientes.findIndex(c => c.id === id);
-        if (index === -1) throw new Error('Cliente no encontrado');
-        
-        mockClientes[index] = {
-          ...mockClientes[index],
-          ...cliente,
-          updatedAt: new Date()
-        };
-        return mockClientes[index];
-      }
-      
       // Preparar datos para la actualización
       const datosActualizacion = prepararDatosActualizacion(cliente);
       
@@ -376,24 +282,6 @@ export const clientesService = {
     telefono: string;
   }): Promise<void> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        const cliente = mockClientes.find(c => c.id === clienteId);
-        if (!cliente) throw new Error('Cliente no encontrado');
-        
-        const nuevoContacto: Contacto = {
-          id: getNextContactoId(mockClientes),
-          personaAutorizada: contacto.personaAutorizada,
-          correoElectronico: contacto.correoElectronico,
-          telefono: contacto.telefono,
-          clienteId: clienteId
-        };
-        
-        if (!cliente.contactos) cliente.contactos = [];
-        cliente.contactos.push(nuevoContacto);
-        return;
-      }
-      
       const contactoFormateado = prepararContactoParaEndpoint(contacto as Contacto, 'add');
       await axios.post(`${API_URL}/agregarContactoACliente/${clienteId}`, contactoFormateado);
     } catch (error) {
@@ -405,17 +293,6 @@ export const clientesService = {
   // Eliminar contacto de un cliente
   async eliminarContactoDeCliente(clienteId: number, contactoId: number): Promise<void> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        const cliente = mockClientes.find(c => c.id === clienteId);
-        if (!cliente) throw new Error('Cliente no encontrado');
-        
-        if (cliente.contactos) {
-          cliente.contactos = cliente.contactos.filter(c => c.id !== contactoId);
-        }
-        return;
-      }
-      
       await axios.delete(`${API_URL}/eliminarContactoDeCliente/${clienteId}/${contactoId}`);
     } catch (error) {
       console.error(`Error al eliminar contacto ${contactoId} del cliente ${clienteId}:`, error);
@@ -430,23 +307,6 @@ export const clientesService = {
     telefono: string;
   }): Promise<void> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        const cliente = mockClientes.find(c => c.id === clienteId);
-        if (!cliente) throw new Error('Cliente no encontrado');
-        
-        if (cliente.contactos) {
-          const index = cliente.contactos.findIndex(c => c.id === contactoId);
-          if (index !== -1) {
-            cliente.contactos[index] = {
-              ...cliente.contactos[index],
-              ...contacto
-            };
-          }
-        }
-        return;
-      }
-      
       const contactoFormateado = prepararContactoParaEndpoint(contacto as Contacto, 'update');
       await axios.put(`${API_URL}/actualizarContactoDeCliente/${clienteId}/${contactoId}`, contactoFormateado);
     } catch (error) {
@@ -458,14 +318,6 @@ export const clientesService = {
   // Eliminar un cliente
   async deleteCliente(id: number): Promise<void> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        const index = mockClientes.findIndex(c => c.id === id);
-        if (index === -1) throw new Error('Cliente no encontrado');
-        mockClientes.splice(index, 1);
-        return;
-      }
-      
       // El backend debería manejar la eliminación en cascada de contactos
       await axios.delete(`${API_URL}/cliente/${id}`);
     } catch (error) {
@@ -484,13 +336,6 @@ export const clientesService = {
   // Obtener contactos de un cliente específico
   async getContactosDeCliente(clienteId: number): Promise<Contacto[]> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        const cliente = mockClientes.find(c => c.id === clienteId);
-        if (!cliente) throw new Error('Cliente no encontrado');
-        return cliente.contactos || [];
-      }
-      
       const response = await axios.get(`${API_URL}/cliente/${clienteId}/contactos`);
       return response.data;
     } catch (error) {

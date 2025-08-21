@@ -2,7 +2,6 @@ import axios from 'axios';
 import { getApiUrl } from '../config/api';
 
 const API_URL = getApiUrl();
-const USE_MOCK_DATA = (import.meta as any).env?.VITE_USE_MOCK_REMITOS === 'true';
 
 // Interface que refleja la estructura real del backend
 export interface Cliente {
@@ -103,67 +102,9 @@ export interface RemitoUpdateData extends Partial<RemitoFormData> {
   estadoId?: number;
 }
 
-// Datos mock para desarrollo
-const mockRemitos: Remito[] = [
-  {
-    id: 1,
-    numeroAsignado: 'R-00123',
-    fechaEmision: '2023-04-15T10:30:00Z',
-    observaciones: 'Entrega urgente',
-    prioridad: 'alta',
-    activo: true,
-    clienteId: 1,
-    destinoId: 1,
-    estadoId: 1,
-    mercaderiaId: 1,
-    cliente: {
-      id: 1,
-      razonSocial: 'Cliente A',
-      cuit_rut: '20-12345678-9',
-      direccion: 'Av. Corrientes 1234'
-    },
-    destino: {
-      id: 1,
-      nombre: 'Santiago',
-      provincia: 'RM',
-      localidad: 'Santiago',
-      direccion: 'Las Condes 567'
-    },
-    estado: {
-      id: 1,
-      nombre: 'Pendiente'
-    },
-    mercaderia: {
-      id: 1,
-      tipoMercaderia: 'Electrónicos',
-      valorDeclarado: 25000,
-      volumenMetrosCubico: 3,
-      pesoMercaderia: 1500,
-      cantidadPallets: 4,
-      cantidadBultos: 12,
-      cantidadRacks: 2,
-      cantidadBobinas: 0,
-      requisitosEspeciales: 'Manipular con cuidado',
-      remitosId: 1
-    },
-    createdAt: '2023-04-15T10:30:00Z',
-    updatedAt: '2023-04-15T10:30:00Z'
-  }
-];
-
 export const remitosService = {
   async getRemitos(page: number = 1, limit: number = 20, filters?: RemitosFilters): Promise<RemitosResponse> {
     try {
-      if (USE_MOCK_DATA) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return {
-          totalItems: mockRemitos.length,
-          totalPages: Math.ceil(mockRemitos.length / limit),
-          currentPage: page,
-          data: mockRemitos
-        };
-      }
-      
       const params = new URLSearchParams();
       params.append('page', page.toString());
       params.append('limit', limit.toString());
@@ -204,12 +145,6 @@ export const remitosService = {
 
   async getRemitoById(id: number): Promise<Remito> {
     try {
-      if (USE_MOCK_DATA) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const remito = mockRemitos.find(r => r.id === id);
-        if (!remito) throw new Error('Remito no encontrado');
-        return remito;
-      }
       const response = await axios.get(`${API_URL}/remito/${id}`);
       return response.data;
     } catch (error) {
@@ -220,26 +155,6 @@ export const remitosService = {
 
   async createRemito(remito: RemitoFormData): Promise<Remito> {
     try {
-      if (USE_MOCK_DATA) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const newRemito: Remito = {
-          id: Math.max(...mockRemitos.map(r => r.id)) + 1,
-          numeroAsignado: remito.numeroAsignado,
-          fechaEmision: new Date().toISOString(),
-          observaciones: remito.observaciones,
-          prioridad: remito.prioridad,
-          activo: true,
-          clienteId: remito.clienteId,
-          destinoId: remito.destinoId,
-          estadoId: 1,
-          mercaderiaId: 1,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        mockRemitos.push(newRemito);
-        return newRemito;
-      }
-
       // Crear FormData para manejar el archivo adjunto
       const formData = new FormData();
       formData.append('numeroAsignado', remito.numeroAsignado);
@@ -289,10 +204,6 @@ export const remitosService = {
 
   async updateRemito(id: number, remitoData: RemitoUpdateData): Promise<Remito> {
     try {
-      if (USE_MOCK_DATA) {
-        return {} as Remito;
-      }
-
       // Si hay un archivo adjunto, usar FormData
       if (remitoData.archivoAdjunto) {
         const formData = new FormData();
@@ -339,9 +250,6 @@ export const remitosService = {
 
   async updateEstadoRemito(remitoId: number, estadoId: number): Promise<Remito> {
     try {
-      if (USE_MOCK_DATA) {
-      return {} as Remito;
-      }
       const response = await axios.put(`${API_URL}/remito/${remitoId}/estado/${estadoId}`);
       return response.data;
     } catch (error) {
@@ -352,9 +260,6 @@ export const remitosService = {
 
   async deleteRemito(id: number): Promise<void> {
     try {
-      if (USE_MOCK_DATA) {
-        return;
-      }
       await axios.delete(`${API_URL}/remito/${id}`);
     } catch (error) {
       throw error;

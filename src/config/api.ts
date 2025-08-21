@@ -1,23 +1,31 @@
 // Configuración centralizada de la API
 export const API_CONFIG = {
-  
   // URL de Render (producción)
   RENDER_API_URL: import.meta.env.VITE_RENDER_API_URL,
   
+  // URL local para desarrollo
+  LOCAL_API_URL: import.meta.env.VITE_API_URL,
+  
   // URL activa - usa la de Render si está disponible, sino la local
   get ACTIVE_API_URL() {
-    return import.meta.env.VITE_RENDER_API_URL || this.LOCAL_API_URL;
+    return this.RENDER_API_URL || this.LOCAL_API_URL;
   },
   
   // URL específica para desarrollo local
   get DEV_API_URL() {
-    return import.meta.env.VITE_API_URL || this.LOCAL_API_URL;
+    return this.LOCAL_API_URL || 'http://localhost:3002';
   }
 };
 
 // Función helper para obtener la URL base de la API
 export const getApiUrl = (): string => {
-  return API_CONFIG.ACTIVE_API_URL;
+  // Usar la URL de Render si está configurada explícitamente
+  if (import.meta.env.VITE_USE_RENDER_API === 'true') {
+    return API_CONFIG.RENDER_API_URL || 'https://remitos-backend.onrender.com';
+  }
+  
+  // Por defecto, usar la URL local
+  return API_CONFIG.LOCAL_API_URL || 'http://localhost:3002';
 };
 
 // Función helper para construir URLs completas

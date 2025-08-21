@@ -3,7 +3,6 @@ import { Contacto } from '../types/contacto';
 import { getApiUrl } from '../config/api';
 
 const API_URL = getApiUrl();
-const USE_MOCK_DATA = (import.meta as any).env.VITE_USE_MOCK_DESTINOS === 'true';
 
 // Función auxiliar para manejar errores de validación del backend
 const handleValidationErrors = (error: any): string => {
@@ -53,40 +52,10 @@ export interface CreateDestinoData {
   contactos?: Contacto[];
 }
 
-// Ya no necesitamos esta interfaz separada, siempre usamos destinoContactoSchema
-
-// Datos mock para desarrollo
-const mockDestinos: Destino[] = [];
-
-// Simular delay de red
-const mockDelay = () => new Promise(resolve => setTimeout(resolve, 500));
-
-// Función auxiliar para obtener el siguiente ID
-const getNextId = (items: { id: number }[]): number => {
-  return items.length > 0 ? Math.max(...items.map(item => item.id)) + 1 : 1;
-};
-
-// Función auxiliar para obtener el siguiente ID de contacto
-const getNextContactoId = (destinos: Destino[]): number => {
-  const allContactos = destinos.flatMap(d => d.contactos || []);
-  if (allContactos.length === 0) return 1;
-  const maxId = Math.max(...allContactos.map(c => c.id || 0));
-  return maxId + 1;
-};
-
 export const destinosService = {
   // Obtener todos los destinos
   async getDestinos(params?: { page?: number, limit?: number }): Promise<{ data: Destino[], totalItems: number, totalPages: number, currentPage: number }> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        return {
-          data: mockDestinos,
-          totalItems: mockDestinos.length,
-          totalPages: 1,
-          currentPage: 1
-        };
-      }
       const response = await axios.get(`${API_URL}/destino`, { params });
       // El backend devuelve una respuesta paginada, necesitamos extraer el array data
       const responseData = response.data;
@@ -135,12 +104,6 @@ export const destinosService = {
   // Obtener un destino por ID
   async getDestinoById(id: number): Promise<Destino> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        const destino = mockDestinos.find(d => d.id === id);
-        if (!destino) throw new Error('Destino no encontrado');
-        return destino;
-      }
       const response = await axios.get(`${API_URL}/destino/${id}`);
       // El backend puede devolver una respuesta paginada o directa
       const responseData = response.data;
@@ -158,21 +121,6 @@ export const destinosService = {
   // Crear un nuevo destino
   async createDestino(destino: CreateDestinoData): Promise<Destino> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        const nextId = getNextId(mockDestinos);
-        const newDestino: Destino = {
-          ...destino,
-          id: nextId,
-          activo: true,
-          contactos: destino.contactos || [],
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
-        mockDestinos.push(newDestino);
-        return newDestino;
-      }
-
       // Validar que haya al menos un contacto (requerido por el esquema del backend)
       if (!destino.contactos || destino.contactos.length === 0) {
         throw new Error('Se requiere agregar al menos un contacto para el destino.');
@@ -217,30 +165,9 @@ export const destinosService = {
   async createDestinoWithContacto(destino: CreateDestinoData & { 
     personaAutorizada: string;
     correoElectronico: string;
-    telefono: string; // Cambiado a string según backend
+    telefono: string;
   }): Promise<Destino> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        const nextId = getNextId(mockDestinos);
-        const newDestino: Destino = {
-          ...destino,
-          id: nextId,
-          activo: true,
-          contactos: [{
-            id: getNextContactoId(mockDestinos),
-            personaAutorizada: destino.personaAutorizada,
-            correoElectronico: destino.correoElectronico,
-            telefono: destino.telefono,
-            destinoId: nextId
-          }],
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
-        mockDestinos.push(newDestino);
-        return newDestino;
-      }
-      
       // Intentar usar /destinoContacto con contactos sin IDs de relación
       const destinoData = {
         nombre: destino.nombre,
@@ -252,7 +179,6 @@ export const destinosService = {
           personaAutorizada: destino.personaAutorizada,
           correoElectronico: destino.correoElectronico,
           telefono: destino.telefono
-          // NO incluir clienteId ni destinoId
         }]
       };
       
@@ -301,19 +227,6 @@ export const destinosService = {
   // Actualizar un destino existente
   async updateDestino(id: number, destino: Partial<CreateDestinoData>): Promise<Destino> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        const index = mockDestinos.findIndex(d => d.id === id);
-        if (index === -1) throw new Error('Destino no encontrado');
-        
-        mockDestinos[index] = {
-          ...mockDestinos[index],
-          ...destino,
-          updatedAt: new Date()
-        };
-        return mockDestinos[index];
-      }
-
       // Preparar datos para actualización
       // Validar que haya al menos un contacto (requerido por el esquema del backend)
       if (!destino.contactos || destino.contactos.length === 0) {
@@ -325,7 +238,6 @@ export const destinosService = {
         personaAutorizada: contacto.personaAutorizada,
         correoElectronico: contacto.correoElectronico,
         telefono: String(contacto.telefono)
-        // NO incluir: id, createdAt, updatedAt, clienteId, destinoId
       }));
 
       const updateData: any = {
@@ -337,7 +249,7 @@ export const destinosService = {
         contactos: contactosParaEnvio
       };
 
-            const response = await axios.put(`${API_URL}/destino/${id}`, updateData);
+      const response = await axios.put(`${API_URL}/destino/${id}`, updateData);
       return response.data;
     } catch (error) {
       console.error(`Error al actualizar destino con ID ${id}:`, error);
@@ -349,13 +261,6 @@ export const destinosService = {
   // Eliminar un destino
   async deleteDestino(id: number): Promise<void> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        const index = mockDestinos.findIndex(d => d.id === id);
-        if (index === -1) throw new Error('Destino no encontrado');
-        mockDestinos.splice(index, 1);
-        return;
-      }
       await axios.delete(`${API_URL}/destino/${id}`);
     } catch (error) {
       console.error(`Error al eliminar destino con ID ${id}:`, error);
@@ -366,15 +271,6 @@ export const destinosService = {
   // Obtener destinos filtrados
   async getDestinosFiltrados(filtros: { pais?: string; provincia?: string; localidad?: string }): Promise<Destino[]> {
     try {
-      if (USE_MOCK_DATA) {
-        await mockDelay();
-        return mockDestinos.filter(destino => {
-          if (filtros.pais && destino.pais !== filtros.pais) return false;
-          if (filtros.provincia && destino.provincia !== filtros.provincia) return false;
-          if (filtros.localidad && destino.localidad !== filtros.localidad) return false;
-          return true;
-        });
-      }
       const response = await axios.get(`${API_URL}/destinoFiltrado`, { params: filtros });
       return response.data;
     } catch (error) {

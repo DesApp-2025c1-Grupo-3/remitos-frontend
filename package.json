@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:render": "vite --mode render",
+    "dev:render": "VITE_USE_RENDER_API=true vite",
     "build": "vite build",
-    "build:render": "vite build --mode render",
+    "build:render": "VITE_USE_RENDER_API=true vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
