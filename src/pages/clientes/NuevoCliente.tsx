@@ -15,7 +15,7 @@ export default function NuevoCliente() {
   const [formData, setFormData] = useState<ClienteFormData>({
     razonSocial: null,
     cuit_rut: null,
-    tipoEmpresa: "",
+    tipoEmpresaId: null,
     direccion: "",
     contactos: []
   })
@@ -46,7 +46,7 @@ export default function NuevoCliente() {
     const newErrors = {
       contactos: !formData.contactos || formData.contactos.length === 0,
       razonSocial: !formData.razonSocial || formData.razonSocial.trim() === '',
-      tipoEmpresa: !formData.tipoEmpresa || formData.tipoEmpresa.trim() === '',
+      tipoEmpresa: !formData.tipoEmpresaId,
       direccion: !formData.direccion || formData.direccion.trim() === ''
     }
     
@@ -63,7 +63,7 @@ export default function NuevoCliente() {
       await clientesService.createCliente({
         razonSocial: formData.razonSocial,
         cuit_rut: formData.cuit_rut,
-        tipoEmpresa: formData.tipoEmpresa,
+        tipoEmpresaId: formData.tipoEmpresaId,
         direccion: formData.direccion,
         contactos: formData.contactos
       });

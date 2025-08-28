@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import styles from '../Form.module.css';
 import { Upload, ArrowLeft, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { Pagination } from '../Pagination/Pagination';
 import { ClienteSelectModal } from '../ClienteSelectModal';
 import { DestinoSelectModal } from '../DestinoSelectModal';
 import { getApiUrl } from '../../config/api';
+import { tipoMercaderiaService, TipoMercaderia } from '../../services/tipoMercaderiaService';
 
 // Funciones de formato para campos numéricos
 const formatCurrency = (value: string | number): string => {
@@ -92,7 +93,7 @@ export interface RemitoFormData {
   clienteId: number | string;
   destinoId: number | string;
   // Campos de mercadería
-  tipoMercaderia: string;
+  tipoMercaderiaId: number | null;
   valorDeclarado: number | string;
   volumenMetrosCubico: number | string;
   pesoMercaderia: number | string;
@@ -171,7 +172,26 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
   const [destinosPaginados, setDestinosPaginados] = useState<{ data: Destino[], totalItems: number, totalPages: number, currentPage: number }>({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
   const [loadingClientes, setLoadingClientes] = useState(false);
   const [loadingDestinos, setLoadingDestinos] = useState(false);
+  const [tiposMercaderia, setTiposMercaderia] = useState<TipoMercaderia[]>([]);
+  const [loadingTiposMercaderia, setLoadingTiposMercaderia] = useState(true);
   const itemsPerPage = 5;
+
+  // Cargar tipos de mercadería al montar el componente
+  useEffect(() => {
+    const cargarTiposMercaderia = async () => {
+      try {
+        setLoadingTiposMercaderia(true);
+        const tipos = await tipoMercaderiaService.getTiposMercaderia();
+        setTiposMercaderia(tipos);
+      } catch (error) {
+        console.error('Error al cargar tipos de mercadería:', error);
+      } finally {
+        setLoadingTiposMercaderia(false);
+      }
+    };
+
+    cargarTiposMercaderia();
+  }, []);
 
   // Función helper para manejar cambios de campos con formato
   const handleFormattedChange = (fieldName: string, formattedValue: string, originalEvent: React.ChangeEvent<HTMLInputElement>) => {
@@ -412,21 +432,19 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
             <div className={styles.campo}>
               <label className={styles.label}>Tipo de mercadería *</label>
               <select
-                name="tipoMercaderia"
-                value={formData.tipoMercaderia}
+                name="tipoMercaderiaId"
+                value={formData.tipoMercaderiaId || ''}
                 onChange={onChange}
                 className={styles.input}
                 required
+                disabled={loadingTiposMercaderia}
               >
-                <option value="">Seleccionar tipo</option>
-                <option value="Automotriz">Automotriz</option>
-                <option value="Amoblamientos">Amoblamientos</option>
-                <option value="Alimentos">Alimentos</option>
-                <option value="Textil">Textil</option>
-                <option value="Materiales Construcción">Materiales Construcción</option>
-                <option value="Electrónica">Electrónica</option>
-                <option value="Químicos">Químicos</option>
-                <option value="Otros">Otros</option>
+                <option value="">{loadingTiposMercaderia ? 'Cargando...' : 'Seleccionar tipo'}</option>
+                {tiposMercaderia.map((tipo) => (
+                  <option key={tipo.id} value={tipo.id}>
+                    {tipo.nombre}
+                  </option>
+                ))}
               </select>
             </div>
             

@@ -18,7 +18,7 @@ export default function NuevoRemito() {
     clienteId: "",
     destinoId: "",
     // Campos de mercadería
-    tipoMercaderia: "",
+    tipoMercaderiaId: null,
     valorDeclarado: "",
     volumenMetrosCubico: "",
     pesoMercaderia: "",
@@ -69,7 +69,7 @@ export default function NuevoRemito() {
   };
 
   const validateForm = () => {
-    if (!formData.numeroAsignado.trim()) {
+    if (!formData.numeroAsignado?.trim()) {
       setError('El número de remito es requerido');
       return false;
     }
@@ -85,8 +85,8 @@ export default function NuevoRemito() {
       setError('Debe seleccionar una prioridad');
       return false;
     }
-    if (!formData.tipoMercaderia.trim()) {
-      setError('El tipo de mercadería es requerido');
+    if (!formData.tipoMercaderiaId) {
+      setError('Debe seleccionar un tipo de mercadería');
       return false;
     }
     if (!formData.valorDeclarado || parseFloat(formData.valorDeclarado) < 0) {
@@ -117,12 +117,12 @@ export default function NuevoRemito() {
       // Convertir los datos al formato esperado por el backend
       const remitoData = {
         numeroAsignado: formData.numeroAsignado.trim(),
-        observaciones: formData.observaciones.trim(),
+        observaciones: formData.observaciones?.trim() || '',
         prioridad: formData.prioridad,
         clienteId: parseInt(formData.clienteId),
         destinoId: parseInt(formData.destinoId),
         // Campos de mercadería
-        tipoMercaderia: formData.tipoMercaderia.trim(),
+        tipoMercaderiaId: parseInt(formData.tipoMercaderiaId),
         valorDeclarado: parseFloat(formData.valorDeclarado),
         volumenMetrosCubico: parseFloat(formData.volumenMetrosCubico),
         pesoMercaderia: parseFloat(formData.pesoMercaderia),
@@ -130,7 +130,7 @@ export default function NuevoRemito() {
         cantidadRacks: formData.cantidadRacks ? parseInt(formData.cantidadRacks) : undefined,
         cantidadBultos: formData.cantidadBultos ? parseInt(formData.cantidadBultos) : undefined,
         cantidadPallets: formData.cantidadPallets ? parseInt(formData.cantidadPallets) : undefined,
-        requisitosEspeciales: formData.requisitosEspeciales.trim(),
+        requisitosEspeciales: formData.requisitosEspeciales?.trim() || '',
         // Archivo adjunto
         archivoAdjunto: formData.archivoAdjunto,
       };

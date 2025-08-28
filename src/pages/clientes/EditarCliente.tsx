@@ -17,7 +17,7 @@ export default function EditarCliente() {
   const [formData, setFormData] = useState<UpdateClienteData>({
     razonSocial: null,
     cuit_rut: null,
-    tipoEmpresa: "",
+    tipoEmpresaId: null,
     direccion: "",
     contactos: []
   })
@@ -37,7 +37,7 @@ export default function EditarCliente() {
           setFormData({
             razonSocial: cliente.razonSocial,
             cuit_rut: cliente.cuit_rut,
-            tipoEmpresa: cliente.tipoEmpresa,
+            tipoEmpresaId: cliente.tipoEmpresaId,
             direccion: cliente.direccion,
             contactos: cliente.contactos || []
           })
@@ -73,7 +73,7 @@ export default function EditarCliente() {
     const newErrors = {
       contactos: !formData.contactos || formData.contactos.length === 0,
       razonSocial: !formData.razonSocial || formData.razonSocial.trim() === '',
-      tipoEmpresa: !formData.tipoEmpresa || formData.tipoEmpresa.trim() === '',
+      tipoEmpresa: !formData.tipoEmpresaId,
       direccion: !formData.direccion || formData.direccion.trim() === ''
     }
     

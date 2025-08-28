@@ -86,7 +86,17 @@ export default function DetalleRemito() {
       setRemito(data);
       
       const estadoInicial: EstadoRemito = data.estado?.nombre as EstadoRemito || 'Autorizado';
-      setEstadoActual(estadoInicial);
+      // Si no hay estado, buscar el estado "Autorizado" por ID (1)
+      if (!data.estado && estados.length > 0) {
+        const estadoAutorizado = estados.find(e => e.id === 1);
+        if (estadoAutorizado) {
+          setEstadoActual(estadoAutorizado.nombre as EstadoRemito);
+        } else {
+          setEstadoActual(estadoInicial);
+        }
+      } else {
+        setEstadoActual(estadoInicial);
+      }
       
       if (data.mercaderia) {
         const mercaderiaItems: MercaderiaConEstado[] = [];
@@ -146,17 +156,21 @@ export default function DetalleRemito() {
     }
   };
 
-  const cambiarEstadoRemito = async (nuevoEstadoNombre: EstadoRemito) => {
-    if (!remito || !estados.length) return;
-
+    const cambiarEstadoRemito = async (nuevoEstadoNombre: EstadoRemito) => {
+    if (!remito || !estados.length) {
+      return;
+    }
+    
     const nuevoEstado = estados.find(e => e.nombre === nuevoEstadoNombre);
+    
     if (!nuevoEstado) {
       showNotification(`Estado "${nuevoEstadoNombre}" no encontrado`, 'error');
       return;
     }
-
+    
     try {
       const remitoActualizado = await remitosService.updateEstadoRemito(remito.id, nuevoEstado.id);
+      
       setRemito(remitoActualizado);
       setEstadoActual(remitoActualizado.estado?.nombre as EstadoRemito);
       showNotification(`Remito actualizado a "${nuevoEstadoNombre}"`, 'success');
@@ -221,14 +235,25 @@ export default function DetalleRemito() {
       estado: estadoActual,
       mercaderia: [...mercaderiaConEstado]
     });
+    
     await cambiarEstadoRemito('Retenido');
   };
 
   const handleLiberar = async () => {
-    if (estadoAnterior) {
-      await cambiarEstadoRemito(estadoAnterior.estado);
-      setMercaderiaConEstado(estadoAnterior.mercaderia);
-      setEstadoAnterior(null);
+    if (!remito) {
+      showNotification('Error: No hay remito para liberar', 'error');
+      return;
+    }
+
+    try {
+      const remitoActualizado = await remitosService.liberarRemito(remito.id);
+      setRemito(remitoActualizado);
+      setEstadoActual(remitoActualizado.estado?.nombre as EstadoRemito);
+      showNotification('Remito liberado exitosamente', 'success');
+    } catch (error) {
+      console.error('Error al liberar remito:', error);
+      const errorMessage = error.response?.data?.message || 'Error al liberar el remito';
+      showNotification(errorMessage, 'error');
     }
   };
 
@@ -519,6 +544,8 @@ export default function DetalleRemito() {
           </div>
         </div>
       )}
+
+
     </div>
   );
 } 

@@ -1,40 +1,38 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getValorPorTipoMercaderia } from '../../services/reportesService';
 import { clientesService } from '../../services/clientesService';
+import { tipoMercaderiaService, TipoMercaderia } from '../../services/tipoMercaderiaService';
 import styles from '../../components/RemitosFilters/RemitosFilters.module.css';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ClienteSelectModal } from '../../components/ClienteSelectModal';
-
-const TIPOS_MERCADERIA = [
-  'Automotriz',
-  'Amoblamientos',
-  'Alimentos',
-  'Textil',
-  'Materiales Construcción',
-  'Electrónica',
-  'Químicos',
-  'Otros',
-];
 
 const COLORS = [
   '#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#b6e880', '#00bcd4', '#ffb6b6', '#a4de6c',
 ];
 
 const ReporteValorPorTipo: React.FC = () => {
-  const [filtros, setFiltros] = useState({ clienteId: '', fechaDesde: '', fechaHasta: '', tipos: [] as string[] });
+  const [filtros, setFiltros] = useState({ clienteId: '', fechaDesde: '', fechaHasta: '', tipos: [] as number[] });
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [clientes, setClientes] = useState<{ id: number; razonSocial: string | null }[]>([]);
+  const [tiposMercaderia, setTiposMercaderia] = useState<TipoMercaderia[]>([]);
   const [modalCliente, setModalCliente] = useState(false);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<any>(null);
-  // Eliminado: lógica de dropdown de cliente, ya no es necesaria
 
   useEffect(() => {
-    const loadClientes = async () => {
-      const res = await clientesService.getClientes();
-      setClientes(res.data);
+    const loadData = async () => {
+      try {
+        const [clientesRes, tiposRes] = await Promise.all([
+          clientesService.getClientes(),
+          tipoMercaderiaService.getTiposMercaderia()
+        ]);
+        setClientes(clientesRes.data);
+        setTiposMercaderia(tiposRes);
+      } catch (error) {
+        console.error('Error al cargar datos:', error);
+      }
     };
-    loadClientes();
+    loadData();
   }, []);
 
   // Eliminado: lógica de dropdown de cliente, ya no es necesaria
@@ -43,8 +41,8 @@ const ReporteValorPorTipo: React.FC = () => {
     setFiltros({ ...filtros, [e.target.name]: e.target.value });
   };
 
-  const handleTipoChange = (tipo: string) => {
-    setFiltros(f => ({ ...f, tipos: f.tipos.includes(tipo) ? f.tipos.filter(t => t !== tipo) : [...f.tipos, tipo] }));
+  const handleTipoChange = (tipoId: number) => {
+    setFiltros(f => ({ ...f, tipos: f.tipos.includes(tipoId) ? f.tipos.filter(t => t !== tipoId) : [...f.tipos, tipoId] }));
   };
 
   const handleBuscar = async () => {
@@ -55,8 +53,8 @@ const ReporteValorPorTipo: React.FC = () => {
       
       // Agregar cada tipo como un parámetro separado para que Express los procese correctamente
       if (tipos.length > 0) {
-        tipos.forEach((tipo, index) => {
-          params[`tipos[${index}]`] = tipo;
+        tipos.forEach((tipoId, index) => {
+          params[`tipos[${index}]`] = tipoId;
         });
       }
       
@@ -150,15 +148,15 @@ const ReporteValorPorTipo: React.FC = () => {
         <div style={{ marginTop: 16 }}>
           <label className={styles.label} style={{ marginBottom: 8, display: 'block' }}>Tipos de Mercadería:</label>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, background: '#fafafa', borderRadius: 8, padding: 12, border: '1px solid #e5e7eb' }}>
-            {TIPOS_MERCADERIA.map((tipo, i) => (
-              <label key={tipo} style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 500 }}>
+            {tiposMercaderia.map((tipo, i) => (
+              <label key={tipo.id} style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 500 }}>
                 <input
                   type="checkbox"
-                  checked={filtros.tipos.includes(tipo)}
-                  onChange={() => handleTipoChange(tipo)}
+                  checked={filtros.tipos.includes(tipo.id)}
+                  onChange={() => handleTipoChange(tipo.id)}
                   style={{ accentColor: COLORS[i % COLORS.length] }}
                 />
-                {tipo}
+                {tipo.nombre}
               </label>
             ))}
           </div>

@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './ClienteForm.module.css';
 import { ContactosForm } from '../ContactosForm/ContactosForm';
 import { Contacto } from '../../types/contacto';
 import { isFeatureEnabled } from '../../config/features';
+import { tipoEmpresaService, TipoEmpresa } from '../../services/tipoEmpresaService';
 
 export interface ClienteFormData {
   razonSocial: string | null;
   cuit_rut: string | null;
-  tipoEmpresa: string;
+  tipoEmpresaId: number | null;
   direccion: string;
   contactos?: Contacto[];
 }
@@ -39,9 +40,29 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
 }) => {
   const showContactos = isFeatureEnabled('ENABLE_CONTACTOS');
   const [cuitError, setCuitError] = React.useState<string | null>(null);
+  const [tiposEmpresa, setTiposEmpresa] = useState<TipoEmpresa[]>([]);
+  const [loadingTipos, setLoadingTipos] = useState(true);
+
+  // Cargar tipos de empresa al montar el componente
+  useEffect(() => {
+    const cargarTiposEmpresa = async () => {
+      try {
+        setLoadingTipos(true);
+        const tipos = await tipoEmpresaService.getTiposEmpresa();
+        setTiposEmpresa(tipos);
+      } catch (error) {
+        console.error('Error al cargar tipos de empresa:', error);
+      } finally {
+        setLoadingTipos(false);
+      }
+    };
+
+    cargarTiposEmpresa();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    
     if (name === 'cuit_rut') {
       // Solo permitir números
       const numericValue = value.replace(/\D/g, '');
@@ -52,6 +73,15 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
         target: {
           name,
           value: numericValue || null
+        }
+      } as any);
+    } else if (name === 'tipoEmpresaId') {
+      // Convertir tipoEmpresaId a número
+      const numericValue = value === '' ? null : parseInt(value, 10);
+      onChange({
+        target: {
+          name,
+          value: numericValue
         }
       } as any);
     } else {
@@ -74,6 +104,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     // Validación de CUIT: debe tener exactamente 11 dígitos
     if (formData.cuit_rut && formData.cuit_rut.length !== 11) {
       setCuitError('El CUIT debe tener exactamente 11 dígitos');
@@ -122,17 +153,20 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
         <div className={styles.campo}>
           <label className={styles.label}>Tipo de cliente</label>
           <select
-            name="tipoEmpresa"
-            value={formData.tipoEmpresa}
+            name="tipoEmpresaId"
+            value={formData.tipoEmpresaId || ''}
             onChange={handleChange}
             className={fieldErrors.tipoEmpresa ? `${styles.input} ${styles.inputError}` : styles.input}
             required
             style={{ width: '100%', maxWidth: 400, minWidth: 0, padding: '0.5rem 1rem', boxSizing: 'border-box', height: 44 }}
+            disabled={loadingTipos}
           >
-            <option value="">Seleccionar tipo de cliente</option>
-            <option value="Empresa privada">Empresa privada</option>
-            <option value="Organismo estatal">Organismo estatal</option>
-            <option value="Particular">Particular</option>
+            <option value="">{loadingTipos ? 'Cargando...' : 'Seleccionar tipo de cliente'}</option>
+            {tiposEmpresa.map((tipo) => (
+              <option key={tipo.id} value={tipo.id}>
+                {tipo.nombre}
+              </option>
+            ))}
           </select>
           {fieldErrors.tipoEmpresa && <div className={styles.inputErrorMsg}>El tipo de cliente es requerido</div>}
         </div>

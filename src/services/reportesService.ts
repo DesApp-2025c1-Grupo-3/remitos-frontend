@@ -5,10 +5,10 @@ import { getApiUrl } from '../config/api';
 const API_URL = getApiUrl();
 
 export const getVolumenPorClientePeriodo = (params: any) =>
-  axios.get(`${API_URL}/reportes/volumen-por-cliente`, { params });
+  axios.get(`${API_URL}/api/reportes/volumen-por-cliente`, { params });
 
 export const getDistribucionGeografica = (params: any) =>
-  axios.get(`${API_URL}/reportes/distribucion-geografica`, { params });
+  axios.get(`${API_URL}/api/reportes/distribucion-geografica`, { params });
 
 export const getValorPorTipoMercaderia = (params: any) =>
-  axios.get(`${API_URL}/reportes/valor-por-tipo-mercaderia`, { params }); 
+  axios.get(`${API_URL}/api/reportes/valor-por-tipo-mercaderia`, { params }); 

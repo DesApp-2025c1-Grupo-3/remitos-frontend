@@ -25,7 +25,8 @@ export const getApiUrl = (): string => {
   }
   
   // Por defecto, usar la URL local
-  return API_CONFIG.LOCAL_API_URL || 'http://localhost:3002';
+  const localUrl = API_CONFIG.LOCAL_API_URL || 'http://localhost:3002';
+  return localUrl;
 };
 
 // Función helper para construir URLs completas

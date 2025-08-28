@@ -27,7 +27,7 @@ export interface Estado {
 
 export interface Mercaderia {
   id: number;
-  tipoMercaderia: string;
+  tipoMercaderiaId: number;
   valorDeclarado: number;
   volumenMetrosCubico: number;
   pesoMercaderia: number;
@@ -37,6 +37,12 @@ export interface Mercaderia {
   cantidadPallets?: number;
   requisitosEspeciales?: string;
   remitosId: number;
+  // Relación incluida
+  tipoMercaderia?: {
+    id: number;
+    nombre: string;
+    descripcion?: string;
+  };
 }
 
 export interface Remito {
@@ -68,7 +74,7 @@ export interface RemitoFormData {
   clienteId: number;
   destinoId: number;
   // Campos de mercadería
-  tipoMercaderia: string;
+  tipoMercaderiaId: number;
   valorDeclarado: number;
   volumenMetrosCubico: number;
   pesoMercaderia: number;
@@ -100,6 +106,7 @@ export interface RemitosFilters {
 export interface RemitoUpdateData extends Partial<RemitoFormData> {
   razonNoEntrega?: string;
   estadoId?: number;
+  tipoMercaderiaId?: number;
 }
 
 export const remitosService = {
@@ -164,7 +171,7 @@ export const remitosService = {
       formData.append('destinoId', remito.destinoId.toString());
       
       // Campos de mercadería
-      formData.append('tipoMercaderia', remito.tipoMercaderia);
+      formData.append('tipoMercaderiaId', remito.tipoMercaderiaId.toString());
       formData.append('valorDeclarado', remito.valorDeclarado.toString());
       formData.append('volumenMetrosCubico', remito.volumenMetrosCubico.toString());
       formData.append('pesoMercaderia', remito.pesoMercaderia.toString());
@@ -218,7 +225,7 @@ export const remitosService = {
         if (remitoData.razonNoEntrega) formData.append('razonNoEntrega', remitoData.razonNoEntrega);
         
         // Campos de mercadería
-        if (remitoData.tipoMercaderia) formData.append('tipoMercaderia', remitoData.tipoMercaderia);
+        if (remitoData.tipoMercaderiaId) formData.append('tipoMercaderiaId', remitoData.tipoMercaderiaId.toString());
         if (remitoData.valorDeclarado !== undefined) formData.append('valorDeclarado', remitoData.valorDeclarado.toString());
         if (remitoData.volumenMetrosCubico !== undefined) formData.append('volumenMetrosCubico', remitoData.volumenMetrosCubico.toString());
         if (remitoData.pesoMercaderia !== undefined) formData.append('pesoMercaderia', remitoData.pesoMercaderia.toString());
@@ -254,6 +261,16 @@ export const remitosService = {
       return response.data;
     } catch (error) {
       console.error(`Error al actualizar estado del remito ${remitoId}:`, error);
+      throw error;
+    }
+  },
+
+  async liberarRemito(remitoId: number): Promise<Remito> {
+    try {
+      const response = await axios.put(`${API_URL}/remito/${remitoId}/liberar`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error al liberar remito ${remitoId}:`, error);
       throw error;
     }
   },

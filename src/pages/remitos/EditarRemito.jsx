@@ -55,7 +55,7 @@ export default function EditarRemito() {
           clienteId: remitoData.clienteId?.toString() || "",
           destinoId: remitoData.destinoId?.toString() || "",
           // Campos de mercadería desde el objeto mercaderia
-          tipoMercaderia: remitoData.mercaderia?.tipoMercaderia || "",
+          tipoMercaderiaId: remitoData.mercaderia?.tipoMercaderiaId || null,
           valorDeclarado: remitoData.mercaderia?.valorDeclarado?.toString() || "",
           volumenMetrosCubico: remitoData.mercaderia?.volumenMetrosCubico?.toString() || "",
           pesoMercaderia: remitoData.mercaderia?.pesoMercaderia?.toString() || "",
@@ -167,6 +167,7 @@ export default function EditarRemito() {
       ...formData,
       clienteId: parseInt(formData.clienteId, 10),
       destinoId: parseInt(formData.destinoId, 10),
+      tipoMercaderiaId: formData.tipoMercaderiaId ? parseInt(formData.tipoMercaderiaId, 10) : null,
       valorDeclarado: parseFloat(formData.valorDeclarado) || 0,
       volumenMetrosCubico: parseFloat(formData.volumenMetrosCubico) || 0,
       pesoMercaderia: parseFloat(formData.pesoMercaderia) || 0,

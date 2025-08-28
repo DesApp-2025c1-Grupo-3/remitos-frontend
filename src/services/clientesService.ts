@@ -37,19 +37,25 @@ export interface Cliente {
   id: number;
   razonSocial: string | null;
   cuit_rut: string | null;
-  tipoEmpresa: string;
+  tipoEmpresaId: number;
   direccion: string;
   activo: boolean;
   contactos?: Contacto[];
   createdAt?: Date;
   updatedAt?: Date;
+  // Relación incluida
+  tipoEmpresa?: {
+    id: number;
+    nombre: string;
+    descripcion?: string;
+  };
 }
 
 // Interfaz para crear/actualizar cliente
 export interface CreateClienteData {
   razonSocial: string | null;
   cuit_rut: string | null;
-  tipoEmpresa: string;
+  tipoEmpresaId: number;
   direccion: string;
 }
 
@@ -85,12 +91,15 @@ const validarClienteBasico = (cliente: any): boolean => {
   if (!cliente.direccion || cliente.direccion.length < 3) {
     throw new Error('La dirección es requerida y debe tener al menos 3 caracteres');
   }
-  if (!cliente.tipoEmpresa || !['Empresa privada', 'Organismo estatal', 'Particular'].includes(cliente.tipoEmpresa)) {
-    throw new Error('El tipo de empresa debe ser: Empresa privada, Organismo estatal o Particular');
+  
+  if (!cliente.tipoEmpresaId || typeof cliente.tipoEmpresaId !== 'number') {
+    throw new Error('El tipo de empresa es requerido');
   }
+  
   if (cliente.cuit_rut && cliente.cuit_rut.toString().length !== 11) {
     throw new Error('El CUIT debe tener exactamente 11 dígitos');
   }
+  
   return true;
 };
 
@@ -99,7 +108,7 @@ const prepararDatosActualizacion = (cliente: UpdateClienteData): any => {
   const clienteBasico = {
     razonSocial: cliente.razonSocial,
     cuit_rut: cliente.cuit_rut,
-    tipoEmpresa: cliente.tipoEmpresa,
+    tipoEmpresaId: cliente.tipoEmpresaId,
     direccion: cliente.direccion
   };
 
@@ -249,12 +258,14 @@ export const clientesService = {
       }
       
       // Validar datos básicos antes de enviar
-      validarClienteBasico({
+      const datosParaValidar = {
         razonSocial: datosActualizacion.razonSocial,
         cuit_rut: datosActualizacion.cuit_rut,
-        tipoEmpresa: datosActualizacion.tipoEmpresa,
+        tipoEmpresaId: datosActualizacion.tipoEmpresaId,
         direccion: datosActualizacion.direccion
-      });
+      };
+      
+      validarClienteBasico(datosParaValidar);
       
       // El esquema del backend requiere SIEMPRE contactos, así que enviamos todo junto
       // Usar PUT /cliente/:id con todos los datos incluyendo contactos
