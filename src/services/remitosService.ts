@@ -49,6 +49,7 @@ export interface Remito {
   id: number;
   numeroAsignado: string;
   fechaEmision: string;
+  fechaAgenda?: string | null;
   observaciones?: string;
   archivoAdjunto?: string;
   prioridad: 'normal' | 'alta' | 'urgente';
@@ -101,12 +102,15 @@ export interface RemitosFilters {
   estadoId?: number;
   prioridad?: 'normal' | 'alta' | 'urgente';
   fechaEmision?: string;
+  fechaAgenda?: string;
 }
 
 export interface RemitoUpdateData extends Partial<RemitoFormData> {
   razonNoEntrega?: string;
   estadoId?: number;
   tipoMercaderiaId?: number;
+  fechaEmision?: string | null;
+  fechaAgenda?: string | null;
 }
 
 export const remitosService = {
@@ -123,6 +127,7 @@ export const remitosService = {
         if (filters.estadoId) params.append('estadoId', filters.estadoId.toString());
         if (filters.prioridad) params.append('prioridad', filters.prioridad);
         if (filters.fechaEmision) params.append('fechaEmision', filters.fechaEmision);
+        if (filters.fechaAgenda) params.append('fechaAgenda', filters.fechaAgenda);
       }
       
       const response = await axios.get(`${API_URL}/remito?${params.toString()}`);

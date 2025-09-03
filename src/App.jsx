@@ -13,6 +13,8 @@ import EditarRemito from "./pages/remitos/EditarRemito"
 import DetalleRemito from "./pages/remitos/DetalleRemito.tsx"
 import { Routes, Route } from "react-router-dom"
 import Reportes from "./pages/reportes/Reportes"
+import Agenda from "./pages/agenda/Agenda"
+
 
 export function App() {
   return (
@@ -30,6 +32,7 @@ export function App() {
         <Route path="remitos/editar/:id" element={<EditarRemito />} />
         <Route path="remitos/detalle/:id" element={<DetalleRemito />} />
         <Route path="reportes" element={<Reportes />} />
+        <Route path="agenda" element={<Agenda />} />
       </Route>
     </Routes>
   )

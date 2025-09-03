@@ -42,6 +42,12 @@ export default function Sidebar() {
             Reportes
           </button>
         </Link>
+
+        <Link to="/agenda">
+          <button className={styles.navButton}>
+            Agenda
+          </button>
+        </Link>
       </div>
     </div>
   );

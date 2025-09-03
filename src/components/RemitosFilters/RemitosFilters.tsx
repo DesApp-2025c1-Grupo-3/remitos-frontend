@@ -335,4 +335,4 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
       </div>
     </div>
   );
-}; 
+};

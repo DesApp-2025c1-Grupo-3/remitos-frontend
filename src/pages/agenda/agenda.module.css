@@ -1,0 +1,32 @@
+.container{padding:1rem 2rem}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;max-width:900px;margin-left:auto;margin-right:auto}
+.titulo{flex:1;text-align:center;font-size:2rem;font-weight:bold;margin:0}
+.wrapper{max-width:900px;margin:0 auto}
+@media (min-width: 1920px){.header{max-width:1400px}.wrapper{max-width:1400px}}
+
+.headerLeft{display:flex;gap:8px}
+.navButton{background:#e5e7eb;border:1px solid #d1d5db;border-radius:6px;padding:6px 10px;cursor:pointer}
+.monthLabel{font-weight:600}
+.viewSwitch{display:flex;gap:6px}
+.viewButton{background:#e5e7eb;border:1px solid #d1d5db;border-radius:6px;padding:6px 10px}
+.viewActive{background:#ef4444;color:#fff;border-color:#ef4444}
+.calendar{background:#fff;border-radius:8px;border:1px solid #e5e7eb;padding:16px;margin-top:12px}
+.weekHeader{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:8px;color:#6b7280;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.cell{min-height:96px;background:#fafafa;border:1px solid #e5e7eb;border-radius:6px;padding:8px;cursor:pointer;position:relative}
+.cellEmpty{background:transparent;border-color:transparent;cursor:default}
+.cellSelected{outline:2px solid #ef4444}
+.cellDay{position:absolute;top:6px;right:8px;color:#6b7280;font-size:12px}
+.dot{width:8px;height:8px;background:#ef4444;border-radius:9999px;position:absolute;left:8px;top:8px}
+.panel{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin-top:12px}
+.panelTitle{font-weight:600;margin-bottom:8px;text-align:center}
+.tableWrapper{overflow:auto}
+.table{width:100%;border-collapse:separate;border-spacing:0 6px}
+.table th{text-align:left;color:#6b7280;font-weight:500}
+.table td,.table th{padding:10px 12px;background:#fff}
+.table tr{border:1px solid #e5e7eb;border-radius:6px}
+.emptyRow{text-align:center;color:#6b7280}
+.actions{display:flex;gap:12px;justify-content:center;margin-top:16px}
+.primaryButton{background:#ef4444;color:#fff;border:1px solid #ef4444;border-radius:8px;padding:10px 16px}
+.secondaryButton{background:#e5e7eb;border:1px solid #d1d5db;border-radius:8px;padding:10px 16px}
+.actionsCell{display:flex;justify-content:flex-end}
