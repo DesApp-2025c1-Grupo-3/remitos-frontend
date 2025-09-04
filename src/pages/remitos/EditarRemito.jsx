@@ -7,6 +7,7 @@ import { RemitoForm } from "../../components/RemitoForm/RemitoForm";
 import { useNotification } from "../../contexts/NotificationContext";
 import { ArrowLeft } from "lucide-react";
 import styles from "./remitos.module.css";
+import formStyles from "../../components/Form.module.css";
 import { getApiUrl } from "../../config/api";
 
 export default function EditarRemito() {
@@ -196,12 +197,14 @@ export default function EditarRemito() {
   if (loading) return <div className={styles.container}>Cargando...</div>;
 
   return (
-    <div className={styles.container}>
+    <div className={formStyles.formContainer}>
       <button className={styles.volverBtn} onClick={() => navigate(-1)}>
         <ArrowLeft />
         Volver
       </button>
-      <h1 className={styles.titulo}>EDITAR REMITO</h1>
+      <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '0 1rem' }}>
+        <h1 className={styles.titulo}>Editar Remito</h1>
+      </div>
       <RemitoForm
         formData={formData}
         onSubmit={handleSubmit}
@@ -214,6 +217,7 @@ export default function EditarRemito() {
         onNuevoCliente={() => navigate("/clientes/nuevo")}
         onNuevoDestino={() => navigate("/destinos/nuevo")}
         existingFile={existingFile}
+        onCancel={() => navigate("/remitos")}
       />
     </div>
   );

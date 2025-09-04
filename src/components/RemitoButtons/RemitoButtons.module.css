@@ -1,58 +1,146 @@
+/* Nuevo sistema de botones basado en las imágenes de referencia */
+
 .crearBtn {
-  background: #1F7A3D;
+  background: var(--primary); /* Naranja principal */
   color: #fff;
   border: none;
-  border-radius: 2rem;
-  padding: 0.6rem 1.5rem;
-  font-size: 0.85rem;
+  border-radius: 8px; /* Bordes menos redondeados, más modernos */
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 6px 0 #0001;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
   margin: 0;
-  display: inline-block;
-  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  letter-spacing: 0.025em;
   min-width: 120px;
+  text-transform: none; /* Sin mayúsculas forzadas */
 }
 
 .crearBtn:hover:not(:disabled) {
-  background: #17602e;
-  box-shadow: 0 4px 10px 0 #0002;
-  transform: translateY(-1px) scale(1.02);
+  background: var(--primary-dark);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.crearBtn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
 }
 
 .crearBtn:disabled {
-  background: #9ca3af;
+  background: var(--secondary-400);
   cursor: not-allowed;
   opacity: 0.6;
+  color: var(--secondary-100);
 }
 
 .crearBtn:disabled:hover {
   transform: none;
-  box-shadow: 0 2px 6px 0 #0001;
+  box-shadow: var(--shadow-sm);
 }
 
-.noEntregadoBtn {
-  background: #dc2626;
-  color: #fff;
-  border: none;
-  border-radius: 2rem;
+/* Botón secundario/outline */
+.crearBtnSecondary {
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  border-radius: 8px;
   padding: 0.6rem 1.5rem;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 6px 0 #0001;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  transition: all 0.2s ease;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  letter-spacing: 0.025em;
   min-width: 120px;
 }
 
-.noEntregadoBtn:hover:not(:disabled) {
-  background: #b91c1c;
-  box-shadow: 0 4px 10px 0 #0002;
-  transform: translateY(-1px) scale(1.02);
+.crearBtnSecondary:hover:not(:disabled) {
+  background: var(--primary);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
+/* Botón de peligro */
+.noEntregadoBtn {
+  background: var(--error);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+  min-width: 120px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  letter-spacing: 0.025em;
+}
+
+.noEntregadoBtn:hover:not(:disabled) {
+  background: #d32f2f;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.noEntregadoBtn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Grupo de botones */
 .botonesEnCamino {
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Botón pequeño para acciones */
+.btnSmall {
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  min-width: 80px;
+}
+
+/* Estados de loading */
+.crearBtn.loading,
+.noEntregadoBtn.loading {
+  position: relative;
+  color: transparent;
+}
+
+.crearBtn.loading::after,
+.noEntregadoBtn.loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 } 

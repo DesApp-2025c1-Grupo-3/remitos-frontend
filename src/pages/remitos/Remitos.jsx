@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { remitosService } from "../../services/remitosService";
 import styles from "./remitos.module.css";
+import tableStyles from "../../styles/table.module.css";
 import { useNotification } from "../../contexts/NotificationContext";
 import { ConfirmModal } from '../../components/ConfirmModal/ConfirmModal';
 import { Pencil, Trash2, ArrowLeft } from "lucide-react";
@@ -83,30 +84,26 @@ export default function Remitos() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <button className={styles.volverBtn} onClick={() => navigate(-1)}>
-          <ArrowLeft />
-          Volver
-        </button>
-        <h1 className={styles.titulo}>Remitos</h1>
-        <div className={styles.headerSpacer}></div> {/* Spacer para centrar el título */}
-      </div>
-      
       <div className={styles.wrapper}>
+        <div className={styles.pageHeader}>
+          <div className={styles.headerContent}>
+            <h1 className={styles.pageTitle}>Remitos</h1>
+          </div>
+          <div className={styles.headerActions}>
+            <Link to="/remitos/nuevo" className={styles.crearBtn}>
+              + Nuevo Remito
+            </Link>
+          </div>
+        </div>
+        
         <RemitosFilters
           filters={filters}
           onFiltersChange={handleFiltersChange}
           onClearFilters={handleClearFilters}
         />
         
-        <div className={styles.crearBtnContainer}>
-          <Link to="/remitos/nuevo" className={styles.crearBtn}>
-            Crear Remito
-          </Link>
-        </div>
-        
-        <div className={styles.tablaContenedor}>
-          <table className={styles.tabla}>
+        <div className={tableStyles.tableContainer}>
+          <table className={tableStyles.table}>
             <thead>
               <tr>
                 <th>Número</th>
@@ -114,13 +111,13 @@ export default function Remitos() {
                 <th>Destino</th>
                 <th>Estado</th>
                 <th>Prioridad</th>
-                <th className={styles.actionsCenterAlign}>Acciones</th>
+                <th className={tableStyles.actionsCenterAlign}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {remitos.data.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className={styles.emptyTableMessage}>
+                  <td colSpan="6" className={tableStyles.emptyTableMessage}>
                     Aún no hay remitos registrados
                   </td>
                 </tr>
@@ -128,7 +125,7 @@ export default function Remitos() {
                 remitos.data.map(remito => (
                   <tr 
                     key={remito.id} 
-                    className={styles.clickableRow}
+                    className={tableStyles.clickableRow}
                     onClick={() => navigate(`/remitos/detalle/${remito.id}`)}
                   >
                     <td>{remito.numeroAsignado}</td>
@@ -146,10 +143,10 @@ export default function Remitos() {
                       </span>
                     </td>
                     <td>
-                      <div className={styles.acciones}>
+                      <div className={tableStyles.actions}>
                         <Link 
                           to={`/remitos/editar/${remito.id}`}
-                          className={styles.accionesBtn}
+                          className={tableStyles.actionBtn}
                           title="Editar"
                           onClick={(e) => e.stopPropagation()}
                         >

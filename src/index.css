@@ -7,8 +7,62 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color: #242424;
-  background-color: rgba(255, 255, 255, 0.87);
+  /* Nuevo sistema de colores - Variables CSS globales */
+  
+  /* Colores primarios - ajustados para coincidir con la referencia */
+  --primary: #FF7043; /* Naranja más suave y cálido */
+  --primary-light: #FF8A65;
+  --primary-dark: #F4511E;
+  --primary-50: #FFF3E0;
+  --primary-100: #FFE0B2;
+  --primary-500: #FF7043;
+  --primary-600: #FF5722;
+  --primary-700: #F4511E;
+  
+  /* Colores secundarios (grises) */
+  --secondary: #343A40;
+  --secondary-light: #6C757D;
+  --secondary-dark: #212529;
+  --secondary-50: #F8F9FA;
+  --secondary-100: #E9ECEF;
+  --secondary-200: #DEE2E6;
+  --secondary-700: #343A40;
+  --secondary-800: #212529;
+  
+  /* Colores de acento */
+  --accent-blue: #2196F3;
+  --accent-purple: #9C27B0;
+  --accent-blue-light: #E3F2FD;
+  --accent-purple-light: #F3E5F5;
+  
+  /* Estados */
+  --success: #4CAF50;
+  --warning: #FF9800;
+  --error: #F44336;
+  
+  /* Estados de remitos */
+  --status-autorizado: #2196F3;
+  --status-preparacion: #FF9800;
+  --status-carga: #9C27B0;
+  --status-camino: #FF6B35;
+  --status-entregado: #4CAF50;
+  --status-retenido: #F44336;
+  
+  /* Texto y fondos */
+  --text-primary: #212529;
+  --text-secondary: #6C757D;
+  --text-light: #ADB5BD;
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F8F9FA;
+  --bg-tertiary: #E9ECEF;
+  
+  /* Sombras */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

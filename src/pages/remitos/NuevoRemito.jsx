@@ -7,6 +7,7 @@ import { RemitoForm } from "../../components/RemitoForm/RemitoForm";
 import { useNotification } from "../../contexts/NotificationContext";
 import { ArrowLeft } from "lucide-react";
 import styles from "./remitos.module.css";
+import formStyles from "../../components/Form.module.css";
 
 export default function NuevoRemito() {
   const navigate = useNavigate();
@@ -147,12 +148,14 @@ export default function NuevoRemito() {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={formStyles.formContainer}>
       <button className={styles.volverBtn} onClick={() => navigate(-1)}>
         <ArrowLeft />
         Volver
       </button>
-      <h1 className={styles.titulo}>NUEVO REMITO</h1>
+      <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '0 1rem' }}>
+        <h1 className={styles.titulo}>Nuevo Remito</h1>
+      </div>
       <RemitoForm
         formData={formData}
         onSubmit={handleSubmit}
@@ -164,6 +167,7 @@ export default function NuevoRemito() {
         destinos={destinos}
         onNuevoCliente={() => navigate("/clientes/nuevo")}
         onNuevoDestino={() => navigate("/destinos/nuevo")}
+        onCancel={() => navigate("/remitos")}
       />
     </div>
   );
