@@ -1,36 +1,40 @@
 /* Estilo para el contenedor principal */
 .container {
-  padding: 1rem 2rem;
+  padding: 0;
+  max-width: 100rem; /* 1600px equivalent in rem */
+  margin: 0 auto;
 }
 
-.header {
+/* Page Header styles */
+.pageHeader {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 1rem;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 2rem 0 2rem 0;
+  gap: 2rem;
+  padding: 0 2rem;
 }
 
-@media (min-width: 1920px) {
-  .header {
-    max-width: 1400px;
-  }
-}
-
-/* Estilo para el encabezado */
-.titulo {
-  text-align: center;
-  font-size: 2rem;
-  font-weight: bold;
-  margin: 0;
+.headerContent {
   flex: 1;
 }
 
+.pageTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--secondary-800);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.headerActions {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
 .wrapper {
-  max-width: 900px;
-  margin: 0 auto;
+  padding: 0;
 }
 
 @media (min-width: 1920px) {
@@ -48,24 +52,37 @@
 }
 
 .crearBtn {
-  background: #1F7A3D;
+  background: var(--primary);
   color: #fff;
   border: none;
-  border-radius: 0.4rem;
-  padding: 0.4rem 1rem;
-  font-size: 0.85rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 6px 0 #0001;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
   margin: 0;
-  display: inline-block;
-  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  letter-spacing: 0.025em;
+  text-align: center;
+  text-decoration: none;
+  min-height: 2rem;
+  white-space: nowrap;
 }
-.crearBtn:hover {
-  background: #17602e;
-  box-shadow: 0 4px 10px 0 #0002;
-  transform: translateY(-1px) scale(1.02);
+
+.crearBtn:hover:not(:disabled) {
+  background: var(--primary-dark);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-0.0625rem);
+}
+
+.crearBtn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
 }
 
 .volverBtn {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import styles from "./clientes.module.css";
+import tableStyles from "../../styles/table.module.css";
 import { clientesService } from "../../services/clientesService";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { useNotification } from "../../contexts/NotificationContext";
@@ -72,56 +73,53 @@ export default function Clientes() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <button className={styles.volverBtn} onClick={() => navigate(-1)}>
-          <ArrowLeft />
-          Volver
-        </button>
-        <h1 className={styles.titulo}>Clientes</h1>
-        <div style={{ width: '120px' }}></div> {/* Spacer para centrar el título */}
-      </div>
       <div className={styles.wrapper}>
-        <div className={styles.crearBtnContainer}>
-          <Link to="/clientes/nuevo" className={styles.crearBtn}>
-            Crear Cliente
-          </Link>
+        <div className={styles.pageHeader}>
+          <div className={styles.headerContent}>
+            <h1 className={styles.pageTitle}>Clientes</h1>
+          </div>
+          <div className={styles.headerActions}>
+            <Link to="/clientes/nuevo" className={styles.crearBtn}>
+              + Nuevo Cliente
+            </Link>
+          </div>
         </div>
-        <div className={styles.tablaContenedor}>
-          <table className={styles.tabla}>
+        <div className={tableStyles.tableContainer}>
+          <table className={tableStyles.table}>
             <thead>
               <tr>
                 <th>Razón Social</th>
                 <th>CUIT/RUT</th>
                 <th>Tipo</th>
                 <th>Dirección</th>
-                <th style={{ textAlign: "center" }}>Acciones</th>
+                <th className={tableStyles.actionsCenterAlign}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {clientes.data.length === 0 ? (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>
+                  <td colSpan="5" className={tableStyles.emptyTableMessage}>
                     Aún no hay clientes registrados
                   </td>
                 </tr>
               ) : (
                 clientes.data.map((cliente) => (
-                  <tr key={cliente.id}>
+                  <tr key={cliente.id} className={tableStyles.clickableRow}>
                     <td>{cliente.razonSocial}</td>
                     <td>{cliente.cuit_rut}</td>
                     <td>{cliente.tipoEmpresa}</td>
                     <td>{cliente.direccion}</td>
                     <td>
-                      <div className={styles.acciones}>
+                      <div className={tableStyles.actions}>
                         <Link 
                           to={`/clientes/editar/${cliente.id}`}
-                          className={styles.accionesBtn}
+                          className={tableStyles.actionBtn}
                           title="Editar"
                         >
                           <Pencil />
                         </Link>
                         <button 
-                          className={`${styles.accionesBtn} ${styles.delete}`} 
+                          className={`${tableStyles.actionBtn} ${styles.delete}`} 
                           onClick={() => handleDeleteClick(cliente)}
                           title="Eliminar"
                         >

@@ -7,15 +7,42 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Nuevo sistema de colores basado en las imágenes de referencia
         primary: {
-          DEFAULT: '#1F7A3D',
-          light: '#28A050',
-          dark: '#175F2F',
+          DEFAULT: '#FF6B35', // Naranja principal
+          light: '#FF8A65',
+          dark: '#E64A19',
+          50: '#FFF3E0',
+          100: '#FFE0B2',
+          200: '#FFCC80',
+          300: '#FFB74D',
+          400: '#FFA726',
+          500: '#FF6B35',
+          600: '#FF5722',
+          700: '#E64A19',
+          800: '#D84315',
+          900: '#BF360C',
         },
         secondary: {
-          DEFAULT: '#4A4A4A',
-          light: '#6A6A6A',
-          dark: '#333333',
+          DEFAULT: '#343A40', // Gris oscuro para sidebar
+          light: '#6C757D',
+          dark: '#212529',
+          50: '#F8F9FA',
+          100: '#E9ECEF',
+          200: '#DEE2E6',
+          300: '#CED4DA',
+          400: '#ADB5BD',
+          500: '#6C757D',
+          600: '#495057',
+          700: '#343A40',
+          800: '#212529',
+          900: '#0D1117',
+        },
+        accent: {
+          blue: '#2196F3', // Para tags AR Nacional
+          purple: '#9C27B0', // Para tags International
+          blueLight: '#E3F2FD',
+          purpleLight: '#F3E5F5',
         },
         success: {
           DEFAULT: '#4CAF50',
@@ -31,6 +58,15 @@ module.exports = {
           DEFAULT: '#F44336',
           light: '#E57373',
           dark: '#D32F2F',
+        },
+        // Colores adicionales para estados
+        status: {
+          autorizado: '#2196F3',
+          preparacion: '#FF9800',
+          carga: '#9C27B0',
+          camino: '#FF6B35',
+          entregado: '#4CAF50',
+          retenido: '#F44336',
         },
       },
       fontFamily: {
