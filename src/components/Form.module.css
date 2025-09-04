@@ -1,6 +1,14 @@
 .wrapper {
-  max-width: 900px;
+  max-width: 80rem; /* 1280px equivalent in rem - ancho específico para formularios */
   margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Clase específica para contenedores de formularios */
+.formContainer {
+  max-width: 80rem; /* 1280px equivalent in rem - ancho específico para formularios */
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .error {
@@ -15,30 +23,28 @@
 .formulario {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 1rem;
   background: #fff;
-  border-radius: 0.5rem;
-  padding: 2rem 2rem 1rem 2rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  align-items: center;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.1);
   width: 100%;
-  max-width: 500px;
+  max-width: 80rem; /* 1280px equivalent in rem - más manejable */
   margin: 0 auto;
+  min-height: auto;
 }
 
 .campo {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.3rem;
   margin-bottom: 0.5rem;
   width: 100%;
-  max-width: 400px;
-  align-self: center;
 }
 
 .label {
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   color: var(--text-primary);
   font-size: 0.875rem;
   text-align: left;
@@ -56,13 +62,13 @@ select.input {
   background: var(--bg-secondary);
   border: 2px solid var(--secondary-200);
   border-radius: 8px;
-  padding: 0.75rem 1rem;
+  padding: 0.6rem 0.8rem;
   font-size: 0.875rem;
   color: var(--text-primary);
   transition: all 0.2s ease;
   outline: none;
   box-sizing: border-box;
-  height: 48px;
+  height: 42px;
   font-family: inherit;
 }
 
@@ -138,19 +144,21 @@ select.input {
   color: #fff;
   border: none;
   border-radius: 8px;
-  padding: 0.75rem 2rem;
-  font-size: 1rem;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
-  margin: 0 auto;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   letter-spacing: 0.025em;
-  min-height: 48px;
+  min-height: 40px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .submitBtn:hover:not(:disabled) {
@@ -169,6 +177,64 @@ select.input {
   cursor: not-allowed;
   opacity: 0.6;
   color: var(--secondary-100);
+}
+
+.cancelBtn {
+  background: white;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  border-radius: 8px;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin: 0;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cancelBtn:hover {
+  background: var(--primary-50);
+  border-color: var(--primary-dark);
+  color: var(--primary-dark);
+}
+
+.cancelBtn:active {
+  transform: translateY(0);
+  background: var(--primary-100);
+}
+
+/* Contenedor del contenido del formulario */
+.formContent {
+  display: flex;
+  flex-direction: row;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+/* Columnas del formulario */
+.formColumn {
+  flex: 1;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* Contenedor de botones del formulario */
+.buttonContainer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 1rem;
+  flex-wrap: nowrap;
 }
 
 .dropdownWrapper {
