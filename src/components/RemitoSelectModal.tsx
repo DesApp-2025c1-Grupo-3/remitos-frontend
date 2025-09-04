@@ -2,15 +2,17 @@ import React from 'react';
 import { Pagination } from './Pagination/Pagination';
 import { X } from 'lucide-react';
 import { remitosService, Remito } from '../services/remitosService';
+import { agendaService } from '../services/agendaService';
 
 interface RemitoSelectModalProps {
   open: boolean;
   onClose: () => void;
   onSelect: (remito: Remito) => void;
   mode: 'assign' | 'remove';
+  remitosAgendados?: Set<number>; // IDs de remitos ya agendados
 }
 
-export const RemitoSelectModal: React.FC<RemitoSelectModalProps> = ({ open, onClose, onSelect, mode }) => {
+export const RemitoSelectModal: React.FC<RemitoSelectModalProps> = ({ open, onClose, onSelect, mode, remitosAgendados = new Set() }) => {
   const [search, setSearch] = React.useState('');
   const [currentPage, setCurrentPage] = React.useState(1);
   const [items, setItems] = React.useState<{ data: Remito[]; totalItems: number; totalPages: number; currentPage: number }>({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
@@ -23,15 +25,66 @@ export const RemitoSelectModal: React.FC<RemitoSelectModalProps> = ({ open, onCl
     if (!open) return;
     setLoading(true);
     try {
-      const filters: any = {};
-      if (debouncedSearch.trim()) filters.numeroAsignado = debouncedSearch.trim();
       if (mode === 'assign') {
-        // Mostrar remitos no agendados
-        filters.fechaAgenda = '';
+        // Para agendar: mostrar remitos disponibles (no agendados)
+        const remitosDisponibles = await agendaService.getRemitosDisponibles();
+        
+        // Filtrar remitos que NO estén agendados (usando el estado global)
+        const remitosSinAgendar = remitosDisponibles.filter(r => !remitosAgendados.has(r.id));
+        
+        // Aplicar filtro de búsqueda
+        const filteredRemitos = debouncedSearch.trim() 
+          ? remitosSinAgendar.filter(r => 
+              r.numeroAsignado.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+              r.cliente?.razonSocial.toLowerCase().includes(debouncedSearch.toLowerCase())
+            )
+          : remitosSinAgendar;
+        
+        // Simular paginación
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedRemitos = filteredRemitos.slice(startIndex, endIndex);
+        
+        setItems({
+          data: paginatedRemitos,
+          totalItems: filteredRemitos.length,
+          totalPages: Math.ceil(filteredRemitos.length / itemsPerPage),
+          currentPage: currentPage
+        });
+      } else {
+        // Para quitar: mostrar solo remitos agendados (usando el estado global)
+        const { data } = await remitosService.getRemitos(1, 100, {});
+        
+        // Filtrar solo los que están en el estado de remitos agendados
+        const remitosAgendadosFiltrados = data.filter(remito => 
+          remitosAgendados.has(remito.id)
+        );
+        
+        // Aplicar filtro de búsqueda
+        const filteredRemitos = debouncedSearch.trim() 
+          ? remitosAgendadosFiltrados.filter(r => 
+              r.numeroAsignado.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+              r.cliente?.razonSocial.toLowerCase().includes(debouncedSearch.toLowerCase())
+            )
+          : remitosAgendadosFiltrados;
+        
+        // Simular paginación
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedRemitos = filteredRemitos.slice(startIndex, endIndex);
+        
+        setItems({
+          data: paginatedRemitos,
+          totalItems: filteredRemitos.length,
+          totalPages: Math.ceil(filteredRemitos.length / itemsPerPage),
+          currentPage: currentPage
+        });
+        
+        console.log('🗑️ Remitos agendados para quitar:', remitosAgendadosFiltrados.length);
+        console.log('📊 Estado global remitos agendados:', Array.from(remitosAgendados));
       }
-      const data = await remitosService.getRemitos(currentPage, itemsPerPage, filters);
-      setItems(data);
     } catch (e) {
+      console.error('Error cargando remitos:', e);
       setItems({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
     } finally {
       setLoading(false);
@@ -66,13 +119,28 @@ export const RemitoSelectModal: React.FC<RemitoSelectModalProps> = ({ open, onCl
             <>
               <div style={{ flex:1, overflow:'auto', padding:'0.5rem' }}>
                 {items.data.map(r => (
-                  <div key={r.id} onClick={()=>{ onSelect(r); onClose(); }} style={{ padding:'0.5rem 0.75rem', border:'1px solid #e5e7eb', marginBottom:'0.25rem', cursor:'pointer', borderRadius:'6px', background:'#fff', transition:'all 0.2s ease', fontSize:'0.92em', lineHeight:1.2 }}
+                  <div key={r.id} onClick={()=>{ onSelect(r); onClose(); }} style={{ padding:'0.75rem', border:'1px solid #e5e7eb', marginBottom:'0.5rem', cursor:'pointer', borderRadius:'8px', background:'#fff', transition:'all 0.2s ease', fontSize:'0.92em', lineHeight:1.3 }}
                     onMouseEnter={(e)=>{ e.currentTarget.style.background='#f9fafb'; e.currentTarget.style.borderColor = '#1F7A3D'; }}
                     onMouseLeave={(e)=>{ e.currentTarget.style.background='#fff'; e.currentTarget.style.borderColor = '#e5e7eb'; }}
                   >
-                    <div style={{ fontWeight:600, color:'#374151', marginBottom:'0.1rem' }}>{r.numeroAsignado}</div>
-                    <div style={{ fontSize:'0.85em', color:'#6b7280', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
-                      {r.cliente?.razonSocial || 'Sin cliente'} — {r.destino?.nombre || 'Sin destino'} — {r.prioridad}
+                    <div style={{ fontWeight:600, color:'#374151', marginBottom:'0.3rem', fontSize:'1em' }}>{r.numeroAsignado}</div>
+                    <div style={{ fontSize:'0.85em', color:'#6b7280', marginBottom:'0.2rem' }}>
+                      <strong>Cliente:</strong> {r.cliente?.razonSocial || 'Sin cliente'}
+                    </div>
+                    <div style={{ fontSize:'0.85em', color:'#6b7280', marginBottom:'0.2rem' }}>
+                      <strong>Destino:</strong> {r.destino?.nombre || 'Sin destino'} ({r.destino?.provincia || 'Sin provincia'})
+                    </div>
+                    <div style={{ fontSize:'0.85em', color:'#6b7280', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                      <span><strong>Prioridad:</strong> {r.prioridad}</span>
+                      <span style={{ 
+                        padding:'0.2rem 0.5rem', 
+                        borderRadius:'4px', 
+                        fontSize:'0.75em',
+                        background: r.prioridad === 'urgente' ? '#fef2f2' : r.prioridad === 'alta' ? '#fef3c7' : '#f0f9ff',
+                        color: r.prioridad === 'urgente' ? '#dc2626' : r.prioridad === 'alta' ? '#d97706' : '#2563eb'
+                      }}>
+                        {r.prioridad.toUpperCase()}
+                      </span>
                     </div>
                   </div>
                 ))}

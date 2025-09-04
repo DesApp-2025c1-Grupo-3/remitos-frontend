@@ -25,8 +25,12 @@ export const agendaService = {
   async getByDate(date: string): Promise<Remito[]> {
     const filters: RemitosFilters = { fechaAgenda: date };
     const { data } = await remitosService.getRemitos(1, 500, filters);
-    return data;
+    // Solo retornar remitos que realmente tengan fechaAgenda (estén agendados)
+    const remitosAgendados = data.filter(remito => remito.fechaAgenda === date);
+    
+    return remitosAgendados;
   },
+
 
   async getMonthGrid({ year, month }: MonthGridRequest): Promise<AgendaDaySummary[]> {
     // Genera todas las fechas del mes y consulta día a día (backend actual soporta filtro por día)
@@ -60,4 +64,33 @@ export const agendaService = {
     const payload = { fechaAgenda: null } as unknown as RemitoUpdateData;
     return remitosService.updateRemito(remitoId, payload);
   },
+
+  // Obtener remitos disponibles para agendar (sin fechaAgenda)
+  async getRemitosDisponibles(): Promise<Remito[]> {
+    try {
+      // Buscar remitos que no tengan fechaAgenda (no estén agendados)
+      const { data } = await remitosService.getRemitos(1, 100, {});
+      
+      // Filtrar solo los que no tienen fechaAgenda (null, undefined, o string vacío)
+      const remitosDisponibles = data.filter(remito => 
+        remito.fechaAgenda === null || 
+        remito.fechaAgenda === undefined || 
+        remito.fechaAgenda === '' ||
+        remito.fechaAgenda === 'null'
+      );
+      
+      console.log('🔍 Remitos del backend:', data.length, 'Disponibles:', remitosDisponibles.length);
+      console.log('📊 Detalle remitos backend:', data.map(r => ({ 
+        id: r.id, 
+        numero: r.numeroAsignado, 
+        fechaAgenda: r.fechaAgenda 
+      })));
+      
+      return remitosDisponibles;
+    } catch (error) {
+      console.error('❌ Error obteniendo remitos disponibles:', error);
+      return [];
+    }
+  },
+
 };

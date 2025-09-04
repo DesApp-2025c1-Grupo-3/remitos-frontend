@@ -31,6 +31,9 @@ export default function Agenda() {
 
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState('assign') // 'assign' | 'remove'
+  
+  // Estado para rastrear remitos agendados y evitar duplicados
+  const [remitosAgendados, setRemitosAgendados] = useState(new Set())
 
   const year = cursorDate.getFullYear()
   const monthIndex = cursorDate.getMonth()
@@ -38,24 +41,63 @@ export default function Agenda() {
 
   // Cargar grilla mensual usando fechaAgenda
   useEffect(() => {
+    let isMounted = true; // Flag para evitar actualizaciones en componentes desmontados
+    
     const load = async () => {
       try {
         setLoading(true)
         const grid = await agendaService.getMonthGrid({ year, month: monthIndex + 1 })
+        
+        if (!isMounted) return; // Evitar actualizaciones si el componente se desmontó
+        
         const map = {}
-        grid.forEach((d) => (map[d.date] = d.remitos))
+        const agendadosIds = new Set()
+        
+        grid.forEach((d) => {
+          map[d.date] = d.remitos
+          // Agregar IDs de remitos agendados al Set
+          d.remitos.forEach(remito => agendadosIds.add(remito.id))
+        })
+        
         setMonthData(map)
+        setRemitosAgendados(agendadosIds)
+        
+        console.log('📅 Cargada agenda del mes:', Object.keys(map).length, 'días con remitos')
+        console.log('📊 Total remitos agendados:', agendadosIds.size)
       } catch (e) {
-        showNotification("Error cargando agenda", "error")
+        if (isMounted) {
+          showNotification("Error cargando agenda", "error")
+        }
       } finally {
-        setLoading(false)
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
+    
     load()
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    }
   }, [year, monthIndex, showNotification])
 
   const cells = useMemo(() => buildMonthMatrix(year, monthIndex), [year, monthIndex])
   const selectedRemitos = monthData[selectedDate] || []
+  
+  // Debug: Solo mostrar cuando hay cambios importantes
+  React.useEffect(() => {
+    if (selectedRemitos.length > 0) {
+      console.log('📅 Agenda - Día seleccionado:', selectedDate, 'Remitos:', selectedRemitos.length)
+      console.log('📊 Detalle remitos del día:', selectedRemitos.map(r => ({ 
+        id: r.id, 
+        numero: r.numeroAsignado, 
+        fechaAgenda: r.fechaAgenda,
+        esDemo: r.numeroAsignado.includes('REM-2025') || r.numeroAsignado.includes('REM-DISP')
+      })))
+    }
+  }, [selectedDate, selectedRemitos.length])
 
   const goPrev = () => setCursorDate(new Date(year, monthIndex - 1, 1))
   const goNext = () => setCursorDate(new Date(year, monthIndex + 1, 1))
@@ -68,22 +110,67 @@ export default function Agenda() {
   // Solo modificar fechaAgenda desde Agenda
   const handleAssign = async (remito) => {
     try {
-      await agendaService.assignRemitoToDate(remito.id, selectedDate)
+      // Verificar si el remito ya está agendado
+      if (remitosAgendados.has(remito.id)) {
+        showNotification("Este remito ya está agendado", "warning")
+        return
+      }
+      
+      // Agendar el remito
+      const remitoAgendado = await agendaService.assignRemitoToDate(remito.id, selectedDate)
       showNotification("Remito agendado", "success")
-      const data = await agendaService.getByDate(selectedDate)
-      setMonthData((prev) => ({ ...prev, [selectedDate]: data }))
+      
+      // Actualizar el remito con la fechaAgenda
+      const remitoActualizado = { ...remito, fechaAgenda: selectedDate }
+      
+      // Actualizar el estado de remitos agendados
+      setRemitosAgendados(prev => new Set([...prev, remito.id]))
+      
+      // Actualizar los datos del mes
+      setMonthData((prev) => {
+        const newData = { ...prev }
+        if (!newData[selectedDate]) {
+          newData[selectedDate] = []
+        }
+        // Agregar el remito a la fecha seleccionada
+        newData[selectedDate] = [...newData[selectedDate], remitoActualizado]
+        return newData
+      })
+      
+      console.log('✅ Remito agendado:', remitoActualizado.numeroAsignado, 'para', selectedDate)
+      console.log('📊 Remitos agendados total:', remitosAgendados.size + 1)
     } catch (e) {
+      console.error('❌ Error agendando remito:', e)
       showNotification("No se pudo agendar", "error")
     }
   }
 
   const handleRemove = async (remito) => {
     try {
+      // Quitar el remito de la agenda
       await agendaService.removeRemitoDate(remito.id)
       showNotification("Remito quitado", "success")
-      const data = await agendaService.getByDate(selectedDate)
-      setMonthData((prev) => ({ ...prev, [selectedDate]: data }))
+      
+      // Actualizar el estado de remitos agendados
+      setRemitosAgendados(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(remito.id)
+        return newSet
+      })
+      
+      // Actualizar los datos del mes removiendo el remito
+      setMonthData((prev) => {
+        const newData = { ...prev }
+        if (newData[selectedDate]) {
+          newData[selectedDate] = newData[selectedDate].filter(r => r.id !== remito.id)
+        }
+        return newData
+      })
+      
+      console.log('✅ Remito quitado:', remito.numeroAsignado, 'de', selectedDate)
+      console.log('📊 Remitos agendados total:', remitosAgendados.size - 1)
     } catch (e) {
+      console.error('❌ Error quitando remito:', e)
       showNotification("No se pudo quitar", "error")
     }
   }
@@ -122,7 +209,11 @@ export default function Agenda() {
               const isEmpty = !dateObj
               const iso = isEmpty ? null : toIsoDate(dateObj)
               const isSelected = iso === selectedDate
-              const count = iso ? (monthData[iso]?.length || 0) : 0
+              // Solo mostrar punto si hay remitos REALMENTE agendados para esa fecha
+              const remitosDelDia = iso ? (monthData[iso] || []) : []
+              const count = remitosDelDia.length
+              const hasRemitos = count > 0
+              
               return (
                 <div
                   key={idx}
@@ -132,7 +223,7 @@ export default function Agenda() {
                   {!isEmpty && (
                     <>
                       <div className={styles.cellDay}>{dateObj.getDate()}</div>
-                      {count > 0 && <div className={styles.dot} />}
+                      {hasRemitos && <div className={styles.dot} />}
                     </>
                   )}
                 </div>
@@ -142,7 +233,10 @@ export default function Agenda() {
         </div>
 
         <div className={styles.panel}>
-          <div className={styles.panelTitle}>{new Date(selectedDate).toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" })}</div>
+          <div className={styles.panelTitle}>
+            {new Date(selectedDate).toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" })}
+            {loading && <span style={{ color: '#ef4444', fontSize: '0.8em', marginLeft: '10px' }}>🔄 Cargando...</span>}
+          </div>
 
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
@@ -184,6 +278,7 @@ export default function Agenda() {
         onClose={()=>setModalOpen(false)}
         onSelect={modalMode==='assign' ? handleAssign : handleRemove}
         mode={modalMode}
+        remitosAgendados={remitosAgendados}
       />
     </div>
   )
