@@ -123,64 +123,72 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
     <div className={styles.wrapper}>
       {/* Eliminado el error global */}
       <form onSubmit={handleSubmit} className={styles.formulario}>
-        <div className={styles.campo}>
-          <label className={styles.label}>Razón Social</label>
-          <input
-            name="razonSocial"
-            value={formData.razonSocial || ''}
-            onChange={handleChange}
-            placeholder="Ingresar razón social"
-            className={fieldErrors.razonSocial ? `${styles.input} ${styles.inputError}` : styles.input}
-            required
-          />
-          {fieldErrors.razonSocial && <div className={styles.inputErrorMsg}>La razón social es requerida</div>}
-        </div>
-        <div className={styles.campo}>
-          <label className={styles.label}>CUIT/RUT</label>
-          <input
-            name="cuit_rut"
-            value={formData.cuit_rut || ''}
-            onChange={handleChange}
-            placeholder="Ingresar CUIT/RUT"
-            className={cuitError ? `${styles.input} ${styles.inputError}` : styles.input}
-            type="text"
-            pattern="[0-9]*"
-            inputMode="numeric"
-            maxLength={11}
-          />
-          {cuitError && <div className={styles.inputErrorMsg}>{cuitError}</div>}
-        </div>
-        <div className={styles.campo}>
-          <label className={styles.label}>Tipo de cliente</label>
-          <select
-            name="tipoEmpresaId"
-            value={formData.tipoEmpresaId || ''}
-            onChange={handleChange}
-            className={fieldErrors.tipoEmpresa ? `${styles.input} ${styles.inputError}` : styles.input}
-            required
-            style={{ width: '100%', maxWidth: 400, minWidth: 0, padding: '0.5rem 1rem', boxSizing: 'border-box', height: 44 }}
-            disabled={loadingTipos}
-          >
-            <option value="">{loadingTipos ? 'Cargando...' : 'Seleccionar tipo de cliente'}</option>
-            {tiposEmpresa.map((tipo) => (
-              <option key={tipo.id} value={tipo.id}>
-                {tipo.nombre}
-              </option>
-            ))}
-          </select>
-          {fieldErrors.tipoEmpresa && <div className={styles.inputErrorMsg}>El tipo de cliente es requerido</div>}
-        </div>
-        <div className={styles.campo}>
-          <label className={styles.label}>Dirección</label>
-          <input
-            name="direccion"
-            value={formData.direccion}
-            onChange={handleChange}
-            placeholder="Ingresar dirección"
-            className={fieldErrors.direccion ? `${styles.input} ${styles.inputError}` : styles.input}
-            required
-          />
-          {fieldErrors.direccion && <div className={styles.inputErrorMsg}>La dirección es requerida</div>}
+        <div className={styles.formContent}>
+          {/* Columna izquierda */}
+          <div className={styles.formColumn}>
+            <div className={styles.campo}>
+              <label className={styles.label}>Razón Social</label>
+              <input
+                name="razonSocial"
+                value={formData.razonSocial || ''}
+                onChange={handleChange}
+                placeholder="Ingresar razón social"
+                className={fieldErrors.razonSocial ? `${styles.input} ${styles.inputError}` : styles.input}
+                required
+              />
+              {fieldErrors.razonSocial && <div className={styles.inputErrorMsg}>La razón social es requerida</div>}
+            </div>
+            <div className={styles.campo}>
+              <label className={styles.label}>CUIT/RUT</label>
+              <input
+                name="cuit_rut"
+                value={formData.cuit_rut || ''}
+                onChange={handleChange}
+                placeholder="Ingresar CUIT/RUT"
+                className={cuitError ? `${styles.input} ${styles.inputError}` : styles.input}
+                type="text"
+                pattern="[0-9]*"
+                inputMode="numeric"
+                maxLength={11}
+              />
+              {cuitError && <div className={styles.inputErrorMsg}>{cuitError}</div>}
+            </div>
+          </div>
+          
+          {/* Columna derecha */}
+          <div className={styles.formColumn}>
+            <div className={styles.campo}>
+              <label className={styles.label}>Tipo de cliente</label>
+              <select
+                name="tipoEmpresaId"
+                value={formData.tipoEmpresaId || ''}
+                onChange={handleChange}
+                className={fieldErrors.tipoEmpresa ? `${styles.input} ${styles.inputError}` : styles.input}
+                required
+                disabled={loadingTipos}
+              >
+                <option value="">{loadingTipos ? 'Cargando...' : 'Seleccionar tipo de cliente'}</option>
+                {tiposEmpresa.map((tipo) => (
+                  <option key={tipo.id} value={tipo.id}>
+                    {tipo.nombre}
+                  </option>
+                ))}
+              </select>
+              {fieldErrors.tipoEmpresa && <div className={styles.inputErrorMsg}>El tipo de cliente es requerido</div>}
+            </div>
+            <div className={styles.campo}>
+              <label className={styles.label}>Dirección</label>
+              <input
+                name="direccion"
+                value={formData.direccion}
+                onChange={handleChange}
+                placeholder="Ingresar dirección"
+                className={fieldErrors.direccion ? `${styles.input} ${styles.inputError}` : styles.input}
+                required
+              />
+              {fieldErrors.direccion && <div className={styles.inputErrorMsg}>La dirección es requerida</div>}
+            </div>
+          </div>
         </div>
 
         {showContactos && (
@@ -192,6 +200,9 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
         )}
 
         <div className={styles.botonera}>
+          <button type="button" onClick={() => window.history.back()} className={styles.cancelBtn}>
+            Cancelar
+          </button>
           <button type="submit" className={styles.formBtn}>
             {submitButtonText}
           </button>

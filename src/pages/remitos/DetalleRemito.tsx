@@ -364,23 +364,31 @@ export default function DetalleRemito() {
 
   return (
     <div className={styles.container}>
-      <div className={`${styles.header} ${styles.detalleHeader}`}> 
-        <div className={detalleStyles.headerContainer}>
+      <div className={styles.wrapper}>
+        {/* Botón Volver separado */}
+        <div className={detalleStyles.volverContainer}>
           <button className={styles.volverBtn} onClick={() => navigate('/remitos')}>
             <ArrowLeft />
             Volver
           </button>
-          <h1 className={`${styles.titulo} ${detalleStyles.tituloConBoton}`}>Remito N° {remito.numeroAsignado}</h1>
-          <Link to={`/remitos/editar/${remito.id}`} title="Editar remito" className={`${styles.editarRemitoBtn} ${detalleStyles.editarRemitoBtn}`}>
-            <Pencil size={20} />
-          </Link>
-          <div className={styles.estadoBadge} style={{ background: getEstadoColor(estadoActual) }}>
-            {estadoActual}
+        </div>
+        
+        {/* Header principal */}
+        <div className={`${styles.header} ${styles.detalleHeader}`}> 
+          <div className={detalleStyles.headerContainer}>
+            <div className={detalleStyles.headerLeft}>
+              <h1 className={`${styles.titulo} ${detalleStyles.tituloConBoton}`}>Remito N° {remito.numeroAsignado}</h1>
+            </div>
+            <div className={detalleStyles.headerRight}>
+              <Link to={`/remitos/editar/${remito.id}`} title="Editar remito" className={`${styles.editarRemitoBtn} ${detalleStyles.editarRemitoBtn}`}>
+                <Pencil size={20} />
+              </Link>
+              <div className={styles.estadoBadge} style={{ background: getEstadoColor(estadoActual) }}>
+                {estadoActual}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className={styles.wrapper}>
         {/* Información del remito */}
         <div className={detalleStyles.infoGridContainer}>
           <div className={detalleStyles.infoGrid}>
@@ -544,8 +552,6 @@ export default function DetalleRemito() {
           </div>
         </div>
       )}
-
-
     </div>
   );
 } 

@@ -1,10 +1,13 @@
 .seccionContactos {
   width: 100%;
-  max-width: 400px;
+  max-width: 100%;
   background: white;
   border-radius: 8px;
   padding: 1rem;
-  align-self: center;
+  margin-top: 1rem;
+  border: 1px solid var(--secondary-200);
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .header {
@@ -12,28 +15,39 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--secondary-200);
+  width: 100%;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .header h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
+  margin: 0;
 }
 
 .btnNuevoContacto {
-  background: #1F7A3D;
+  background: var(--primary);
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: 8px;
   color: white;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 0;
 }
 
 .btnNuevoContacto:hover {
-  background: #17602e;
+  background: var(--primary-dark);
+  transform: translateY(-1px);
 }
 
 .errorMessage {
@@ -51,11 +65,15 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  background: #e5e7eb;
-  border-radius: 6px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
   padding: 1rem;
   margin-top: 0.5rem;
   width: 100%;
+  max-width: 100%;
+  border: 1px solid var(--secondary-200);
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .contactoItem {
@@ -64,55 +82,69 @@
   align-items: center;
   padding: 0.75rem;
   background: white;
-  border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  border: 1px solid var(--secondary-200);
   transition: all 0.2s ease;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .contactoItem:hover {
-  transform: translateX(2px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .contactoInfo {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .nombreContacto {
-  font-weight: 500;
-  color: #111827;
+  font-weight: 600;
+  color: var(--text-primary);
   font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .detallesContacto {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .acciones {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .btnEditar, .btnEliminar {
   background: none;
   border: none;
-  padding: 0.25rem;
-  color: #9ca3af;
+  padding: 0.5rem;
+  color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: 6px;
   transition: all 0.2s ease;
 }
 
 .btnEditar:hover {
-  background: #e5e7eb;
-  color: #1F7A3D;
+  background: var(--primary-50);
+  color: var(--primary);
 }
 
 .btnEliminar:hover {
@@ -171,21 +203,23 @@
 
 .input {
   width: 100%;
-  max-width: 400px;
-  padding: 0.625rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
+  padding: 0.6rem 0.8rem;
+  border: 2px solid var(--secondary-200);
+  border-radius: 8px;
   font-size: 0.875rem;
-  color: #111827;
-  background: white;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
   transition: all 0.2s ease;
-  margin: 0 auto;
+  height: 42px;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
 .input:focus {
   outline: none;
-  border-color: #1F7A3D;
-  box-shadow: 0 0 0 3px rgba(31, 122, 61, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-50);
+  background: var(--bg-primary);
 }
 
 .input::placeholder {
@@ -204,35 +238,48 @@
 }
 
 .btnCancelar {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1.5rem;
   background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
+  border: 2px solid var(--primary);
+  border-radius: 8px;
   font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
+  font-weight: 600;
+  color: var(--primary);
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btnCancelar:hover {
-  background: #f9fafb;
+  background: var(--primary-50);
+  border-color: var(--primary-dark);
+  color: var(--primary-dark);
 }
 
 .btnAgregar {
-  padding: 0.5rem 1rem;
-  background: #1F7A3D;
+  padding: 0.5rem 1.5rem;
+  background: var(--primary);
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   color: white;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btnAgregar:hover {
-  background: #17602e;
+  background: var(--primary-dark);
+  transform: translateY(-1px);
 }
 
 .inputError {

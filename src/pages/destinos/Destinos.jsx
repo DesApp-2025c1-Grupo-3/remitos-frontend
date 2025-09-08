@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import styles from "./destinos.module.css";
+import tableStyles from "../../styles/table.module.css";
 import { destinosService } from "../../services/destinosService";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { useNotification } from "../../contexts/NotificationContext";
@@ -73,22 +74,19 @@ export default function Destinos() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <button className={styles.volverBtn} onClick={() => navigate(-1)}>
-          <ArrowLeft />
-          Volver
-        </button>
-        <h1 className={styles.titulo}>Destinos</h1>
-        <div style={{ width: '120px' }}></div> {/* Spacer para centrar el título */}
-      </div>
       <div className={styles.wrapper}>
-        <div className={styles.crearBtnContainer}>
-          <Link to="/destinos/nuevo" className={styles.crearBtn}>
-            Crear Destino
-          </Link>
+        <div className={styles.pageHeader}>
+          <div className={styles.headerContent}>
+            <h1 className={styles.pageTitle}>Destinos</h1>
+          </div>
+          <div className={styles.headerActions}>
+            <Link to="/destinos/nuevo" className={styles.crearBtn}>
+              + Nuevo Destino
+            </Link>
+          </div>
         </div>
-        <div className={styles.tablaContenedor}>
-          <table className={styles.tabla}>
+        <div className={tableStyles.tableContainer}>
+          <table className={tableStyles.table}>
             <thead>
               <tr>
                 <th>Nombre</th>
@@ -96,35 +94,35 @@ export default function Destinos() {
                 <th>Provincia</th>
                 <th>Localidad</th>
                 <th>Dirección</th>
-                <th style={{ textAlign: "center" }}>Acciones</th>
+                <th className={tableStyles.actionsCenterAlign}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {destinos.data.length === 0 ? (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>
+                  <td colSpan="6" className={tableStyles.emptyTableMessage}>
                     Aún no hay destinos registrados
                   </td>
                 </tr>
               ) : (
                 destinos.data.map((destino) => (
-                  <tr key={destino.id}>
+                  <tr key={destino.id} className={tableStyles.clickableRow}>
                     <td>{destino.nombre}</td>
                     <td>{destino.pais}</td>
                     <td>{destino.provincia}</td>
                     <td>{destino.localidad}</td>
                     <td>{destino.direccion}</td>
                     <td>
-                      <div className={styles.acciones}>
+                      <div className={tableStyles.actions}>
                         <button 
-                          className={styles.accionesBtn} 
+                          className={tableStyles.actionBtn} 
                           onClick={() => navigate(`/destinos/editar/${destino.id}`)}
                           title="Editar"
                         >
                           <Pencil />
                         </button>
                         <button 
-                          className={`${styles.accionesBtn} ${styles.delete}`} 
+                          className={`${tableStyles.actionBtn} ${styles.delete}`} 
                           onClick={() => handleDeleteClick(destino)}
                           title="Eliminar"
                         >

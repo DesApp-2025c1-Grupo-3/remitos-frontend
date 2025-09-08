@@ -138,6 +138,7 @@ interface RemitoFormProps {
     path: string;
     url: string;
   } | null;
+  onCancel?: () => void;
 }
 
 export const RemitoForm: React.FC<RemitoFormProps> = ({
@@ -151,7 +152,8 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
   destinos,
   onNuevoCliente,
   onNuevoDestino,
-  existingFile
+  existingFile,
+  onCancel
 }) => {
   const navigate = useNavigate();
   // Estados para modales
@@ -362,10 +364,10 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
   return (
     <div className={styles.wrapper}>
       {error && <div className={styles.error}>{error}</div>}
-      <form onSubmit={onSubmit} className={styles.formulario} style={{maxWidth: 1100, width: '100%'}}>
-        <div style={{ display: 'flex', gap: '2rem', width: '100%', justifyContent: 'center', flexWrap: 'wrap' }}>
+      <form onSubmit={onSubmit} className={styles.formulario}>
+        <div className={styles.formContent}>
           {/* Columna izquierda */}
-          <div style={{ flex: 1, minWidth: 320 }}>
+          <div className={styles.formColumn}>
             <div className={styles.campo} style={{ width: '100%' }}>
               <label className={styles.label} style={{ textAlign: 'left' }}>Número de remito *</label>
               <input
@@ -390,7 +392,7 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
                   readOnly
                   onClick={() => setModalCliente(true)}
                 />
-                <button type="button" onClick={onNuevoCliente} style={{ background: '#1F7A3D', color: '#fff', border: 'none', borderRadius: 8, padding: '0.5rem 1.2rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', height: 40 }}>
+                <button type="button" onClick={onNuevoCliente} style={{ background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 8, padding: '0.5rem 1.2rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', height: 40 }}>
                   Crear
                 </button>
               </div>
@@ -407,7 +409,7 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
                   readOnly
                   onClick={() => setModalDestino(true)}
                 />
-                <button type="button" onClick={onNuevoDestino} style={{ background: '#1F7A3D', color: '#fff', border: 'none', borderRadius: 8, padding: '0.5rem 1.2rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', height: 40 }}>
+                <button type="button" onClick={onNuevoDestino} style={{ background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 8, padding: '0.5rem 1.2rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', height: 40 }}>
                   Crear
                 </button>
               </div>
@@ -492,7 +494,7 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
           </div>
           
           {/* Columna derecha */}
-          <div style={{ flex: 1, minWidth: 320 }}>
+          <div className={styles.formColumn}>
             <div className={styles.campo}>
               <label className={styles.label}>Cantidad de Pallets</label>
               <input
@@ -665,7 +667,12 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
           </div>
         </div>
         
-        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+        <div className={styles.buttonContainer}>
+          {onCancel && (
+            <button type="button" onClick={onCancel} className={styles.cancelBtn}>
+              Cancelar
+            </button>
+          )}
           <button type="submit" className={styles.submitBtn}>
             {submitButtonText}
           </button>
