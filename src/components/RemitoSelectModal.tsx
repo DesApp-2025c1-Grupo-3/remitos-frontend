@@ -10,9 +10,10 @@ interface RemitoSelectModalProps {
   onSelect: (remito: Remito) => void;
   mode: 'assign' | 'remove';
   remitosAgendados?: Set<number>; // IDs de remitos ya agendados
+  selectedDate?: string; // para refrescar disponibles al cambiar el día
 }
 
-export const RemitoSelectModal: React.FC<RemitoSelectModalProps> = ({ open, onClose, onSelect, mode, remitosAgendados = new Set() }) => {
+export const RemitoSelectModal: React.FC<RemitoSelectModalProps> = ({ open, onClose, onSelect, mode, remitosAgendados = new Set(), selectedDate }) => {
   const [search, setSearch] = React.useState('');
   const [currentPage, setCurrentPage] = React.useState(1);
   const [items, setItems] = React.useState<{ data: Remito[]; totalItems: number; totalPages: number; currentPage: number }>({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
@@ -89,9 +90,9 @@ export const RemitoSelectModal: React.FC<RemitoSelectModalProps> = ({ open, onCl
     } finally {
       setLoading(false);
     }
-  }, [open, debouncedSearch, currentPage, mode]);
+  }, [open, debouncedSearch, currentPage, mode, remitosAgendados, selectedDate]);
 
-  React.useEffect(() => { if (open) load(); }, [open, debouncedSearch, currentPage, mode]);
+  React.useEffect(() => { if (open) load(); }, [open, debouncedSearch, currentPage, mode, remitosAgendados, selectedDate]);
   React.useEffect(() => { if (open) setCurrentPage(1); }, [debouncedSearch, mode, open]);
 
   if (!open) return null;

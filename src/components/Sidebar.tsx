@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Link, useLocation } from "react-router-dom"
-import { FileText, Users, MapPin, BarChart3 } from "lucide-react"
+import { FileText, Users, MapPin, BarChart3, CalendarDays } from "lucide-react"
 import styles from "./components.module.css";
 
 export default function Sidebar() {
@@ -57,8 +57,9 @@ export default function Sidebar() {
         </Link>
 
         <Link to="/agenda">
-          <button className={styles.navButton}>
-            Agenda
+          <button className={`${styles.navButton} ${isActive('/agenda') ? styles.active : ''}`}>
+            <CalendarDays size={20} />
+            <span>Agenda</span>
           </button>
         </Link>
       </div>

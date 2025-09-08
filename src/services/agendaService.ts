@@ -24,11 +24,19 @@ const toIsoDate = (date: Date): string => {
 export const agendaService = {
   async getByDate(date: string): Promise<Remito[]> {
     const filters: RemitosFilters = { fechaAgenda: date };
-    const { data } = await remitosService.getRemitos(1, 500, filters);
-    // Solo retornar remitos que realmente tengan fechaAgenda (estén agendados)
-    const remitosAgendados = data.filter(remito => remito.fechaAgenda === date);
-    
-    return remitosAgendados;
+    const { data } = await remitosService.getRemitos(1, 1000, filters);
+    // Normalizar a YYYY-MM-DD por si backend envía fecha con tiempo
+    const asIsoDay = (val: string | null | undefined) => {
+      if (!val) return null;
+      try {
+        const d = new Date(val);
+        if (isNaN(d.getTime())) return (typeof val === 'string' && val.length >= 10) ? val.slice(0,10) : null;
+        return toIsoDate(d);
+      } catch {
+        return (typeof val === 'string' && val.length >= 10) ? val.slice(0,10) : null;
+      }
+    };
+    return data.filter(remito => asIsoDay(remito.fechaAgenda) === date);
   },
 
 
@@ -68,25 +76,10 @@ export const agendaService = {
   // Obtener remitos disponibles para agendar (sin fechaAgenda)
   async getRemitosDisponibles(): Promise<Remito[]> {
     try {
-      // Buscar remitos que no tengan fechaAgenda (no estén agendados)
-      const { data } = await remitosService.getRemitos(1, 100, {});
-      
-      // Filtrar solo los que no tienen fechaAgenda (null, undefined, o string vacío)
-      const remitosDisponibles = data.filter(remito => 
-        remito.fechaAgenda === null || 
-        remito.fechaAgenda === undefined || 
-        remito.fechaAgenda === '' ||
-        remito.fechaAgenda === 'null'
-      );
-      
-      console.log('🔍 Remitos del backend:', data.length, 'Disponibles:', remitosDisponibles.length);
-      console.log('📊 Detalle remitos backend:', data.map(r => ({ 
-        id: r.id, 
-        numero: r.numeroAsignado, 
-        fechaAgenda: r.fechaAgenda 
-      })));
-      
-      return remitosDisponibles;
+      // Pedir al backend directamente los de fechaAgenda=null
+      const filters: RemitosFilters = { fechaAgenda: 'null' as unknown as string } as any;
+      const { data } = await remitosService.getRemitos(1, 1000, filters);
+      return data;
     } catch (error) {
       console.error('❌ Error obteniendo remitos disponibles:', error);
       return [];

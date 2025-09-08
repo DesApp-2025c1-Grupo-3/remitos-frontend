@@ -279,6 +279,7 @@ export default function Agenda() {
         onSelect={modalMode==='assign' ? handleAssign : handleRemove}
         mode={modalMode}
         remitosAgendados={remitosAgendados}
+        selectedDate={selectedDate}
       />
     </div>
   )
