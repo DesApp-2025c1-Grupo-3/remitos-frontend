@@ -98,9 +98,10 @@ export default function DetalleRemito() {
         setEstadoActual(estadoInicial);
       }
       
-      if (data.mercaderia) {
+      // Procesar mercaderías (tomar la primera si existe)
+      if (data.mercaderias && data.mercaderias.length > 0) {
         const mercaderiaItems: MercaderiaConEstado[] = [];
-        const m = data.mercaderia;
+        const m = data.mercaderias[0]; // Tomar la primera mercadería
         
         if (m.cantidadBobinas && m.cantidadBobinas > 0) {
           mercaderiaItems.push({ id: 'bobinas', tipoMercaderia: 'Bobinas', cantidad: m.cantidadBobinas, preparada: false });
@@ -418,15 +419,15 @@ export default function DetalleRemito() {
             </div>
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Volumen:</label>
-              <span className={styles.infoValue}>{formatAndTruncateNumber(remito.mercaderia?.volumenMetrosCubico || 0)} m³</span>
+              <span className={styles.infoValue}>{formatAndTruncateNumber(remito.mercaderias?.[0]?.volumenMetrosCubico || 0)} m³</span>
             </div>
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Valor:</label>
-              <span className={styles.infoValue}>${formatAndTruncateNumber(remito.mercaderia?.valorDeclarado || 0)}</span>
+              <span className={styles.infoValue}>${formatAndTruncateNumber(remito.mercaderias?.[0]?.valorDeclarado || 0)}</span>
             </div>
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Peso:</label>
-              <span className={styles.infoValue}>{formatAndTruncateNumber(remito.mercaderia?.pesoMercaderia || 0)} kg</span>
+              <span className={styles.infoValue}>{formatAndTruncateNumber(remito.mercaderias?.[0]?.pesoMercaderia || 0)} kg</span>
             </div>
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Prioridad:</label>
@@ -446,10 +447,10 @@ export default function DetalleRemito() {
               <label className={styles.infoLabel}>Observaciones:</label>
               <span className={styles.infoValue}>{remito.observaciones || 'Sin observaciones'}</span>
             </div>
-            {remito.mercaderia?.requisitosEspeciales && (
+            {remito.mercaderias?.[0]?.requisitosEspeciales && (
               <div className={styles.infoCard}>
                 <label className={styles.infoLabel}>Requisitos Especiales:</label>
-                <span className={styles.infoValue}>{remito.mercaderia.requisitosEspeciales}</span>
+                <span className={styles.infoValue}>{remito.mercaderias[0].requisitosEspeciales}</span>
               </div>
             )}
             <div className={styles.infoCard}>
@@ -470,8 +471,8 @@ export default function DetalleRemito() {
           <div className={styles.mercaderiaContainer}>
             <h2 className={styles.mercaderiaTitle}>
               Mercadería
-              {remito.mercaderia?.tipoMercaderia && (
-                <span className={styles.badgeTipoMercaderia}>{remito.mercaderia.tipoMercaderia}</span>
+              {remito.mercaderias && remito.mercaderias.length > 0 && remito.mercaderias[0]?.tipoMercaderia && (
+                <span className={styles.badgeTipoMercaderia}>{remito.mercaderias[0].tipoMercaderia.nombre}</span>
               )}
             </h2>
             {mercaderiaConEstado.length > 0 ? (

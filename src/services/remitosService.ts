@@ -57,12 +57,13 @@ export interface Remito {
   clienteId?: number;
   destinoId?: number;
   estadoId?: number;
-  mercaderiaId?: number;
+  mercaderiaId?: number; // Mantener por compatibilidad, pero usar mercaderias
   // Relaciones incluidas
   cliente?: Cliente;
   destino?: Destino;
   estado?: Estado;
-  mercaderia?: Mercaderia;
+  mercaderia?: Mercaderia; // Mantener por compatibilidad
+  mercaderias?: Mercaderia[]; // Nueva estructura: array de mercaderías
   createdAt: string;
   updatedAt: string;
   razonNoEntrega?: string;
@@ -175,27 +176,21 @@ export const remitosService = {
       formData.append('clienteId', remito.clienteId.toString());
       formData.append('destinoId', remito.destinoId.toString());
       
-      // Campos de mercadería
-      formData.append('tipoMercaderiaId', remito.tipoMercaderiaId.toString());
-      formData.append('valorDeclarado', remito.valorDeclarado.toString());
-      formData.append('volumenMetrosCubico', remito.volumenMetrosCubico.toString());
-      formData.append('pesoMercaderia', remito.pesoMercaderia.toString());
+      // Crear objeto de mercadería
+      const mercaderia = {
+        tipoMercaderiaId: parseInt(remito.tipoMercaderiaId.toString()),
+        valorDeclarado: parseInt(remito.valorDeclarado.toString()),
+        volumenMetrosCubico: parseInt(remito.volumenMetrosCubico.toString()),
+        pesoMercaderia: parseInt(remito.pesoMercaderia.toString()),
+        cantidadBobinas: remito.cantidadBobinas ? parseInt(remito.cantidadBobinas.toString()) : null,
+        cantidadRacks: remito.cantidadRacks ? parseInt(remito.cantidadRacks.toString()) : null,
+        cantidadBultos: remito.cantidadBultos ? parseInt(remito.cantidadBultos.toString()) : null,
+        cantidadPallets: remito.cantidadPallets ? parseInt(remito.cantidadPallets.toString()) : null,
+        requisitosEspeciales: remito.requisitosEspeciales || null
+      };
       
-      if (remito.cantidadBobinas !== undefined) {
-        formData.append('cantidadBobinas', remito.cantidadBobinas.toString());
-      }
-      if (remito.cantidadRacks !== undefined) {
-        formData.append('cantidadRacks', remito.cantidadRacks.toString());
-      }
-      if (remito.cantidadBultos !== undefined) {
-        formData.append('cantidadBultos', remito.cantidadBultos.toString());
-      }
-      if (remito.cantidadPallets !== undefined) {
-        formData.append('cantidadPallets', remito.cantidadPallets.toString());
-      }
-      if (remito.requisitosEspeciales) {
-        formData.append('requisitosEspeciales', remito.requisitosEspeciales);
-      }
+      // Agregar mercaderías como array JSON
+      formData.append('mercaderias', JSON.stringify([mercaderia]));
       
       // Archivo adjunto
       if (remito.archivoAdjunto) {
@@ -229,16 +224,21 @@ export const remitosService = {
         if (remitoData.estadoId) formData.append('estadoId', remitoData.estadoId.toString());
         if (remitoData.razonNoEntrega) formData.append('razonNoEntrega', remitoData.razonNoEntrega);
         
-        // Campos de mercadería
-        if (remitoData.tipoMercaderiaId) formData.append('tipoMercaderiaId', remitoData.tipoMercaderiaId.toString());
-        if (remitoData.valorDeclarado !== undefined) formData.append('valorDeclarado', remitoData.valorDeclarado.toString());
-        if (remitoData.volumenMetrosCubico !== undefined) formData.append('volumenMetrosCubico', remitoData.volumenMetrosCubico.toString());
-        if (remitoData.pesoMercaderia !== undefined) formData.append('pesoMercaderia', remitoData.pesoMercaderia.toString());
-        if (remitoData.cantidadBobinas !== undefined) formData.append('cantidadBobinas', remitoData.cantidadBobinas.toString());
-        if (remitoData.cantidadRacks !== undefined) formData.append('cantidadRacks', remitoData.cantidadRacks.toString());
-        if (remitoData.cantidadBultos !== undefined) formData.append('cantidadBultos', remitoData.cantidadBultos.toString());
-        if (remitoData.cantidadPallets !== undefined) formData.append('cantidadPallets', remitoData.cantidadPallets.toString());
-        if (remitoData.requisitosEspeciales) formData.append('requisitosEspeciales', remitoData.requisitosEspeciales);
+        // Crear objeto de mercadería
+        const mercaderia = {
+          tipoMercaderiaId: parseInt(remitoData.tipoMercaderiaId.toString()),
+          valorDeclarado: parseInt(remitoData.valorDeclarado.toString()),
+          volumenMetrosCubico: parseInt(remitoData.volumenMetrosCubico.toString()),
+          pesoMercaderia: parseInt(remitoData.pesoMercaderia.toString()),
+          cantidadBobinas: remitoData.cantidadBobinas ? parseInt(remitoData.cantidadBobinas.toString()) : null,
+          cantidadRacks: remitoData.cantidadRacks ? parseInt(remitoData.cantidadRacks.toString()) : null,
+          cantidadBultos: remitoData.cantidadBultos ? parseInt(remitoData.cantidadBultos.toString()) : null,
+          cantidadPallets: remitoData.cantidadPallets ? parseInt(remitoData.cantidadPallets.toString()) : null,
+          requisitosEspeciales: remitoData.requisitosEspeciales || null
+        };
+        
+        // Agregar mercaderías como array JSON
+        formData.append('mercaderias', JSON.stringify([mercaderia]));
         
         // Archivo adjunto
         formData.append('archivoAdjunto', remitoData.archivoAdjunto);
@@ -250,8 +250,41 @@ export const remitosService = {
         });
         return response.data;
       } else {
-        // Si no hay archivo, enviar como JSON normal
-        const response = await axios.put(`${API_URL}/remito/${id}`, remitoData);
+        // Si no hay archivo, enviar como JSON pero con mercaderías como array
+        const updateData = { ...remitoData };
+        
+        // Crear objeto de mercadería
+        const mercaderia = {
+          tipoMercaderiaId: parseInt(remitoData.tipoMercaderiaId.toString()),
+          valorDeclarado: parseInt(remitoData.valorDeclarado.toString()),
+          volumenMetrosCubico: parseInt(remitoData.volumenMetrosCubico.toString()),
+          pesoMercaderia: parseInt(remitoData.pesoMercaderia.toString()),
+          cantidadBobinas: remitoData.cantidadBobinas ? parseInt(remitoData.cantidadBobinas.toString()) : null,
+          cantidadRacks: remitoData.cantidadRacks ? parseInt(remitoData.cantidadRacks.toString()) : null,
+          cantidadBultos: remitoData.cantidadBultos ? parseInt(remitoData.cantidadBultos.toString()) : null,
+          cantidadPallets: remitoData.cantidadPallets ? parseInt(remitoData.cantidadPallets.toString()) : null,
+          requisitosEspeciales: remitoData.requisitosEspeciales || null
+        };
+        
+        // Agregar mercaderías como array
+        updateData.mercaderias = [mercaderia];
+        
+        // Remover campos individuales de mercadería
+        delete updateData.tipoMercaderiaId;
+        delete updateData.valorDeclarado;
+        delete updateData.volumenMetrosCubico;
+        delete updateData.pesoMercaderia;
+        delete updateData.cantidadBobinas;
+        delete updateData.cantidadRacks;
+        delete updateData.cantidadBultos;
+        delete updateData.cantidadPallets;
+        delete updateData.requisitosEspeciales;
+        
+        const response = await axios.put(`${API_URL}/remito/${id}`, updateData, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
         return response.data;
       }
     } catch (error) {

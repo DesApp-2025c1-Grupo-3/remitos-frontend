@@ -122,11 +122,11 @@ export default function NuevoRemito() {
         prioridad: formData.prioridad,
         clienteId: parseInt(formData.clienteId),
         destinoId: parseInt(formData.destinoId),
-        // Campos de mercadería
+        // Campos de mercadería (se envían individualmente, el servicio los convertirá a array)
         tipoMercaderiaId: parseInt(formData.tipoMercaderiaId),
-        valorDeclarado: parseFloat(formData.valorDeclarado),
-        volumenMetrosCubico: parseFloat(formData.volumenMetrosCubico),
-        pesoMercaderia: parseFloat(formData.pesoMercaderia),
+        valorDeclarado: parseInt(formData.valorDeclarado),
+        volumenMetrosCubico: parseInt(formData.volumenMetrosCubico),
+        pesoMercaderia: parseInt(formData.pesoMercaderia),
         cantidadBobinas: formData.cantidadBobinas ? parseInt(formData.cantidadBobinas) : undefined,
         cantidadRacks: formData.cantidadRacks ? parseInt(formData.cantidadRacks) : undefined,
         cantidadBultos: formData.cantidadBultos ? parseInt(formData.cantidadBultos) : undefined,

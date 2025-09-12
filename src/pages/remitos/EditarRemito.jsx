@@ -49,22 +49,25 @@ export default function EditarRemito() {
         ]);
         
         // Mapear los datos del remito al formato del formulario
+        // Tomar la primera mercadería del array (ya que el formulario maneja una sola mercadería)
+        const primeraMercaderia = remitoData.mercaderias && remitoData.mercaderias.length > 0 ? remitoData.mercaderias[0] : null;
+        
         const mappedData = {
           numeroAsignado: remitoData.numeroAsignado || "",
           observaciones: remitoData.observaciones || "",
           prioridad: remitoData.prioridad || "normal",
           clienteId: remitoData.clienteId?.toString() || "",
           destinoId: remitoData.destinoId?.toString() || "",
-          // Campos de mercadería desde el objeto mercaderia
-          tipoMercaderiaId: remitoData.mercaderia?.tipoMercaderiaId || null,
-          valorDeclarado: remitoData.mercaderia?.valorDeclarado?.toString() || "",
-          volumenMetrosCubico: remitoData.mercaderia?.volumenMetrosCubico?.toString() || "",
-          pesoMercaderia: remitoData.mercaderia?.pesoMercaderia?.toString() || "",
-          cantidadBobinas: remitoData.mercaderia?.cantidadBobinas?.toString() || "",
-          cantidadRacks: remitoData.mercaderia?.cantidadRacks?.toString() || "",
-          cantidadBultos: remitoData.mercaderia?.cantidadBultos?.toString() || "",
-          cantidadPallets: remitoData.mercaderia?.cantidadPallets?.toString() || "",
-          requisitosEspeciales: remitoData.mercaderia?.requisitosEspeciales || "",
+          // Campos de mercadería desde la primera mercadería del array
+          tipoMercaderiaId: primeraMercaderia?.tipoMercaderiaId || null,
+          valorDeclarado: primeraMercaderia?.valorDeclarado?.toString() || "",
+          volumenMetrosCubico: primeraMercaderia?.volumenMetrosCubico?.toString() || "",
+          pesoMercaderia: primeraMercaderia?.pesoMercaderia?.toString() || "",
+          cantidadBobinas: primeraMercaderia?.cantidadBobinas?.toString() || "",
+          cantidadRacks: primeraMercaderia?.cantidadRacks?.toString() || "",
+          cantidadBultos: primeraMercaderia?.cantidadBultos?.toString() || "",
+          cantidadPallets: primeraMercaderia?.cantidadPallets?.toString() || "",
+          requisitosEspeciales: primeraMercaderia?.requisitosEspeciales || "",
           // Archivo adjunto existente
           archivoAdjunto: null,
         };
