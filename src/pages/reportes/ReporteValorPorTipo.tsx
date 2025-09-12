@@ -96,14 +96,14 @@ const ReporteValorPorTipo: React.FC = () => {
   };
 
   return (
-    <div>
+    <div style={{ width: '100%', padding: '0 2rem' }}>
       <h3 style={{ fontWeight: 600, fontSize: '1.3rem', marginBottom: 16 }}>Valor declarado por tipo de mercadería</h3>
-      <div className={styles.filtersContainer} style={{ maxWidth: 900, margin: '0 auto', marginBottom: 24 }}>
+      <div className={styles.filtersContainer} style={{ marginBottom: 24 }}>
         <div className={styles.filtersHeader}>
           <span className={styles.filtersTitle}>Filtros de búsqueda</span>
           <button className={styles.clearFiltersBtn} onClick={handleLimpiar}>Limpiar</button>
         </div>
-        <div className={styles.filtersGrid}>
+        <div className={styles.filtersGrid} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           <div className={styles.filterField}>
             <label className={styles.label}>Fecha desde</label>
             <input
@@ -161,11 +161,11 @@ const ReporteValorPorTipo: React.FC = () => {
             ))}
           </div>
         </div>
-        <button onClick={handleBuscar} disabled={loading} style={{ marginTop: 16, width: 120, background: '#256029', color: 'white', border: 'none', borderRadius: 6, padding: '8px 0', fontWeight: 600 }}>Buscar</button>
+        <button onClick={handleBuscar} disabled={loading} style={{ marginTop: 16, width: 120, background: '#FF6B35', color: 'white', border: 'none', borderRadius: 6, padding: '8px 0', fontWeight: 600 }}>Buscar</button>
       </div>
-      <div style={{ width: '100%', height: 350, marginTop: 24 }}>
+      <div style={{ width: '100%', height: 400, marginTop: 24 }}>
         {data.length > 0 && (
-          <ResponsiveContainer width="100%" height={350}>
+          <ResponsiveContainer width="100%" height={400}>
             <PieChart>
               <Pie
                 data={data}
@@ -173,7 +173,7 @@ const ReporteValorPorTipo: React.FC = () => {
                 nameKey="tipo"
                 cx="50%"
                 cy="50%"
-                outerRadius={120}
+                outerRadius={140}
                 label={({ name }) => name}
               >
                 {data.map((entry, i) => (

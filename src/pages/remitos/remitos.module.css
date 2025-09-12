@@ -294,7 +294,7 @@
 }
 
 .modalTextarea:focus {
-  border-color: #1F7A3D;
+  border-color: #FF6B35;
 }
 
 .modalText {
@@ -318,7 +318,7 @@
 }
 
 .modalSelect:focus {
-  border-color: #1F7A3D;
+  border-color: #FF6B35;
 }
 
 .modalBotones {

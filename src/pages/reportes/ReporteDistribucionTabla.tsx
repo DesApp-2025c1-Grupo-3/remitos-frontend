@@ -61,14 +61,14 @@ const ReporteDistribucionTabla: React.FC = () => {
   };
 
   return (
-    <div>
+    <div style={{ width: '100%', padding: '0 2rem' }}>
       <h3 style={{ fontWeight: 600, fontSize: '1.3rem', marginBottom: 16 }}>Distribución geográfica de orígenes y destinos</h3>
-      <div className={styles.filtersContainer} style={{ maxWidth: 700, margin: '0 auto', marginBottom: 24 }}>
+      <div className={styles.filtersContainer} style={{ marginBottom: 24 }}>
         <div className={styles.filtersHeader}>
           <span className={styles.filtersTitle}>Filtros de búsqueda</span>
           <button className={styles.clearFiltersBtn} onClick={handleLimpiar}>Limpiar</button>
         </div>
-        <div className={styles.filtersGrid}>
+        <div className={styles.filtersGrid} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           <div className={styles.filterField}>
             <label className={styles.label}>País</label>
             <select
@@ -114,30 +114,30 @@ const ReporteDistribucionTabla: React.FC = () => {
             </select>
           </div>
         </div>
-        <button onClick={handleBuscar} disabled={loading} style={{ marginTop: 16, width: 120, background: '#256029', color: 'white', border: 'none', borderRadius: 6, padding: '8px 0', fontWeight: 600 }}>Buscar</button>
+        <button onClick={handleBuscar} disabled={loading} style={{ marginTop: 16, width: 120, background: '#FF6B35', color: 'white', border: 'none', borderRadius: 6, padding: '8px 0', fontWeight: 600 }}>Buscar</button>
       </div>
-      <div style={{ maxWidth: 900, margin: '0 auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: 8, overflow: 'hidden' }}>
+      <div style={{ width: '100%' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: 8, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
           <thead style={{ background: '#f3f4f6' }}>
             <tr>
-              <th style={{ padding: 10, textAlign: 'left' }}>País</th>
-              <th style={{ padding: 10, textAlign: 'left' }}>Provincia</th>
-              <th style={{ padding: 10, textAlign: 'left' }}>Localidad</th>
-              <th style={{ padding: 10, textAlign: 'left' }}>Destino</th>
-              <th style={{ padding: 10, textAlign: 'left' }}>Cantidad de Envíos</th>
+              <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '0.875rem', color: '#374151' }}>País</th>
+              <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '0.875rem', color: '#374151' }}>Provincia</th>
+              <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '0.875rem', color: '#374151' }}>Localidad</th>
+              <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '0.875rem', color: '#374151' }}>Destino</th>
+              <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '0.875rem', color: '#374151' }}>Cantidad de Envíos</th>
             </tr>
           </thead>
           <tbody>
             {data.length === 0 && (
-              <tr><td colSpan={5} style={{ textAlign: 'center', padding: 20, color: '#888' }}>Sin datos</td></tr>
+              <tr><td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: '#6b7280', fontStyle: 'italic', fontSize: '0.875rem' }}>Sin datos</td></tr>
             )}
             {data.map((row, i) => (
-              <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: 10 }}>{row.pais || '-'}</td>
-                <td style={{ padding: 10 }}>{row.provincia || '-'}</td>
-                <td style={{ padding: 10 }}>{row.localidad || '-'}</td>
-                <td style={{ padding: 10 }}>{row.destino || '-'}</td>
-                <td style={{ padding: 10 }}>{row.cantidad || '-'}</td>
+              <tr key={i} style={{ borderBottom: '1px solid #e5e7eb', transition: 'background-color 0.2s' }}>
+                <td style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#374151' }}>{row.pais || '-'}</td>
+                <td style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#374151' }}>{row.provincia || '-'}</td>
+                <td style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#374151' }}>{row.localidad || '-'}</td>
+                <td style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#374151' }}>{row.destino || '-'}</td>
+                <td style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#374151', fontWeight: 500 }}>{row.cantidad || '-'}</td>
               </tr>
             ))}
           </tbody>

@@ -595,7 +595,7 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
                         target="_blank" 
                         rel="noopener noreferrer"
                         style={{ 
-                          color: '#1F7A3D', 
+                          color: '#FF6B35', 
                           textDecoration: 'underline',
                           fontSize: '0.9rem'
                         }}
@@ -656,7 +656,7 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
                         id="fileInput"
                         accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                       />
-                      <label htmlFor="fileInput" style={{ cursor: 'pointer', color: '#1F7A3D', textDecoration: 'underline' }}>
+                      <label htmlFor="fileInput" style={{ cursor: 'pointer', color: '#FF6B35', textDecoration: 'underline' }}>
                         Seleccionar archivo
                       </label>
                     </>

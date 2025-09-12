@@ -121,7 +121,7 @@ export const RemitoSelectModal: React.FC<RemitoSelectModalProps> = ({ open, onCl
               <div style={{ flex:1, overflow:'auto', padding:'0.5rem' }}>
                 {items.data.map(r => (
                   <div key={r.id} onClick={()=>{ onSelect(r); onClose(); }} style={{ padding:'0.75rem', border:'1px solid #e5e7eb', marginBottom:'0.5rem', cursor:'pointer', borderRadius:'8px', background:'#fff', transition:'all 0.2s ease', fontSize:'0.92em', lineHeight:1.3 }}
-                    onMouseEnter={(e)=>{ e.currentTarget.style.background='#f9fafb'; e.currentTarget.style.borderColor = '#1F7A3D'; }}
+                    onMouseEnter={(e)=>{ e.currentTarget.style.background='#f9fafb'; e.currentTarget.style.borderColor = '#FF6B35'; }}
                     onMouseLeave={(e)=>{ e.currentTarget.style.background='#fff'; e.currentTarget.style.borderColor = '#e5e7eb'; }}
                   >
                     <div style={{ fontWeight:600, color:'#374151', marginBottom:'0.3rem', fontSize:'1em' }}>{r.numeroAsignado}</div>

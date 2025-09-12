@@ -77,14 +77,14 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
   );
 
   return (
-    <div>
+    <div style={{ width: '100%', padding: '0 2rem' }}>
       <h3 style={{ fontWeight: 600, fontSize: '1.3rem', marginBottom: 16 }}>Volumen total de mercadería por cliente/período</h3>
       <div className={styles.filtersContainer}>
         <div className={styles.filtersHeader}>
           <div className={styles.filtersTitle}>Filtros de búsqueda</div>
           <button className={styles.clearFiltersBtn} onClick={handleLimpiar} title="Limpiar filtros">Limpiar</button>
         </div>
-        <div className={styles.filtersGrid}>
+        <div className={styles.filtersGrid} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           {/* Filtro por fecha desde */}
           <div className={styles.filterField}>
             <label className={styles.label}>Fecha desde</label>
@@ -130,15 +130,15 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
           </div>
         </div>
         <div style={{ marginTop: 16 }}>
-          <button onClick={handleBuscar} disabled={loading} className={styles.clearFiltersBtn} style={{ background: '#1F7A3D', color: '#fff', borderColor: '#1F7A3D' }}>
+          <button onClick={handleBuscar} disabled={loading} className={styles.clearFiltersBtn} style={{ background: '#FF6B35', color: '#fff', borderColor: '#FF6B35' }}>
             Buscar
           </button>
         </div>
       </div>
-      <div style={{ width: '100%', height: 300, marginTop: 24 }}>
+      <div style={{ width: '100%', height: 400, marginTop: 24 }}>
         {data.length > 0 && (
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="cliente" />
               <YAxis />

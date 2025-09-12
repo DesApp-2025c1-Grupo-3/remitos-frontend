@@ -234,7 +234,7 @@ export const DestinoSelectModal: React.FC<DestinoSelectModalProps> = ({ open, on
                     onMouseEnter={(e) => {
                       if (!(destinoSeleccionado && destinoSeleccionado.id === destino.id)) {
                         e.currentTarget.style.background = '#f9fafb';
-                        e.currentTarget.style.borderColor = '#1F7A3D';
+                        e.currentTarget.style.borderColor = '#FF6B35';
                       }
                     }}
                     onMouseLeave={(e) => {

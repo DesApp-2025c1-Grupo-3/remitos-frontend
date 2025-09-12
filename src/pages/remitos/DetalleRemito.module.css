@@ -80,7 +80,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #1F7A3D;
+  color: #FF6B35;
   text-decoration: none;
   font-weight: 500;
 }
@@ -98,7 +98,7 @@
 }
 
 .archivoAdjuntoTexto {
-  color: #1F7A3D;
+  color: #FF6B35;
   text-decoration: none;
   font-weight: 500;
 }

@@ -137,8 +137,8 @@
 }
 
 .input:focus {
-  border: 1.5px solid #1F7A3D;
-  box-shadow: 0 0 0 2px #1F7A3D22;
+  border: 1.5px solid #FF6B35;
+  box-shadow: 0 0 0 2px #FF6B3522;
   background: #fff;
 }
 
