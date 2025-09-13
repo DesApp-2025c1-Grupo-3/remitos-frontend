@@ -11,9 +11,10 @@ interface RemitoSelectModalProps {
   mode: 'assign' | 'remove';
   remitosAgendados?: Set<number>; // IDs de remitos ya agendados
   selectedDate?: string; // para refrescar disponibles al cambiar el día
+  remitosDelDia?: Remito[]; // Remitos agendados para la fecha seleccionada
 }
 
-export const RemitoSelectModal: React.FC<RemitoSelectModalProps> = ({ open, onClose, onSelect, mode, remitosAgendados = new Set(), selectedDate }) => {
+export const RemitoSelectModal: React.FC<RemitoSelectModalProps> = ({ open, onClose, onSelect, mode, remitosAgendados = new Set(), selectedDate, remitosDelDia = [] }) => {
   const [search, setSearch] = React.useState('');
   const [currentPage, setCurrentPage] = React.useState(1);
   const [items, setItems] = React.useState<{ data: Remito[]; totalItems: number; totalPages: number; currentPage: number }>({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
@@ -53,13 +54,8 @@ export const RemitoSelectModal: React.FC<RemitoSelectModalProps> = ({ open, onCl
           currentPage: currentPage
         });
       } else {
-        // Para quitar: mostrar solo remitos agendados (usando el estado global)
-        const { data } = await remitosService.getRemitos(1, 100, {});
-        
-        // Filtrar solo los que están en el estado de remitos agendados
-        const remitosAgendadosFiltrados = data.filter(remito => 
-          remitosAgendados.has(remito.id)
-        );
+        // Para quitar: usar los remitos del día que vienen del componente padre
+        const remitosAgendadosFiltrados = remitosDelDia;
         
         // Aplicar filtro de búsqueda
         const filteredRemitos = debouncedSearch.trim() 

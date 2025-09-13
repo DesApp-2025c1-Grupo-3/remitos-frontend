@@ -6,7 +6,13 @@ import { RemitoSelectModal } from "../../components/RemitoSelectModal"
 
 // Utilidades de fecha
 const pad2 = (n) => `${n}`.padStart(2, "0")
-const toIsoDate = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
+const toIsoDate = (d) => {
+  // Usar UTC para consistencia con el backend
+  const year = d.getUTCFullYear()
+  const month = d.getUTCMonth() + 1
+  const day = d.getUTCDate()
+  return `${year}-${pad2(month)}-${pad2(day)}`
+}
 
 const buildMonthMatrix = (year, monthIndex) => {
   const first = new Date(year, monthIndex, 1)
@@ -23,7 +29,11 @@ const buildMonthMatrix = (year, monthIndex) => {
 export default function Agenda() {
   const today = useMemo(() => new Date(), [])
   const [cursorDate, setCursorDate] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1))
-  const [selectedDate, setSelectedDate] = useState(() => toIsoDate(today))
+  const [selectedDate, setSelectedDate] = useState(() => {
+    // Usar UTC para consistencia con el backend
+    const now = new Date()
+    return toIsoDate(now)
+  })
   const [monthData, setMonthData] = useState({}) // { 'YYYY-MM-DD': Remito[] }
   const [loading, setLoading] = useState(false)
   const { showNotification } = useNotification()
@@ -39,6 +49,51 @@ export default function Agenda() {
   const monthIndex = cursorDate.getMonth()
   const monthLabel = cursorDate.toLocaleDateString("es-AR", { month: "long", year: "numeric" })
 
+  // Función para refrescar los datos del mes
+  const refreshMonthData = async () => {
+    try {
+      setLoading(true)
+      console.log('🔍 DEBUG - refreshMonthData - Iniciando refresh...')
+      console.log('🔍 DEBUG - refreshMonthData - Datos locales ANTES del refresh:', monthData)
+      
+      const grid = await agendaService.getMonthGrid({ year, month: monthIndex + 1 })
+      console.log('🔍 DEBUG - refreshMonthData - Grid del backend:', grid)
+      
+      // Verificar si el backend tiene datos de fechaAgenda
+      const hasBackendData = Object.values(grid).some(remitos => 
+        Array.isArray(remitos) && remitos.some(remito => remito.fechaAgenda)
+      )
+      
+      console.log('🔍 DEBUG - refreshMonthData - ¿Backend tiene datos de fechaAgenda?', hasBackendData)
+      
+      if (hasBackendData) {
+        // Si el backend tiene datos correctos, usarlos
+        console.log('✅ Usando datos del backend')
+        setMonthData(grid)
+        const agendados = new Set()
+        Object.values(grid).forEach(remitos => {
+          remitos.forEach(remito => {
+            if (remito.fechaAgenda) {
+              agendados.add(remito.id)
+            }
+          })
+        })
+        setRemitosAgendados(agendados)
+        console.log('🔍 DEBUG - refreshMonthData - Agendados del backend:', agendados)
+      } else {
+        // Si el backend no tiene datos correctos, mantener los datos locales
+        console.log('⚠️ Backend no tiene datos de fechaAgenda, manteniendo datos locales')
+        console.log('🔍 DEBUG - refreshMonthData - Datos locales que se mantienen:', monthData)
+        // No actualizar monthData ni remitosAgendados
+      }
+    } catch (e) {
+      console.error('Error refrescando datos:', e)
+      showNotification("Error al cargar datos", "error")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // Cargar grilla mensual usando fechaAgenda
   useEffect(() => {
     let isMounted = true; // Flag para evitar actualizaciones en componentes desmontados
@@ -53,10 +108,23 @@ export default function Agenda() {
         const map = {}
         const agendadosIds = new Set()
         
+        console.log('🔍 DEBUG - Carga inicial - Grid del backend:', grid)
+        
         grid.forEach((d) => {
           map[d.date] = d.remitos
-          // Agregar IDs de remitos agendados al Set
-          d.remitos.forEach(remito => agendadosIds.add(remito.id))
+          console.log(`🔍 DEBUG - Carga inicial - Día ${d.date}:`, d.remitos)
+          
+          // Solo agregar IDs de remitos que realmente tienen fechaAgenda
+          d.remitos.forEach(remito => {
+            console.log(`🔍 DEBUG - Carga inicial - Remito ${remito.id}:`, {
+              numeroAsignado: remito.numeroAsignado,
+              fechaAgenda: remito.fechaAgenda,
+              tipoFechaAgenda: typeof remito.fechaAgenda
+            })
+            if (remito.fechaAgenda) {
+              agendadosIds.add(remito.id)
+            }
+          })
         })
         
         setMonthData(map)
@@ -64,6 +132,7 @@ export default function Agenda() {
         
         console.log('📅 Cargada agenda del mes:', Object.keys(map).length, 'días con remitos')
         console.log('📊 Total remitos agendados:', agendadosIds.size)
+        console.log('🔍 DEBUG - Carga inicial - Map final:', map)
       } catch (e) {
         if (isMounted) {
           showNotification("Error cargando agenda", "error")
@@ -104,6 +173,7 @@ export default function Agenda() {
   const goToday = () => {
     const d = new Date()
     setCursorDate(new Date(d.getFullYear(), d.getMonth(), 1))
+    // Usar UTC para consistencia con el backend
     setSelectedDate(toIsoDate(d))
   }
 
@@ -116,24 +186,38 @@ export default function Agenda() {
         return
       }
       
+      console.log('🔍 DEBUG - handleAssign - Remito:', remito);
+      console.log('🔍 DEBUG - handleAssign - Fecha seleccionada:', selectedDate);
+      console.log('🔍 DEBUG - handleAssign - Tipo de fecha:', typeof selectedDate);
+      console.log('🔍 DEBUG - handleAssign - Fecha parseada:', new Date(selectedDate));
+      console.log('🔍 DEBUG - handleAssign - Fecha local:', new Date(selectedDate).toLocaleDateString());
+      
       // Agendar el remito
       const remitoAgendado = await agendaService.assignRemitoToDate(remito.id, selectedDate)
       showNotification("Remito agendado", "success")
       
-      // Actualizar el remito con la fechaAgenda
+      // Actualizar el remito con la fechaAgenda (usar la fecha seleccionada directamente)
       const remitoActualizado = { ...remito, fechaAgenda: selectedDate }
+      console.log('🔍 DEBUG - handleAssign - Remito actualizado:', remitoActualizado)
+      console.log('🔍 DEBUG - handleAssign - Fecha que se guarda:', selectedDate)
       
       // Actualizar el estado de remitos agendados
-      setRemitosAgendados(prev => new Set([...prev, remito.id]))
+      setRemitosAgendados(prev => {
+        const newSet = new Set([...prev, remito.id])
+        console.log('🔍 DEBUG - handleAssign - Nuevo set de agendados:', newSet)
+        return newSet
+      })
       
       // Actualizar los datos del mes
       setMonthData((prev) => {
+        console.log('🔍 DEBUG - handleAssign - monthData ANTES:', prev)
         const newData = { ...prev }
         if (!newData[selectedDate]) {
           newData[selectedDate] = []
         }
         // Agregar el remito a la fecha seleccionada
         newData[selectedDate] = [...newData[selectedDate], remitoActualizado]
+        console.log('🔍 DEBUG - handleAssign - monthData DESPUÉS:', newData)
         return newData
       })
       
@@ -234,7 +318,12 @@ export default function Agenda() {
 
         <div className={styles.panel}>
           <div className={styles.panelTitle}>
-            {new Date(selectedDate).toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" })}
+            {(() => {
+              // Parsear la fecha usando UTC para consistencia
+              const [year, month, day] = selectedDate.split('-').map(Number)
+              const date = new Date(Date.UTC(year, month - 1, day))
+              return date.toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" })
+            })()}
             {loading && <span style={{ color: '#ef4444', fontSize: '0.8em', marginLeft: '10px' }}>🔄 Cargando...</span>}
           </div>
 
@@ -280,6 +369,7 @@ export default function Agenda() {
         mode={modalMode}
         remitosAgendados={remitosAgendados}
         selectedDate={selectedDate}
+        remitosDelDia={selectedRemitos}
       />
     </div>
   )

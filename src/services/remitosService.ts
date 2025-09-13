@@ -211,6 +211,14 @@ export const remitosService = {
 
   async updateRemito(id: number, remitoData: RemitoUpdateData): Promise<Remito> {
     try {
+      // Debug: Mostrar qué datos se están enviando
+      console.log('🔍 DEBUG - updateRemito - Datos recibidos:', remitoData);
+      console.log('🔍 DEBUG - updateRemito - Tipo de datos:', typeof remitoData);
+      console.log('🔍 DEBUG - updateRemito - Campos individuales:');
+      Object.keys(remitoData).forEach(key => {
+        console.log(`  ${key}:`, remitoData[key], `(tipo: ${typeof remitoData[key]})`);
+      });
+      
       // Si hay un archivo adjunto, usar FormData
       if (remitoData.archivoAdjunto) {
         const formData = new FormData();
@@ -253,21 +261,26 @@ export const remitosService = {
         // Si no hay archivo, enviar como JSON pero con mercaderías como array
         const updateData = { ...remitoData };
         
-        // Crear objeto de mercadería
-        const mercaderia = {
-          tipoMercaderiaId: parseInt(remitoData.tipoMercaderiaId.toString()),
-          valorDeclarado: parseInt(remitoData.valorDeclarado.toString()),
-          volumenMetrosCubico: parseInt(remitoData.volumenMetrosCubico.toString()),
-          pesoMercaderia: parseInt(remitoData.pesoMercaderia.toString()),
-          cantidadBobinas: remitoData.cantidadBobinas ? parseInt(remitoData.cantidadBobinas.toString()) : null,
-          cantidadRacks: remitoData.cantidadRacks ? parseInt(remitoData.cantidadRacks.toString()) : null,
-          cantidadBultos: remitoData.cantidadBultos ? parseInt(remitoData.cantidadBultos.toString()) : null,
-          cantidadPallets: remitoData.cantidadPallets ? parseInt(remitoData.cantidadPallets.toString()) : null,
-          requisitosEspeciales: remitoData.requisitosEspeciales || null
-        };
+        // Crear objeto de mercadería - Solo si hay datos de mercadería
+        let mercaderia = null;
+        if (remitoData.tipoMercaderiaId || remitoData.valorDeclarado || remitoData.volumenMetrosCubico || remitoData.pesoMercaderia) {
+          mercaderia = {
+            tipoMercaderiaId: remitoData.tipoMercaderiaId ? parseInt(remitoData.tipoMercaderiaId.toString()) : null,
+            valorDeclarado: remitoData.valorDeclarado ? parseInt(remitoData.valorDeclarado.toString()) : null,
+            volumenMetrosCubico: remitoData.volumenMetrosCubico ? parseInt(remitoData.volumenMetrosCubico.toString()) : null,
+            pesoMercaderia: remitoData.pesoMercaderia ? parseInt(remitoData.pesoMercaderia.toString()) : null,
+            cantidadBobinas: remitoData.cantidadBobinas ? parseInt(remitoData.cantidadBobinas.toString()) : null,
+            cantidadRacks: remitoData.cantidadRacks ? parseInt(remitoData.cantidadRacks.toString()) : null,
+            cantidadBultos: remitoData.cantidadBultos ? parseInt(remitoData.cantidadBultos.toString()) : null,
+            cantidadPallets: remitoData.cantidadPallets ? parseInt(remitoData.cantidadPallets.toString()) : null,
+            requisitosEspeciales: remitoData.requisitosEspeciales || null
+          };
+        }
         
-        // Agregar mercaderías como array
-        updateData.mercaderias = [mercaderia];
+        // Agregar mercaderías como array solo si existe
+        if (mercaderia) {
+          updateData.mercaderias = [mercaderia];
+        }
         
         // Remover campos individuales de mercadería
         delete updateData.tipoMercaderiaId;
@@ -280,11 +293,24 @@ export const remitosService = {
         delete updateData.cantidadPallets;
         delete updateData.requisitosEspeciales;
         
+        // Debug: Mostrar qué se envía al backend
+        console.log('🔍 DEBUG - updateRemito - Datos que se envían al backend:', updateData);
+        console.log('🔍 DEBUG - updateRemito - URL:', `${API_URL}/remito/${id}`);
+        console.log('🔍 DEBUG - updateRemito - Headers:', {
+          'Content-Type': 'application/json',
+        });
+        
         const response = await axios.put(`${API_URL}/remito/${id}`, updateData, {
           headers: {
             'Content-Type': 'application/json',
           },
         });
+        
+        // Debug: Mostrar respuesta del backend
+        console.log('🔍 DEBUG - updateRemito - Respuesta del backend:', response.data);
+        console.log('🔍 DEBUG - updateRemito - Status:', response.status);
+        console.log('🔍 DEBUG - updateRemito - Headers de respuesta:', response.headers);
+        
         return response.data;
       }
     } catch (error) {

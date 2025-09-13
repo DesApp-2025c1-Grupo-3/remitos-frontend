@@ -31,7 +31,11 @@ export const agendaService = {
       try {
         const d = new Date(val);
         if (isNaN(d.getTime())) return (typeof val === 'string' && val.length >= 10) ? val.slice(0,10) : null;
-        return toIsoDate(d);
+        // Usar métodos UTC para fechas UTC del backend (como updatedAt)
+        const year = d.getUTCFullYear();
+        const month = d.getUTCMonth() + 1;
+        const day = d.getUTCDate();
+        return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
       } catch {
         return (typeof val === 'string' && val.length >= 10) ? val.slice(0,10) : null;
       }
@@ -59,12 +63,26 @@ export const agendaService = {
   },
 
   async assignRemitoToDate(remitoId: number, date: string): Promise<Remito> {
-    const payload = { fechaAgenda: date } as unknown as RemitoUpdateData;
-    return remitosService.updateRemito(remitoId, payload);
+    console.log('🔍 DEBUG - assignRemitoToDate - Remito ID:', remitoId, 'Fecha:', date);
+    
+    // Convertir la fecha YYYY-MM-DD a UTC para ser consistente con updatedAt
+    const utcDate = `${date}T00:00:00.000Z`;
+    console.log('🔍 DEBUG - assignRemitoToDate - Fecha UTC enviada:', utcDate);
+    
+    const payload = { fechaAgenda: utcDate } as unknown as RemitoUpdateData;
+    console.log('🔍 DEBUG - assignRemitoToDate - Payload:', payload);
+    
+    const result = await remitosService.updateRemito(remitoId, payload);
+    console.log('🔍 DEBUG - assignRemitoToDate - Resultado:', result);
+    console.log('🔍 DEBUG - assignRemitoToDate - fechaAgenda en respuesta:', result.fechaAgenda);
+    
+    return result;
   },
 
   async moveRemitoToDate(remitoId: number, date: string): Promise<Remito> {
-    const payload = { fechaAgenda: date } as unknown as RemitoUpdateData;
+    // Convertir la fecha YYYY-MM-DD a UTC para ser consistente con updatedAt
+    const utcDate = `${date}T00:00:00.000Z`;
+    const payload = { fechaAgenda: utcDate } as unknown as RemitoUpdateData;
     return remitosService.updateRemito(remitoId, payload);
   },
 
