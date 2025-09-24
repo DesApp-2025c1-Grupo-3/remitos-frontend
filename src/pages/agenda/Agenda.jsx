@@ -3,6 +3,8 @@ import styles from "./agenda.module.css"
 import { agendaService } from "../../services/agendaService"
 import { useNotification } from "../../contexts/NotificationContext"
 import { RemitoSelectModal } from "../../components/RemitoSelectModal"
+import { CronConfigModal } from "../../components/CronConfigModal/CronConfigModal"
+import { Settings } from "lucide-react"
 
 // Utilidades de fecha
 const pad2 = (n) => `${n}`.padStart(2, "0")
@@ -44,6 +46,9 @@ export default function Agenda() {
   
   // Estado para rastrear remitos agendados y evitar duplicados
   const [remitosAgendados, setRemitosAgendados] = useState(new Set())
+
+  // Estado para el modal de configuración del cron
+  const [cronConfigModalOpen, setCronConfigModalOpen] = useState(false)
 
   const year = cursorDate.getFullYear()
   const monthIndex = cursorDate.getMonth()
@@ -261,11 +266,19 @@ export default function Agenda() {
 
   const openAssignModal = () => { setModalMode('assign'); setModalOpen(true); }
   const openRemoveModal = () => { setModalMode('remove'); setModalOpen(true); }
+  const openCronConfigModal = () => { setCronConfigModalOpen(true); }
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.titulo}>Agenda</h1>
+        <button 
+          className={styles.configButton} 
+          onClick={openCronConfigModal}
+          title="Configurar horario de notificaciones"
+        >
+          <Settings size={20} strokeWidth={1.5} />
+        </button>
       </div>
 
       <div className={styles.wrapper}>
@@ -370,6 +383,11 @@ export default function Agenda() {
         remitosAgendados={remitosAgendados}
         selectedDate={selectedDate}
         remitosDelDia={selectedRemitos}
+      />
+
+      <CronConfigModal
+        open={cronConfigModalOpen}
+        onClose={()=>setCronConfigModalOpen(false)}
       />
     </div>
   )

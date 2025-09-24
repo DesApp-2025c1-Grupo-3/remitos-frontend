@@ -31,10 +31,10 @@ export const agendaService = {
       try {
         const d = new Date(val);
         if (isNaN(d.getTime())) return (typeof val === 'string' && val.length >= 10) ? val.slice(0,10) : null;
-        // Usar métodos UTC para fechas UTC del backend (como updatedAt)
-        const year = d.getUTCFullYear();
-        const month = d.getUTCMonth() + 1;
-        const day = d.getUTCDate();
+        // Usar métodos locales para fechas que ya incluyen zona horaria
+        const year = d.getFullYear();
+        const month = d.getMonth() + 1;
+        const day = d.getDate();
         return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
       } catch {
         return (typeof val === 'string' && val.length >= 10) ? val.slice(0,10) : null;
@@ -65,11 +65,19 @@ export const agendaService = {
   async assignRemitoToDate(remitoId: number, date: string): Promise<Remito> {
     console.log('🔍 DEBUG - assignRemitoToDate - Remito ID:', remitoId, 'Fecha:', date);
     
-    // Convertir la fecha YYYY-MM-DD a UTC para ser consistente con updatedAt
-    const utcDate = `${date}T00:00:00.000Z`;
-    console.log('🔍 DEBUG - assignRemitoToDate - Fecha UTC enviada:', utcDate);
+    // Crear una fecha local para el día seleccionado a las 00:00 hora local
+    // Esto evita problemas de zona horaria al enviar a la base de datos
+    const [year, month, day] = date.split('-').map(Number);
+    const localDate = new Date(year, month - 1, day, 0, 0, 0, 0);
     
-    const payload = { fechaAgenda: utcDate } as unknown as RemitoUpdateData;
+    console.log('🔍 DEBUG - assignRemitoToDate - Fecha local creada:', localDate);
+    console.log('🔍 DEBUG - assignRemitoToDate - Fecha local ISO:', localDate.toISOString());
+    
+    // Al agendar un remito, también cambiar su estado a "Agendado" (id = 9)
+    const payload = { 
+      fechaAgenda: localDate.toISOString(),
+      estadoId: 9 // Estado "Agendado"
+    } as unknown as RemitoUpdateData;
     console.log('🔍 DEBUG - assignRemitoToDate - Payload:', payload);
     
     const result = await remitosService.updateRemito(remitoId, payload);
@@ -80,14 +88,24 @@ export const agendaService = {
   },
 
   async moveRemitoToDate(remitoId: number, date: string): Promise<Remito> {
-    // Convertir la fecha YYYY-MM-DD a UTC para ser consistente con updatedAt
-    const utcDate = `${date}T00:00:00.000Z`;
-    const payload = { fechaAgenda: utcDate } as unknown as RemitoUpdateData;
+    // Crear una fecha local para el día seleccionado a las 00:00 hora local
+    const [year, month, day] = date.split('-').map(Number);
+    const localDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+    
+    // Al mover un remito a otra fecha, mantener el estado "Agendado" (id = 9)
+    const payload = { 
+      fechaAgenda: localDate.toISOString(),
+      estadoId: 9 // Estado "Agendado"
+    } as unknown as RemitoUpdateData;
     return remitosService.updateRemito(remitoId, payload);
   },
 
   async removeRemitoDate(remitoId: number): Promise<Remito> {
-    const payload = { fechaAgenda: null } as unknown as RemitoUpdateData;
+    // Al quitar un remito de la agenda, también cambiar su estado de vuelta a "Autorizado" (id = 2)
+    const payload = { 
+      fechaAgenda: null,
+      estadoId: 2 // Estado "Autorizado"
+    } as unknown as RemitoUpdateData;
     return remitosService.updateRemito(remitoId, payload);
   },
 
