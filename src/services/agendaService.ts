@@ -21,6 +21,7 @@ const toIsoDate = (date: Date): string => {
   return `${y}-${m}-${d}`;
 };
 
+
 export const agendaService = {
   async getByDate(date: string): Promise<Remito[]> {
     const filters: RemitosFilters = { fechaAgenda: date };
@@ -73,10 +74,10 @@ export const agendaService = {
     console.log('🔍 DEBUG - assignRemitoToDate - Fecha local creada:', localDate);
     console.log('🔍 DEBUG - assignRemitoToDate - Fecha local ISO:', localDate.toISOString());
     
-    // Al agendar un remito, también cambiar su estado a "Agendado" (id = 9)
+    // Al agendar un remito, también cambiar su estado a "Agendado" (id = 8)
     const payload = { 
       fechaAgenda: localDate.toISOString(),
-      estadoId: 9 // Estado "Agendado"
+      estadoId: 8 // Estado "Agendado"
     } as unknown as RemitoUpdateData;
     console.log('🔍 DEBUG - assignRemitoToDate - Payload:', payload);
     
@@ -92,19 +93,19 @@ export const agendaService = {
     const [year, month, day] = date.split('-').map(Number);
     const localDate = new Date(year, month - 1, day, 0, 0, 0, 0);
     
-    // Al mover un remito a otra fecha, mantener el estado "Agendado" (id = 9)
+    // Al mover un remito a otra fecha, mantener el estado "Agendado" (id = 8)
     const payload = { 
       fechaAgenda: localDate.toISOString(),
-      estadoId: 9 // Estado "Agendado"
+      estadoId: 8 // Estado "Agendado"
     } as unknown as RemitoUpdateData;
     return remitosService.updateRemito(remitoId, payload);
   },
 
   async removeRemitoDate(remitoId: number): Promise<Remito> {
-    // Al quitar un remito de la agenda, también cambiar su estado de vuelta a "Autorizado" (id = 2)
+    // Al quitar un remito de la agenda, también cambiar su estado de vuelta a "Autorizado" (id = 1)
     const payload = { 
       fechaAgenda: null,
-      estadoId: 2 // Estado "Autorizado"
+      estadoId: 1 // Estado "Autorizado"
     } as unknown as RemitoUpdateData;
     return remitosService.updateRemito(remitoId, payload);
   },
