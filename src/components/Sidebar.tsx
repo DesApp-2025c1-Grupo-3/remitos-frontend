@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Link, useLocation } from "react-router-dom"
-import { FileText, Users, MapPin, BarChart3, CalendarDays } from "lucide-react"
+import { FileText, Users, MapPin, BarChart3, CalendarDays, Truck, DollarSign } from "lucide-react"
 import styles from "./components.module.css";
 
 export default function Sidebar() {
@@ -62,6 +62,20 @@ export default function Sidebar() {
             <span>Agenda</span>
           </button>
         </Link>
+
+        <a href="https://gestion-de-viajes.vercel.app/" target="_blank" rel="noopener noreferrer">
+          <button className={styles.navButton}>
+            <Truck size={20} />
+            <span>Viajes</span>
+          </button>
+        </a>
+
+        <a href="#" target="_blank" rel="noopener noreferrer">
+          <button className={styles.navButton}>
+            <DollarSign size={20} />
+            <span>Costos</span>
+          </button>
+        </a>
       </div>
     </div>
   );

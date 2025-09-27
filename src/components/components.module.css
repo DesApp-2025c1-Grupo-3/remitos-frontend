@@ -107,3 +107,10 @@
 .navIcon {
   margin: 0 auto;
 }
+
+/* Estilos para enlaces externos */
+.navLinks a {
+  text-decoration: none;
+  display: block;
+  width: 100%;
+}

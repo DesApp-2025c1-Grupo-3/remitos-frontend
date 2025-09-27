@@ -39,7 +39,6 @@ export default function Agenda() {
   const [monthData, setMonthData] = useState({}) // { 'YYYY-MM-DD': Remito[] }
   const [loading, setLoading] = useState(false)
   const { showNotification } = useNotification()
-  const [view, setView] = useState('month') // 'month' | 'week' | 'day'
 
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState('assign') // 'assign' | 'remove'
@@ -289,14 +288,8 @@ export default function Agenda() {
             <button className={styles.navButton} onClick={goNext}>Siguiente</button>
           </div>
           <div className={styles.monthLabel}>{monthLabel}</div>
-          <div className={styles.viewSwitch}>
-            <button className={`${styles.viewButton} ${view==='month'?styles.viewActive:''}`} onClick={()=>setView('month')}>Mes</button>
-            <button className={`${styles.viewButton} ${view==='week'?styles.viewActive:''}`} onClick={()=>setView('week')}>Semana</button>
-            <button className={`${styles.viewButton} ${view==='day'?styles.viewActive:''}`} onClick={()=>setView('day')}>Día</button>
-          </div>
         </div>
 
-        {/* Vista actual (por ahora, mostramos el grid mensual en todas hasta definir semana/día) */}
         <div className={styles.calendar}>
           <div className={styles.weekHeader}>
             <div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div>
@@ -320,7 +313,7 @@ export default function Agenda() {
                   {!isEmpty && (
                     <>
                       <div className={styles.cellDay}>{dateObj.getDate()}</div>
-                      {hasRemitos && <div className={styles.dot} />}
+                      {hasRemitos && <div className={styles.remitoCount}>{count}</div>}
                     </>
                   )}
                 </div>
