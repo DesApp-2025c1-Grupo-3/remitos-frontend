@@ -110,11 +110,24 @@ export const agendaService = {
     return remitosService.updateRemito(remitoId, payload);
   },
 
-  // Obtener remitos disponibles para agendar (sin fechaAgenda)
+  // Obtener remitos disponibles para agendar (solo los que están autorizados)
   async getRemitosDisponibles(): Promise<Remito[]> {
     try {
-      // Pedir al backend directamente los de fechaAgenda=null
-      const filters: RemitosFilters = { fechaAgenda: 'null' as unknown as string } as any;
+      // Primero obtener el estado "Autorizado"
+      const estadosResponse = await axios.get(`${API_URL}/estado`);
+      const estadoAutorizado = estadosResponse.data.find((estado: any) => estado.nombre === 'Autorizado');
+      
+      if (!estadoAutorizado) {
+        console.warn('⚠️ No se encontró el estado "Autorizado"');
+        return [];
+      }
+      
+      // Filtrar remitos que estén autorizados y sin fechaAgenda
+      const filters: RemitosFilters = { 
+        estadoId: estadoAutorizado.id,
+        fechaAgenda: 'null' as unknown as string 
+      } as any;
+      
       const { data } = await remitosService.getRemitos(1, 1000, filters);
       return data;
     } catch (error) {
