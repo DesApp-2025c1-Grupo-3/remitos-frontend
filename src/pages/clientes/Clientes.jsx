@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import styles from "./clientes.module.css";
 import tableStyles from "../../styles/table.module.css";
 import { clientesService } from "../../services/clientesService";
+import { tipoEmpresaService } from "../../services/tipoEmpresaService";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { useNotification } from "../../contexts/NotificationContext";
 import { ConfirmModal } from '../../components/ConfirmModal/ConfirmModal';
@@ -15,14 +16,33 @@ export default function Clientes() {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [clienteToDelete, setClienteToDelete] = useState(null);
+  const [tiposEmpresa, setTiposEmpresa] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Función helper para obtener el nombre del tipo de empresa
+  const getNombreTipoEmpresa = (tipoEmpresaId) => {
+    const tipo = tiposEmpresa.find(t => t.id === tipoEmpresaId);
+    return tipo ? tipo.nombre : 'N/A';
+  };
+
+  // Cargar tipos de empresa al montar el componente
+  useEffect(() => {
+    const fetchTiposEmpresa = async () => {
+      try {
+        const tipos = await tipoEmpresaService.getTiposEmpresa();
+        setTiposEmpresa(tipos);
+      } catch (err) {
+        console.error('Error al cargar tipos de empresa:', err);
+      }
+    };
+    fetchTiposEmpresa();
+  }, []);
 
   useEffect(() => {
     const fetchClientes = async () => {
       setLoading(true);
       try {
-        // Suponiendo que el servicio acepta un parámetro de página
         const data = await clientesService.getClientes({ page: currentPage, limit: 10 });
         setClientes(data);
       } catch (err) {
@@ -108,7 +128,7 @@ export default function Clientes() {
                   <tr key={cliente.id} className={tableStyles.clickableRow}>
                     <td data-label="Razón Social">{cliente.razonSocial}</td>
                     <td data-label="CUIT/RUT">{cliente.cuit_rut}</td>
-                    <td data-label="Tipo">{cliente.tipoEmpresa}</td>
+                    <td data-label="Tipo">{getNombreTipoEmpresa(cliente.tipoEmpresaId)}</td>
                     <td data-label="Dirección">{cliente.direccion}</td>
                     <td>
                       <div className={tableStyles.actions}>
