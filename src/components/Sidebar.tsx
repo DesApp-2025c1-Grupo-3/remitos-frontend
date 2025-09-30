@@ -150,7 +150,7 @@ export default function Sidebar() {
             </button>
           </a>
 
-          <a href="#" target="_blank" rel="noopener noreferrer" onClick={isMobile ? closeMobile : undefined}>
+          <a href="https://68d73033f00e1875e53568ce--tarifas-de-costo.netlify.app/" target="_blank" rel="noopener noreferrer" onClick={isMobile ? closeMobile : undefined}>
             <button 
               className={styles.navButton}
               data-tooltip="Costos"
