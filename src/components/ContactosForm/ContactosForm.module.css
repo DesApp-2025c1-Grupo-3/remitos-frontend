@@ -115,11 +115,34 @@
 }
 
 .detallesContacto {
-  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.875rem;
+}
+
+.detailLabel {
+  color: var(--text-secondary);
+  font-weight: 500;
+  min-width: fit-content;
+  flex-shrink: 0;
+}
+
+.detailValue {
+  color: var(--text-primary);
+  font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
 }
 
 .acciones {
@@ -299,4 +322,90 @@
   margin-bottom: 2px;
   background: none;
   padding-left: 2px;
+}
+
+/* Estilos para paginación */
+.pagination {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--secondary-200);
+}
+
+.paginationInfo {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.paginationButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.paginationButton {
+  background: white;
+  border: 1px solid var(--secondary-200);
+  color: var(--text-primary);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+}
+
+.paginationButton:hover:not(:disabled) {
+  background: var(--primary-50);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.paginationButton:disabled {
+  background: var(--bg-tertiary);
+  color: var(--text-light);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.paginationButton.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.paginationButton.active:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+/* Responsive para móvil */
+@media (max-width: 768px) {
+  .pagination {
+    padding: 0.75rem;
+  }
+  
+  .paginationButtons {
+    gap: 0.25rem;
+  }
+  
+  .paginationButton {
+    min-width: 36px;
+    height: 36px;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
 }

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import styles from "./clientes.module.css"
 import { clientesService } from "../../services/clientesService"
-import { ArrowLeft } from "lucide-react"
 import { ClienteForm, ClienteFormData } from "../../components/ClienteForm/ClienteForm"
 import { Contacto } from "../../types/contacto"
 import { useNotification } from "../../contexts/NotificationContext"
@@ -105,10 +104,6 @@ export default function EditarCliente() {
 
   return (
     <div className={styles.container}>
-      <button className={styles.volverBtn} onClick={() => navigate(-1)}>
-        <ArrowLeft />
-        Volver
-      </button>
       <h1 className={styles.titulo}>EDITAR CLIENTE</h1>
       
       <ClienteForm

@@ -124,9 +124,7 @@ export default function Remitos() {
               ) : (
                 remitos.data.map(remito => (
                   <tr 
-                    key={remito.id} 
-                    className={tableStyles.clickableRow}
-                    onClick={() => navigate(`/remitos/detalle/${remito.id}`)}
+                    key={remito.id}
                   >
                     <td data-label="Número">{remito.numeroAsignado}</td>
                     <td data-label="Cliente">{remito.cliente?.razonSocial || 'Sin cliente'}</td>
