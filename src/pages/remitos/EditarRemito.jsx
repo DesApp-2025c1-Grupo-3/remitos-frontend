@@ -20,16 +20,8 @@ export default function EditarRemito() {
     prioridad: "normal",
     clienteId: "",
     destinoId: "",
-    // Campos de mercadería
-    tipoMercaderia: "",
-    valorDeclarado: "",
-    volumenMetrosCubico: "",
-    pesoMercaderia: "",
-    cantidadBobinas: "",
-    cantidadRacks: "",
-    cantidadBultos: "",
-    cantidadPallets: "",
-    requisitosEspeciales: "",
+    // Mercaderías como array
+    mercaderias: [],
     // Archivo adjunto
     archivoAdjunto: null,
   });
@@ -38,6 +30,7 @@ export default function EditarRemito() {
   const [error, setError] = useState(null);
   const [clientes, setClientes] = useState([]);
   const [destinos, setDestinos] = useState([]);
+  const [showMercaderiasError, setShowMercaderiasError] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,25 +42,14 @@ export default function EditarRemito() {
         ]);
         
         // Mapear los datos del remito al formato del formulario
-        // Tomar la primera mercadería del array (ya que el formulario maneja una sola mercadería)
-        const primeraMercaderia = remitoData.mercaderias && remitoData.mercaderias.length > 0 ? remitoData.mercaderias[0] : null;
-        
         const mappedData = {
           numeroAsignado: remitoData.numeroAsignado || "",
           observaciones: remitoData.observaciones || "",
           prioridad: remitoData.prioridad || "normal",
           clienteId: remitoData.clienteId?.toString() || "",
           destinoId: remitoData.destinoId?.toString() || "",
-          // Campos de mercadería desde la primera mercadería del array
-          tipoMercaderiaId: primeraMercaderia?.tipoMercaderiaId || null,
-          valorDeclarado: primeraMercaderia?.valorDeclarado?.toString() || "",
-          volumenMetrosCubico: primeraMercaderia?.volumenMetrosCubico?.toString() || "",
-          pesoMercaderia: primeraMercaderia?.pesoMercaderia?.toString() || "",
-          cantidadBobinas: primeraMercaderia?.cantidadBobinas?.toString() || "",
-          cantidadRacks: primeraMercaderia?.cantidadRacks?.toString() || "",
-          cantidadBultos: primeraMercaderia?.cantidadBultos?.toString() || "",
-          cantidadPallets: primeraMercaderia?.cantidadPallets?.toString() || "",
-          requisitosEspeciales: primeraMercaderia?.requisitosEspeciales || "",
+          // Todas las mercaderías del array
+          mercaderias: remitoData.mercaderias || [],
           // Archivo adjunto existente
           archivoAdjunto: null,
         };
@@ -139,6 +121,14 @@ export default function EditarRemito() {
     setFormData(prev => ({ ...prev, archivoAdjunto: file }));
   };
 
+  const handleMercaderiasChange = (mercaderias) => {
+    setFormData(prev => ({ ...prev, mercaderias }));
+    // Ocultar error si se agrega al menos una mercadería
+    if (mercaderias.length > 0) {
+      setShowMercaderiasError(false);
+    }
+  };
+
   const validateForm = () => {
     if (!formData.numeroAsignado.trim()) {
       setError('El número de remito es requerido');
@@ -156,6 +146,11 @@ export default function EditarRemito() {
       setError('Debe seleccionar un destino');
       return false;
     }
+    if (!formData.mercaderias || formData.mercaderias.length === 0) {
+      setShowMercaderiasError(true);
+      setError('Debe agregar al menos una mercadería');
+      return false;
+    }
     return true;
   };
 
@@ -171,14 +166,7 @@ export default function EditarRemito() {
       ...formData,
       clienteId: parseInt(formData.clienteId, 10),
       destinoId: parseInt(formData.destinoId, 10),
-      tipoMercaderiaId: formData.tipoMercaderiaId ? parseInt(formData.tipoMercaderiaId, 10) : null,
-      valorDeclarado: parseFloat(formData.valorDeclarado) || 0,
-      volumenMetrosCubico: parseFloat(formData.volumenMetrosCubico) || 0,
-      pesoMercaderia: parseFloat(formData.pesoMercaderia) || 0,
-      cantidadBobinas: parseInt(formData.cantidadBobinas, 10) || 0,
-      cantidadRacks: parseInt(formData.cantidadRacks, 10) || 0,
-      cantidadBultos: parseInt(formData.cantidadBultos, 10) || 0,
-      cantidadPallets: parseInt(formData.cantidadPallets, 10) || 0,
+      mercaderias: formData.mercaderias,
     };
 
     try {
@@ -212,6 +200,7 @@ export default function EditarRemito() {
         formData={formData}
         onSubmit={handleSubmit}
         onChange={handleChange}
+        onMercaderiasChange={handleMercaderiasChange}
         onFileChange={handleFileChange}
         submitButtonText="Actualizar Remito"
         error={error}
@@ -221,6 +210,7 @@ export default function EditarRemito() {
         onNuevoDestino={() => navigate("/destinos/nuevo")}
         existingFile={existingFile}
         onCancel={() => navigate("/remitos")}
+        showMercaderiasError={showMercaderiasError}
       />
     </div>
   );

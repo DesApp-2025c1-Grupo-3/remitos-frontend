@@ -18,22 +18,15 @@ export default function NuevoRemito() {
     prioridad: "normal",
     clienteId: "",
     destinoId: "",
-    // Campos de mercadería
-    tipoMercaderiaId: null,
-    valorDeclarado: "",
-    volumenMetrosCubico: "",
-    pesoMercaderia: "",
-    cantidadBobinas: "",
-    cantidadRacks: "",
-    cantidadBultos: "",
-    cantidadPallets: "",
-    requisitosEspeciales: "",
+    // Mercaderías como array
+    mercaderias: [],
     // Archivo adjunto
     archivoAdjunto: null,
   });
   const [clientes, setClientes] = useState([]);
   const [destinos, setDestinos] = useState([]);
   const [error, setError] = useState(null);
+  const [showMercaderiasError, setShowMercaderiasError] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,6 +62,14 @@ export default function NuevoRemito() {
     setFormData(prev => ({ ...prev, archivoAdjunto: file }));
   };
 
+  const handleMercaderiasChange = (mercaderias) => {
+    setFormData(prev => ({ ...prev, mercaderias }));
+    // Ocultar error si se agrega al menos una mercadería
+    if (mercaderias.length > 0) {
+      setShowMercaderiasError(false);
+    }
+  };
+
   const validateForm = () => {
     if (!formData.numeroAsignado?.trim()) {
       setError('El número de remito es requerido');
@@ -86,20 +87,9 @@ export default function NuevoRemito() {
       setError('Debe seleccionar una prioridad');
       return false;
     }
-    if (!formData.tipoMercaderiaId) {
-      setError('Debe seleccionar un tipo de mercadería');
-      return false;
-    }
-    if (!formData.valorDeclarado || parseFloat(formData.valorDeclarado) < 0) {
-      setError('El valor declarado debe ser un número válido mayor o igual a 0');
-      return false;
-    }
-    if (!formData.volumenMetrosCubico || parseFloat(formData.volumenMetrosCubico) < 0) {
-      setError('El volumen debe ser un número válido mayor o igual a 0');
-      return false;
-    }
-    if (!formData.pesoMercaderia || parseFloat(formData.pesoMercaderia) < 0) {
-      setError('El peso debe ser un número válido mayor o igual a 0');
+    if (!formData.mercaderias || formData.mercaderias.length === 0) {
+      setShowMercaderiasError(true);
+      setError('Debe agregar al menos una mercadería');
       return false;
     }
     return true;
@@ -122,16 +112,8 @@ export default function NuevoRemito() {
         prioridad: formData.prioridad,
         clienteId: parseInt(formData.clienteId),
         destinoId: parseInt(formData.destinoId),
-        // Campos de mercadería (se envían individualmente, el servicio los convertirá a array)
-        tipoMercaderiaId: parseInt(formData.tipoMercaderiaId),
-        valorDeclarado: parseInt(formData.valorDeclarado),
-        volumenMetrosCubico: parseInt(formData.volumenMetrosCubico),
-        pesoMercaderia: parseInt(formData.pesoMercaderia),
-        cantidadBobinas: formData.cantidadBobinas ? parseInt(formData.cantidadBobinas) : undefined,
-        cantidadRacks: formData.cantidadRacks ? parseInt(formData.cantidadRacks) : undefined,
-        cantidadBultos: formData.cantidadBultos ? parseInt(formData.cantidadBultos) : undefined,
-        cantidadPallets: formData.cantidadPallets ? parseInt(formData.cantidadPallets) : undefined,
-        requisitosEspeciales: formData.requisitosEspeciales?.trim() || '',
+        // Mercaderías como array
+        mercaderias: formData.mercaderias,
         // Archivo adjunto
         archivoAdjunto: formData.archivoAdjunto,
       };
@@ -159,6 +141,7 @@ export default function NuevoRemito() {
         formData={formData}
         onSubmit={handleSubmit}
         onChange={handleChange}
+        onMercaderiasChange={handleMercaderiasChange}
         onFileChange={handleFileChange}
         submitButtonText="Cargar Remito"
         error={error}
@@ -167,6 +150,7 @@ export default function NuevoRemito() {
         onNuevoCliente={() => navigate("/clientes/nuevo")}
         onNuevoDestino={() => navigate("/destinos/nuevo")}
         onCancel={() => navigate("/remitos")}
+        showMercaderiasError={showMercaderiasError}
       />
     </div>
   );

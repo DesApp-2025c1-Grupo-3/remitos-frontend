@@ -5,86 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { Pagination } from '../Pagination/Pagination';
 import { ClienteSelectModal } from '../ClienteSelectModal';
 import { DestinoSelectModal } from '../DestinoSelectModal';
+import { MercaderiasForm } from '../MercaderiasForm/MercaderiasForm';
 import { getApiUrl } from '../../config/api';
-import { tipoMercaderiaService, TipoMercaderia } from '../../services/tipoMercaderiaService';
+import { Mercaderia } from '../../types/mercaderia';
 
-// Funciones de formato para campos numéricos
-const formatCurrency = (value: string | number): string => {
-  if (!value || value === '') return '';
-  const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
-  if (numValue === 0) return '';
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(numValue);
-};
-
-const formatNumber = (value: string | number): string => {
-  if (!value || value === '') return '';
-  const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
-  if (numValue === 0) return '';
-  return new Intl.NumberFormat('es-AR', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(numValue);
-};
-
-const formatInteger = (value: string | number): string => {
-  if (!value || value === '') return '';
-  const numValue = typeof value === 'string' ? parseInt(value) || 0 : Math.floor(Number(value)) || 0;
-  if (numValue === 0) return '';
-  return new Intl.NumberFormat('es-AR').format(numValue);
-};
-
-const parseFormattedValue = (formattedValue: string): string => {
-  // Si está vacío, retornar cadena vacía
-  if (!formattedValue || formattedValue.trim() === '') return '';
-  
-  // Remover símbolos de moneda, puntos y espacios, mantener solo números y coma decimal
-  const cleaned = formattedValue.replace(/[^\d,]/g, '').replace(',', '.');
-  
-  // Si después de limpiar está vacío, retornar cadena vacía
-  if (!cleaned || cleaned === '') return '';
-  
-  // Validar que sea un número válido
-  const numValue = parseFloat(cleaned);
-  if (isNaN(numValue)) return '';
-  
-  // Convertir a entero para BIGINT
-  return Math.floor(numValue).toString();
-};
-
-// Función para validar límites según el tipo de campo
-const validateFieldLimit = (fieldName: string, value: string): string => {
-  const numValue = parseInt(value);
-  if (isNaN(numValue)) return value;
-  
-  switch (fieldName) {
-    case 'valorDeclarado':
-      // Máximo 999.999.999.999 (12 dígitos enteros)
-      if (numValue > 999999999999) return '999999999999';
-      break;
-    case 'pesoMercaderia':
-      // Máximo 999.999.999 kg (9 dígitos enteros)
-      if (numValue > 999999999) return '999999999';
-      break;
-    case 'volumenMetrosCubico':
-      // Máximo 999.999 m³ (6 dígitos enteros)
-      if (numValue > 999999) return '999999';
-      break;
-    case 'cantidadPallets':
-    case 'cantidadBultos':
-    case 'cantidadRacks':
-    case 'cantidadBobinas':
-      // Máximo 999.999.999 (9 dígitos enteros)
-      if (numValue > 999999999) return '999999999';
-      break;
-  }
-  
-  return value;
-};
 
 export interface RemitoFormData {
   numeroAsignado: string;
@@ -92,16 +16,8 @@ export interface RemitoFormData {
   prioridad: 'normal' | 'alta' | 'urgente';
   clienteId: number | string;
   destinoId: number | string;
-  // Campos de mercadería
-  tipoMercaderiaId: number | null;
-  valorDeclarado: number | string;
-  volumenMetrosCubico: number | string;
-  pesoMercaderia: number | string;
-  cantidadBobinas: number | string;
-  cantidadRacks: number | string;
-  cantidadBultos: number | string;
-  cantidadPallets: number | string;
-  requisitosEspeciales: string;
+  // Mercaderías como array
+  mercaderias: Mercaderia[];
   // Archivo adjunto
   archivoAdjunto?: File;
 }
@@ -125,6 +41,7 @@ interface RemitoFormProps {
   formData: RemitoFormData;
   onSubmit: (e: React.FormEvent) => Promise<void>;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
+  onMercaderiasChange: (mercaderias: Mercaderia[]) => void;
   onFileChange?: (file: File | null) => void;
   submitButtonText: string;
   error: string | null;
@@ -139,12 +56,14 @@ interface RemitoFormProps {
     url: string;
   } | null;
   onCancel?: () => void;
+  showMercaderiasError?: boolean;
 }
 
 export const RemitoForm: React.FC<RemitoFormProps> = ({
   formData,
   onSubmit,
   onChange,
+  onMercaderiasChange,
   onFileChange,
   submitButtonText,
   error,
@@ -153,7 +72,8 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
   onNuevoCliente,
   onNuevoDestino,
   existingFile,
-  onCancel
+  onCancel,
+  showMercaderiasError = false
 }) => {
   const navigate = useNavigate();
   // Estados para modales
@@ -174,51 +94,7 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
   const [destinosPaginados, setDestinosPaginados] = useState<{ data: Destino[], totalItems: number, totalPages: number, currentPage: number }>({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
   const [loadingClientes, setLoadingClientes] = useState(false);
   const [loadingDestinos, setLoadingDestinos] = useState(false);
-  const [tiposMercaderia, setTiposMercaderia] = useState<TipoMercaderia[]>([]);
-  const [loadingTiposMercaderia, setLoadingTiposMercaderia] = useState(true);
   const itemsPerPage = 5;
-
-  // Cargar tipos de mercadería al montar el componente
-  useEffect(() => {
-    const cargarTiposMercaderia = async () => {
-      try {
-        setLoadingTiposMercaderia(true);
-        const tipos = await tipoMercaderiaService.getTiposMercaderia();
-        setTiposMercaderia(tipos);
-      } catch (error) {
-        console.error('Error al cargar tipos de mercadería:', error);
-      } finally {
-        setLoadingTiposMercaderia(false);
-      }
-    };
-
-    cargarTiposMercaderia();
-  }, []);
-
-  // Función helper para manejar cambios de campos con formato
-  const handleFormattedChange = (fieldName: string, formattedValue: string, originalEvent: React.ChangeEvent<HTMLInputElement>) => {
-    // Si el usuario está borrando y el campo queda vacío, permitir que se borre completamente
-    if (formattedValue === '') {
-      const event = {
-        target: {
-          name: fieldName,
-          value: ''
-        }
-      } as React.ChangeEvent<HTMLInputElement>;
-      onChange(event);
-      return;
-    }
-    
-    const parsedValue = parseFormattedValue(formattedValue);
-    const validatedValue = validateFieldLimit(fieldName, parsedValue);
-    const event = {
-      target: {
-        name: fieldName,
-        value: validatedValue
-      }
-    } as React.ChangeEvent<HTMLInputElement>;
-    onChange(event);
-  };
 
   // Función para cargar clientes paginados del servidor
   const cargarClientes = useCallback(async () => {
@@ -430,135 +306,10 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
                 <option value="urgente">Urgente</option>
               </select>
             </div>
-            
-            <div className={styles.campo}>
-              <label className={styles.label}>Tipo de mercadería *</label>
-              <select
-                name="tipoMercaderiaId"
-                value={formData.tipoMercaderiaId || ''}
-                onChange={onChange}
-                className={styles.input}
-                required
-                disabled={loadingTiposMercaderia}
-              >
-                <option value="">{loadingTiposMercaderia ? 'Cargando...' : 'Seleccionar tipo'}</option>
-                {tiposMercaderia.map((tipo) => (
-                  <option key={tipo.id} value={tipo.id}>
-                    {tipo.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <div className={styles.campo}>
-              <label className={styles.label}>Valor declarado ($) *</label>
-              <input
-                name="valorDeclarado"
-                type="text"
-                value={formatNumber(formData.valorDeclarado)}
-                onChange={(e) => handleFormattedChange('valorDeclarado', e.target.value, e)}
-                placeholder="Ingresar valor declarado (solo números enteros)"
-                className={styles.input}
-                maxLength={20}
-                required
-              />
-            </div>
-            
-            <div className={styles.campo}>
-              <label className={styles.label}>Peso total (kg) *</label>
-              <input
-                name="pesoMercaderia"
-                type="text"
-                value={formatNumber(formData.pesoMercaderia)}
-                onChange={(e) => handleFormattedChange('pesoMercaderia', e.target.value, e)}
-                placeholder="Ingresar peso total (solo números enteros)"
-                className={styles.input}
-                maxLength={15}
-                required
-              />
-            </div>
-            
-            <div className={styles.campo}>
-              <label className={styles.label}>Volumen (m³) *</label>
-              <input
-                name="volumenMetrosCubico"
-                type="text"
-                value={formatNumber(formData.volumenMetrosCubico)}
-                onChange={(e) => handleFormattedChange('volumenMetrosCubico', e.target.value, e)}
-                placeholder="Ingresar volumen (solo números enteros)"
-                className={styles.input}
-                maxLength={12}
-                required
-              />
-            </div>
           </div>
           
           {/* Columna derecha */}
           <div className={styles.formColumn}>
-            <div className={styles.campo}>
-              <label className={styles.label}>Cantidad de Pallets</label>
-              <input
-                name="cantidadPallets"
-                type="text"
-                value={formatInteger(formData.cantidadPallets)}
-                onChange={(e) => handleFormattedChange('cantidadPallets', e.target.value, e)}
-                placeholder="0"
-                className={styles.input}
-                maxLength={12}
-              />
-            </div>
-            
-            <div className={styles.campo}>
-              <label className={styles.label}>Cantidad de Bultos</label>
-              <input
-                name="cantidadBultos"
-                type="text"
-                value={formatInteger(formData.cantidadBultos)}
-                onChange={(e) => handleFormattedChange('cantidadBultos', e.target.value, e)}
-                placeholder="0"
-                className={styles.input}
-                maxLength={12}
-              />
-            </div>
-            
-            <div className={styles.campo}>
-              <label className={styles.label}>Cantidad de Racks</label>
-              <input
-                name="cantidadRacks"
-                type="text"
-                value={formatInteger(formData.cantidadRacks)}
-                onChange={(e) => handleFormattedChange('cantidadRacks', e.target.value, e)}
-                placeholder="0"
-                className={styles.input}
-                maxLength={12}
-              />
-            </div>
-            
-            <div className={styles.campo}>
-              <label className={styles.label}>Cantidad de Bobinas</label>
-              <input
-                name="cantidadBobinas"
-                type="text"
-                value={formatInteger(formData.cantidadBobinas)}
-                onChange={(e) => handleFormattedChange('cantidadBobinas', e.target.value, e)}
-                placeholder="0"
-                className={styles.input}
-                maxLength={12}
-              />
-            </div>
-            
-            <div className={styles.campo}>
-              <label className={styles.label}>Requisitos especiales de manipulación</label>
-              <textarea
-                name="requisitosEspeciales"
-                value={formData.requisitosEspeciales}
-                onChange={onChange}
-                placeholder="Ingresar requisitos especiales"
-                className={styles.input}
-                rows={3}
-              />
-            </div>
-            
             <div className={styles.campo}>
               <label className={styles.label}>Observaciones</label>
               <textarea
@@ -666,6 +417,13 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Sección de mercaderías */}
+        <MercaderiasForm 
+          mercaderias={formData.mercaderias || []}
+          onMercaderiasChange={onMercaderiasChange}
+          showError={showMercaderiasError}
+        />
         
         <div className={styles.buttonContainer}>
           {onCancel && (

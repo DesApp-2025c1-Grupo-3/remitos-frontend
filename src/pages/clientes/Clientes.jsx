@@ -125,7 +125,7 @@ export default function Clientes() {
                 </tr>
               ) : (
                 clientes.data.map((cliente) => (
-                  <tr key={cliente.id} className={tableStyles.clickableRow}>
+                  <tr key={cliente.id}>
                     <td data-label="Razón Social">{cliente.razonSocial}</td>
                     <td data-label="CUIT/RUT">{cliente.cuit_rut}</td>
                     <td data-label="Tipo">{getNombreTipoEmpresa(cliente.tipoEmpresaId)}</td>

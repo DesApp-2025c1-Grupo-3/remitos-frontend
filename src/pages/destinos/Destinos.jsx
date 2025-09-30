@@ -107,7 +107,7 @@ export default function Destinos() {
                 </tr>
               ) : (
                 destinos.data.map((destino) => (
-                  <tr key={destino.id} className={tableStyles.clickableRow}>
+                  <tr key={destino.id}>
                     <td data-label="Nombre">{destino.nombre}</td>
                     <td data-label="País">{destino.pais}</td>
                     <td data-label="Provincia">{destino.provincia}</td>
