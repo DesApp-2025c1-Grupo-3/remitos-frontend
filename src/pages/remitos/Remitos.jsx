@@ -128,16 +128,16 @@ export default function Remitos() {
                     className={tableStyles.clickableRow}
                     onClick={() => navigate(`/remitos/detalle/${remito.id}`)}
                   >
-                    <td>{remito.numeroAsignado}</td>
-                    <td>{remito.cliente?.razonSocial || 'Sin cliente'}</td>
-                    <td>
+                    <td data-label="Número">{remito.numeroAsignado}</td>
+                    <td data-label="Cliente">{remito.cliente?.razonSocial || 'Sin cliente'}</td>
+                    <td data-label="Destino">
                       {remito.destino 
                         ? `${remito.destino.nombre}, ${remito.destino.provincia}` 
                         : 'Sin destino'
                       }
                     </td>
-                    <td>{remito.estado?.nombre || 'Sin estado'}</td>
-                    <td>
+                    <td data-label="Estado">{remito.estado?.nombre || 'Sin estado'}</td>
+                    <td data-label="Prioridad">
                       <span className={getPrioridadClass(remito.prioridad, styles)}>
                         {remito.prioridad}
                       </span>

@@ -148,14 +148,13 @@ export default function NuevoRemito() {
   };
 
   return (
-    <div className={formStyles.formContainer}>
+    <div className={styles.container}>
       <button className={styles.volverBtn} onClick={() => navigate(-1)}>
         <ArrowLeft />
         Volver
       </button>
-      <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '0 1rem' }}>
-        <h1 className={styles.titulo}>Nuevo Remito</h1>
-      </div>
+      <h1 className={styles.titulo}>Nuevo Remito</h1>
+      
       <RemitoForm
         formData={formData}
         onSubmit={handleSubmit}

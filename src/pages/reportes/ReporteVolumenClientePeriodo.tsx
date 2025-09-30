@@ -77,9 +77,9 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
   );
 
   return (
-    <div style={{ width: '100%', padding: '0 2rem' }}>
-      <h3 style={{ fontWeight: 600, fontSize: '1.3rem', marginBottom: 16 }}>Volumen total de mercadería por cliente/período</h3>
-      <div className={styles.filtersContainer}>
+    <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+      <h3 style={{ fontWeight: 600, fontSize: '1.3rem', marginBottom: '1rem', color: '#5a5a65', padding: '0 2rem' }}>Volumen total de mercadería por cliente/período</h3>
+      <div className={styles.filtersContainer} style={{ margin: '0 2rem' }}>
         <div className={styles.filtersHeader}>
           <div className={styles.filtersTitle}>Filtros de búsqueda</div>
           <button className={styles.clearFiltersBtn} onClick={handleLimpiar} title="Limpiar filtros">Limpiar</button>
@@ -135,7 +135,7 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
           </button>
         </div>
       </div>
-      <div style={{ width: '100%', height: 400, marginTop: 24 }}>
+      <div style={{ width: '100%', maxWidth: '100%', height: 400, marginTop: '1.5rem', padding: '0 2rem', boxSizing: 'border-box' }}>
         {data.length > 0 && (
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>

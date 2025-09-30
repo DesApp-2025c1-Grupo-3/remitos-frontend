@@ -178,7 +178,11 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
+  .filtersContainer {
+    margin: 0 0 1.1rem 0;
+  }
+  
   .filtersGrid {
     grid-template-columns: 1fr;
   }
