@@ -15,24 +15,27 @@ const Reportes: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.titulo}>Reportes</h1>
-        <div className={styles.headerSpacer}></div>
-      </div>
       <div className={styles.wrapper}>
-        <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <label htmlFor="reporte-select" style={{ fontWeight: 600, fontSize: '1rem' }}>Tipo de reporte:</label>
+        <div className={styles.pageHeader}>
+          <div className={styles.headerContent}>
+            <h1 className={styles.pageTitle}>Reportes</h1>
+          </div>
+        </div>
+        
+        <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0 2rem', flexWrap: 'wrap' }}>
+          <label htmlFor="reporte-select" style={{ fontWeight: 600, fontSize: '1rem', color: '#5a5a65', minWidth: 'fit-content' }}>Tipo de reporte:</label>
           <select
             id="reporte-select"
             value={tab}
             onChange={e => setTab(Number(e.target.value))}
-            style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb', fontSize: '1rem' }}
+            style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb', fontSize: '1rem', flex: '1', minWidth: '200px', maxWidth: '400px' }}
           >
             {tabs.map((t, i) => (
               <option key={i} value={i}>{t.label}</option>
             ))}
           </select>
         </div>
+        
         <div>{tabs[tab].component}</div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 /* Estilo para el contenedor principal */
 .container {
-  padding: 0;
+  padding: 0 2rem;
   max-width: 100rem; /* 1600px equivalent in rem */
   margin: 0 auto;
 }
@@ -12,7 +12,7 @@
   justify-content: space-between;
   margin: 2rem 0 2rem 0;
   gap: 2rem;
-  padding: 0 2rem;
+  padding: 0 2rem; /* Padding agregado para consistencia */
 }
 
 .headerContent {
@@ -22,7 +22,7 @@
 .pageTitle {
   font-size: 2.5rem;
   font-weight: 700;
-  color: var(--secondary-800);
+  color: #5a5a65; /* Color específico solicitado */
   margin: 0;
   line-height: 1.2;
 }
@@ -56,7 +56,7 @@
   color: #fff;
   border: none;
   border-radius: 0.5rem;
-  padding: 0.5rem 1.25rem;
+  padding: 0.375rem 1.25rem;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -70,7 +70,7 @@
   letter-spacing: 0.025em;
   text-align: center;
   text-decoration: none;
-  min-height: 2rem;
+  min-height: 1.75rem;
   white-space: nowrap;
 }
 
@@ -115,7 +115,7 @@
 .titulo {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--secondary-800);
+  color: #5a5a65; /* Color específico solicitado */
   margin: 1rem auto;
   text-align: center;
   max-width: 80rem;
@@ -255,4 +255,38 @@
 
 a:hover{
   color: #fff !important;
+}
+
+/* Responsive para móvil */
+@media (max-width: 1000px) {
+  .container {
+    padding: 0 1.5rem;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0 1.5rem;
+    margin: 1rem 0;
+  }
+
+  .headerActions {
+    width: 100%;
+  }
+
+  .crearBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pageTitle {
+    font-size: 2rem;
+  }
+
+  .titulo {
+    font-size: 1.5rem;
+    padding: 0 1rem;
+  }
 }

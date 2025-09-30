@@ -1,30 +1,119 @@
-/* Sidebar ajustado para coincidir exactamente con la imagen de referencia */
+/* Sidebar ajustado para coincidir con el sistema de viajes */
 
 .sidebar {
-  background-color: white; /* Fondo blanco como en la referencia */
+  background-color: white;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   position: relative;
-  width: 200px;
-  overflow-x: hidden;
+  width: 240px; /* Más ancho como en el sistema de viajes */
+  overflow: visible; /* Cambiado para que el botón pueda sobresalir */
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   border-right: 1px solid var(--secondary-200);
+  transition: width 0.3s ease, transform 0.3s ease;
+  z-index: 1000;
+}
+
+.sidebar.collapsed {
+  width: 80px; /* Ancho colapsado para mostrar solo iconos */
+}
+
+/* Estilos para móvil */
+.sidebar.mobile {
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translateX(-100%);
+  z-index: 1001;
+  width: 280px; /* Ancho completo en móvil */
+}
+
+.sidebar.mobile.mobileOpen {
+  transform: translateX(0);
+}
+
+/* Botón hamburguesa */
+.hamburgerButton {
+  position: fixed;
+  top: 0.25rem;
+  left: 0.25rem;
+  background: white;
+  border: 1px solid var(--secondary-200);
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #5a5a65;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 999; /* Menor z-index para que no se superponga al sidebar */
+}
+
+.hamburgerButton:hover {
+  background: var(--secondary-50);
+  color: var(--primary-600);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Overlay para móvil */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+
+/* Layout móvil */
+.mobileLayout {
+  padding-left: 0 !important;
+}
+
+.mobileLayout main {
+  margin-left: 0 !important;
+  width: 100% !important;
+}
+
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem; /* Padding mínimo para que el logo aproveche todo el espacio */
+  border-bottom: none; /* Sin línea divisoria */
+  position: relative;
+}
+
+/* Reducir altura del header y tamaño del logo cuando está colapsado para que no sobresalga */
+.sidebar.collapsed .sidebarHeader {
+  padding: 0.5rem 0.75rem;
 }
 
 .logoLink {
   display: flex;
   text-decoration: none;
-  width: 100%;
-  padding: 1rem 0;
   justify-content: center;
   align-items: center;
 }
 
 .logoWrapper {
-  width: 160px;
-  height: 160px;
-  padding: 5px;
+  width: 220px; /* Aprovecha casi todo el ancho del sidebar (280px) */
+  height: 160px; /* Altura generosa */
+  padding: 0; /* Sin padding para aprovechar todo el espacio */
+  margin: 0; /* Sin margen */
+}
+
+/* Tamaño seguro cuando está colapsado (no sobresale del ancho 80px) */
+.sidebar.collapsed .logoWrapper {
+  width: 56px;
+  height: 56px;
+  padding: 4px;
 }
 
 .logoImage {
@@ -32,13 +121,48 @@
   height: 100%;
   object-fit: contain;
   display: block;
-  max-width: 10rem;
-  max-height: 10rem;
+  max-width: none; /* Sin límite de ancho */
+  max-height: none; /* Sin límite de alto */
   opacity: 1;
   filter: none;
   background: transparent;
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
+}
+
+.sidebar.collapsed .logoImage {
+  max-width: 56px;
+  max-height: 56px;
+}
+
+.collapseButton {
+  position: absolute;
+  right: -20px; /* Más hacia afuera para que sobresalga completamente */
+  top: 50%;
+  transform: translateY(-50%);
+  background: white; /* Fondo blanco suave */
+  border: 1px solid var(--secondary-200); /* Borde sutil */
+  border-radius: 50%;
+  width: 36px; /* Ligeramente más grande */
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--secondary-600); /* Color más suave */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra más suave */
+  z-index: 1000; /* Mayor z-index para asegurar que esté encima */
+}
+
+.collapseButton:hover {
+  background: var(--secondary-50); /* Fondo muy suave en hover */
+  color: var(--primary-600); /* Color naranja suave en hover */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar.collapsed .collapseButton {
+  right: -20px; /* Mantiene la misma posición */
 }
 
 .navLinks {
@@ -58,25 +182,47 @@
 
 .navButton {
   width: 100%;
-  background-color: white; /* Fondo blanco para botones inactivos */
-  color: var(--secondary-700); /* Texto gris oscuro */
-  padding: 16px 20px;
-  border-radius: 0; /* Sin bordes redondeados para que se vean como filas */
-  font-size: 0.875rem;
-  font-weight: 600;
+  background-color: white;
+  color: #5a5a65; /* Color específico solicitado */
+  padding: 12px 20px; /* Reducido de 16px a 12px para menor altura */
+  border-radius: 0;
+  font-size: 0.9rem; /* Fuente más grande */
+  font-weight: 530; /* Peso de fuente más normal, no tan grueso */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; /* Fuente más limpia */
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Alineado a la izquierda como en la referencia */
-  gap: 12px; /* Espacio entre icono y texto */
-  border: none;
-  border-bottom: 1px solid var(--secondary-100); /* Borde inferior sutil */
+  justify-content: flex-start;
+  gap: 14px; /* Más espacio entre icono y texto */
+  border: none; /* Sin bordes */
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: none;
-  letter-spacing: 0.025em;
+  letter-spacing: 0.01em; /* Espaciado de letras más sutil */
   text-transform: none;
   margin: 0;
   text-align: left;
+  position: relative;
+}
+
+/* Estilos para modo colapsado */
+.sidebar.collapsed .navButton {
+  justify-content: center;
+  padding: 12px 8px; /* Reducido para mantener consistencia */
+}
+
+.sidebar.collapsed .navButton span {
+  display: none;
+}
+
+/* En móvil, siempre mostrar el texto incluso si está colapsado */
+.sidebar.mobile .navButton span {
+  display: inline !important;
+}
+
+/* Ajustar el layout de los botones en móvil para que se vean correctamente con texto */
+.sidebar.mobile .navButton {
+  justify-content: flex-start !important;
+  padding: 12px 20px !important;
 }
 
 .navButton:hover {
@@ -91,17 +237,46 @@
   box-shadow: none;
 }
 
-/* Estilo para el botón activo - naranja claro como en la referencia */
+/* Estilo para el botón activo */
 .navButton.active {
-  background-color: var(--primary-50); /* Naranja claro para el botón activo */
-  color: var(--primary-700); /* Texto naranja oscuro en el botón activo */
+  background-color: var(--primary-50);
+  color: var(--primary-700);
   box-shadow: none;
-  border-left: 3px solid var(--primary); /* Borde izquierdo naranja para indicar activo */
+  border-left: 3px solid var(--primary);
+}
+
+/* Tooltip para modo colapsado */
+.sidebar.collapsed .navButton {
+  position: relative;
+}
+
+.sidebar.collapsed .navButton::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--secondary-800);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1000;
+  margin-left: 8px;
+}
+
+.sidebar.collapsed .navButton:hover::after {
+  opacity: 1;
 }
 
 .navButton svg {
   flex-shrink: 0; /* Evita que el icono se comprima */
   color: inherit; /* Hereda el color del botón */
+  stroke-width: 2.5; /* Iconos más gruesos */
 }
 
 .navIcon {
@@ -113,4 +288,41 @@
   text-decoration: none;
   display: block;
   width: 100%;
+}
+
+/* Media queries para responsive */
+@media (max-width: 1000px) {
+  .sidebar:not(.mobile) {
+    display: none;
+  }
+  
+  .hamburgerButton {
+    display: flex;
+  }
+  
+  /* Ocultar botón hamburguesa cuando sidebar está abierto */
+  .sidebar.mobile.mobileOpen ~ .hamburgerButton,
+  .hamburgerButton.hidden {
+    display: none;
+  }
+  
+  .collapseButton {
+    display: none;
+  }
+}
+
+@media (min-width: 1000px) {
+  .hamburgerButton {
+    display: none;
+  }
+  
+  .overlay {
+    display: none;
+  }
+  
+  .sidebar.mobile {
+    position: relative;
+    transform: none;
+    width: 240px;
+  }
 }

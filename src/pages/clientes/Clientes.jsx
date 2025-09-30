@@ -84,6 +84,7 @@ export default function Clientes() {
             </Link>
           </div>
         </div>
+        
         <div className={tableStyles.tableContainer}>
           <table className={tableStyles.table}>
             <thead>
@@ -105,10 +106,10 @@ export default function Clientes() {
               ) : (
                 clientes.data.map((cliente) => (
                   <tr key={cliente.id} className={tableStyles.clickableRow}>
-                    <td>{cliente.razonSocial}</td>
-                    <td>{cliente.cuit_rut}</td>
-                    <td>{cliente.tipoEmpresa}</td>
-                    <td>{cliente.direccion}</td>
+                    <td data-label="Razón Social">{cliente.razonSocial}</td>
+                    <td data-label="CUIT/RUT">{cliente.cuit_rut}</td>
+                    <td data-label="Tipo">{cliente.tipoEmpresa}</td>
+                    <td data-label="Dirección">{cliente.direccion}</td>
                     <td>
                       <div className={tableStyles.actions}>
                         <Link 

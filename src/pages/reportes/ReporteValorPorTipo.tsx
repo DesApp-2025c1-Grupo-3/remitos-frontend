@@ -96,9 +96,9 @@ const ReporteValorPorTipo: React.FC = () => {
   };
 
   return (
-    <div style={{ width: '100%', padding: '0 2rem' }}>
-      <h3 style={{ fontWeight: 600, fontSize: '1.3rem', marginBottom: 16 }}>Valor declarado por tipo de mercadería</h3>
-      <div className={styles.filtersContainer} style={{ marginBottom: 24 }}>
+    <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+      <h3 style={{ fontWeight: 600, fontSize: '1.3rem', marginBottom: '1rem', color: '#5a5a65', padding: '0 2rem' }}>Valor declarado por tipo de mercadería</h3>
+      <div className={styles.filtersContainer} style={{ marginBottom: '1.5rem', margin: '0 2rem 1.5rem 2rem' }}>
         <div className={styles.filtersHeader}>
           <span className={styles.filtersTitle}>Filtros de búsqueda</span>
           <button className={styles.clearFiltersBtn} onClick={handleLimpiar}>Limpiar</button>
@@ -163,7 +163,7 @@ const ReporteValorPorTipo: React.FC = () => {
         </div>
         <button onClick={handleBuscar} disabled={loading} style={{ marginTop: 16, width: 120, background: '#FF6B35', color: 'white', border: 'none', borderRadius: 6, padding: '8px 0', fontWeight: 600 }}>Buscar</button>
       </div>
-      <div style={{ width: '100%', height: 400, marginTop: 24 }}>
+      <div style={{ width: '100%', maxWidth: '100%', height: 400, marginTop: '1.5rem', padding: '0 2rem', boxSizing: 'border-box' }}>
         {data.length > 0 && (
           <ResponsiveContainer width="100%" height={400}>
             <PieChart>

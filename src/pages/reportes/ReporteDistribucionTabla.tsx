@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getDistribucionGeografica } from '../../services/reportesService';
 import { georefService } from '../../services/destinosService';
 import styles from '../../components/RemitosFilters/RemitosFilters.module.css';
+import tableStyles from '../../styles/table.module.css';
 
 const ReporteDistribucionTabla: React.FC = () => {
   const [filtros, setFiltros] = useState({ pais: '', provincia: '', localidad: '' });
@@ -61,9 +62,9 @@ const ReporteDistribucionTabla: React.FC = () => {
   };
 
   return (
-    <div style={{ width: '100%', padding: '0 2rem' }}>
-      <h3 style={{ fontWeight: 600, fontSize: '1.3rem', marginBottom: 16 }}>Distribución geográfica de orígenes y destinos</h3>
-      <div className={styles.filtersContainer} style={{ marginBottom: 24 }}>
+    <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+      <h3 style={{ fontWeight: 600, fontSize: '1.3rem', marginBottom: '1rem', color: '#5a5a65', padding: '0 2rem' }}>Distribución geográfica de orígenes y destinos</h3>
+      <div className={styles.filtersContainer} style={{ marginBottom: '1.5rem', margin: '0 2rem 1.5rem 2rem' }}>
         <div className={styles.filtersHeader}>
           <span className={styles.filtersTitle}>Filtros de búsqueda</span>
           <button className={styles.clearFiltersBtn} onClick={handleLimpiar}>Limpiar</button>
@@ -116,28 +117,28 @@ const ReporteDistribucionTabla: React.FC = () => {
         </div>
         <button onClick={handleBuscar} disabled={loading} style={{ marginTop: 16, width: 120, background: '#FF6B35', color: 'white', border: 'none', borderRadius: 6, padding: '8px 0', fontWeight: 600 }}>Buscar</button>
       </div>
-      <div style={{ width: '100%' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: 8, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
-          <thead style={{ background: '#f3f4f6' }}>
+      <div className={tableStyles.tableContainer} style={{ width: '100%', maxWidth: '100%', padding: '0 2rem', boxSizing: 'border-box' }}>
+        <table className={tableStyles.table}>
+          <thead>
             <tr>
-              <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '0.875rem', color: '#374151' }}>País</th>
-              <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '0.875rem', color: '#374151' }}>Provincia</th>
-              <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '0.875rem', color: '#374151' }}>Localidad</th>
-              <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '0.875rem', color: '#374151' }}>Destino</th>
-              <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, fontSize: '0.875rem', color: '#374151' }}>Cantidad de Envíos</th>
+              <th>País</th>
+              <th>Provincia</th>
+              <th>Localidad</th>
+              <th>Destino</th>
+              <th>Cantidad de Envíos</th>
             </tr>
           </thead>
           <tbody>
             {data.length === 0 && (
-              <tr><td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: '#6b7280', fontStyle: 'italic', fontSize: '0.875rem' }}>Sin datos</td></tr>
+              <tr><td colSpan={5} className={tableStyles.emptyTableMessage}>Sin datos</td></tr>
             )}
             {data.map((row, i) => (
-              <tr key={i} style={{ borderBottom: '1px solid #e5e7eb', transition: 'background-color 0.2s' }}>
-                <td style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#374151' }}>{row.pais || '-'}</td>
-                <td style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#374151' }}>{row.provincia || '-'}</td>
-                <td style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#374151' }}>{row.localidad || '-'}</td>
-                <td style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#374151' }}>{row.destino || '-'}</td>
-                <td style={{ padding: '12px 16px', fontSize: '0.875rem', color: '#374151', fontWeight: 500 }}>{row.cantidad || '-'}</td>
+              <tr key={i}>
+                <td data-label="País">{row.destino || '-'}</td>
+                <td data-label="Provincia">{row.provincia || '-'}</td>
+                <td data-label="Localidad">{row.localidad || '-'}</td>
+                <td data-label="Destino">{row.pais || '-'}</td>
+                <td data-label="Cantidad de Envíos">{row.cantidad || '-'}</td>
               </tr>
             ))}
           </tbody>

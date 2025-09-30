@@ -10,6 +10,19 @@
   box-shadow: var(--shadow-sm);
 }
 
+/* Responsive: Ajustar padding en móvil */
+@media (max-width: 767px) {
+  .tableContainer {
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    box-shadow: none;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
 /* Tabla base */
 .table {
   width: 100%;
@@ -33,7 +46,7 @@
   padding: 0.75rem 1.5rem;
   font-weight: 600;
   background: var(--secondary-50);
-  color: var(--secondary-800);
+  color: #5a5a65; /* Color específico solicitado */
   font-size: 0.875rem;
   border-bottom: 1px solid var(--secondary-200);
   letter-spacing: 0.025em;
@@ -149,4 +162,172 @@
 /* Alineación de acciones */
 .actionsCenterAlign {
   text-align: center;
+}
+
+/* ========================================
+   RESPONSIVE: Modo Card para Móvil
+   ======================================== */
+
+@media (max-width: 767px) {
+  /* Ocultar thead en móvil */
+  .table thead {
+    display: none;
+  }
+
+  /* Tabla como bloque */
+  .table,
+  .table tbody,
+  .table tr {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Convertir cada fila en una card */
+  .table tr {
+    margin: 0 0.5rem 1rem 0.5rem;
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 1rem;
+    border: 1px solid var(--secondary-100);
+    box-sizing: border-box;
+    width: calc(100% - 1rem);
+    max-width: calc(100% - 1rem);
+  }
+
+  /* Resetear estilos de celdas para móvil */
+  .table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border: none;
+    border-bottom: 1px solid var(--secondary-100);
+    white-space: normal;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* Contenido de la celda alineado a la izquierda en móvil */
+  .table td > * {
+    text-align: left;
+    width: 100%;
+  }
+
+  /* Primera celda como header con icono */
+  .table td:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 0 0.75rem 0;
+    border-bottom: 1px solid var(--secondary-200);
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--secondary-800);
+  }
+
+  .table td:first-child::before {
+    content: '';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    border-radius: 50%;
+    flex-shrink: 0;
+    font-size: 1.25rem;
+    color: white;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 20px 20px;
+  }
+
+  /* Última celda sin borde inferior */
+  .table td:last-child {
+    border-bottom: none;
+    justify-content: flex-end;
+    padding-top: 1rem;
+  }
+
+  /* Resetear border-radius en móvil */
+  .table td:first-child,
+  .table td:last-child {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  /* Cambiar layout para que labels estén encima de los valores */
+  .table td:not(:first-child) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  /* Agregar etiquetas antes de cada celda con data-label (excepto primera) */
+  .table td:not(:first-child)::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--secondary-700);
+    text-align: left;
+    width: 100%;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* Celda de acciones sin etiqueta */
+  .table td:last-child::before {
+    content: none;
+  }
+
+  /* Valor de la celda */
+  .table td:not(:first-child) {
+    font-size: 1rem;
+    color: var(--secondary-700);
+  }
+
+  /* Ajustar ancho de columnas en móvil */
+  .table th:last-child,
+  .table td:last-child {
+    width: 100%;
+    min-width: auto;
+    max-width: none;
+  }
+
+  /* Contenedor de acciones en móvil */
+  .actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    width: 100%;
+  }
+
+  /* Botones de acción más grandes en móvil para mejor touch */
+  .actionBtn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.75rem;
+  }
+
+  /* Filas clickeables en móvil */
+  .clickableRow:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Mensaje de tabla vacía */
+  .emptyTableMessage {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
 }

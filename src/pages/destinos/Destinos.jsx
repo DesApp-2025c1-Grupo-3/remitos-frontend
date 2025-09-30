@@ -85,6 +85,7 @@ export default function Destinos() {
             </Link>
           </div>
         </div>
+        
         <div className={tableStyles.tableContainer}>
           <table className={tableStyles.table}>
             <thead>
@@ -107,11 +108,11 @@ export default function Destinos() {
               ) : (
                 destinos.data.map((destino) => (
                   <tr key={destino.id} className={tableStyles.clickableRow}>
-                    <td>{destino.nombre}</td>
-                    <td>{destino.pais}</td>
-                    <td>{destino.provincia}</td>
-                    <td>{destino.localidad}</td>
-                    <td>{destino.direccion}</td>
+                    <td data-label="Nombre">{destino.nombre}</td>
+                    <td data-label="País">{destino.pais}</td>
+                    <td data-label="Provincia">{destino.provincia}</td>
+                    <td data-label="Localidad">{destino.localidad}</td>
+                    <td data-label="Dirección">{destino.direccion}</td>
                     <td>
                       <div className={tableStyles.actions}>
                         <button 
