@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, X, Pencil } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, X, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './ContactosForm.module.css';
 import { Contacto } from '../../types/contacto';
 
@@ -23,6 +23,10 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
   });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [telefonoError, setTelefonoError] = useState<string | null>(null);
+  
+  // Estados para paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3; // Mostrar 3 contactos por página
 
   const handleContactoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -49,11 +53,6 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
     }
   };
 
-  const abrirModalEdicion = (index: number) => {
-    setEditingIndex(index);
-    setNuevoContacto(contactos[index]);
-    setShowModal(true);
-  };
 
   const validateEmail = (email: string) => {
     // Validación básica de email
@@ -100,7 +99,15 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
   };
 
   const eliminarContacto = (index: number) => {
-    onContactosChange(contactos.filter((_, i) => i !== index));
+    // Calcular el índice real en el array completo basado en la paginación
+    const realIndex = (currentPage - 1) * itemsPerPage + index;
+    onContactosChange(contactos.filter((_, i) => i !== realIndex));
+    
+    // Ajustar la página actual si es necesario
+    const newTotalPages = Math.ceil((contactos.length - 1) / itemsPerPage);
+    if (currentPage > newTotalPages && newTotalPages > 0) {
+      setCurrentPage(newTotalPages);
+    }
   };
 
   const cerrarModal = () => {
@@ -112,6 +119,33 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
       telefono: '',
     });
   };
+
+  // Lógica de paginación
+  const totalPages = Math.ceil(contactos.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentContactos = contactos.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const abrirModalEdicion = (index: number) => {
+    // Calcular el índice real en el array completo basado en la paginación
+    const realIndex = (currentPage - 1) * itemsPerPage + index;
+    const contacto = contactos[realIndex];
+    setNuevoContacto(contacto);
+    setEditingIndex(realIndex);
+    setShowModal(true);
+  };
+
+  // Ajustar página actual cuando cambia el número de contactos
+  useEffect(() => {
+    const newTotalPages = Math.ceil(contactos.length / itemsPerPage);
+    if (currentPage > newTotalPages && newTotalPages > 0) {
+      setCurrentPage(newTotalPages);
+    }
+  }, [contactos.length, currentPage]);
 
   return (
     <div className={styles.seccionContactos}>
@@ -134,13 +168,20 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
 
       {contactos.length > 0 && (
         <div className={styles.listaContactos}>
-          {contactos.map((contacto, index) => (
+          {currentContactos.map((contacto, index) => (
             <div key={index} className={styles.contactoItem}>
               <div className={styles.contactoInfo}>
                 <span className={styles.nombreContacto}>{contacto.personaAutorizada}</span>
-                <span className={styles.detallesContacto}>
-                  {contacto.correoElectronico} | {contacto.telefono}
-                </span>
+                <div className={styles.detallesContacto}>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Email:</span>
+                    <span className={styles.detailValue}>{contacto.correoElectronico}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Teléfono:</span>
+                    <span className={styles.detailValue}>{contacto.telefono}</span>
+                  </div>
+                </div>
               </div>
               <div className={styles.acciones}>
                 <button
@@ -160,6 +201,46 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Controles de paginación */}
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          <div className={styles.paginationInfo}>
+            Mostrando {startIndex + 1} - {Math.min(endIndex, contactos.length)} de {contactos.length} contactos
+          </div>
+          <div className={styles.paginationButtons}>
+            <button
+              type="button"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={styles.paginationButton}
+            >
+              <ChevronLeft size={16} />
+            </button>
+            
+            {/* Números de página */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                type="button"
+                onClick={() => handlePageChange(page)}
+                className={`${styles.paginationButton} ${currentPage === page ? styles.active : ''}`}
+              >
+                {page}
+              </button>
+            ))}
+            
+            <button
+              type="button"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={styles.paginationButton}
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
         </div>
       )}
 

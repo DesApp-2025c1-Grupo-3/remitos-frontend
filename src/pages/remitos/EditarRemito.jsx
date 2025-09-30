@@ -5,7 +5,6 @@ import { clientesService } from "../../services/clientesService";
 import { destinosService } from "../../services/destinosService";
 import { RemitoForm } from "../../components/RemitoForm/RemitoForm";
 import { useNotification } from "../../contexts/NotificationContext";
-import { ArrowLeft } from "lucide-react";
 import styles from "./remitos.module.css";
 import formStyles from "../../components/Form.module.css";
 import { getApiUrl } from "../../config/api";
@@ -189,10 +188,6 @@ export default function EditarRemito() {
 
   return (
     <div className={formStyles.formContainer}>
-      <button className={styles.volverBtn} onClick={() => navigate(-1)}>
-        <ArrowLeft />
-        Volver
-      </button>
       <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '0 1rem' }}>
         <h1 className={styles.titulo}>Editar Remito</h1>
       </div>

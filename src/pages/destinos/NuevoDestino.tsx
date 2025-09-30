@@ -4,7 +4,6 @@ import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import styles from "./destinos.module.css"
 import { destinosService } from "../../services/destinosService"
-import { ArrowLeft } from "lucide-react"
 import { DestinoForm, DestinoFormData } from "../../components/DestinoForm/DestinoForm"
 import { Contacto } from "../../types/contacto"
 import { useNotification } from "../../contexts/NotificationContext"
@@ -82,10 +81,6 @@ export default function NuevoDestino() {
 
   return (
     <div className={styles.container}>
-      <button className={styles.volverBtn} onClick={() => navigate(-1)}>
-        <ArrowLeft />
-        Volver
-      </button>
       <h1 className={styles.titulo}>NUEVO DESTINO</h1>
       
       <DestinoForm

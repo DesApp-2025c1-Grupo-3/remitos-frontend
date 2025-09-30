@@ -5,7 +5,6 @@ import { clientesService } from "../../services/clientesService";
 import { destinosService } from "../../services/destinosService";
 import { RemitoForm } from "../../components/RemitoForm/RemitoForm";
 import { useNotification } from "../../contexts/NotificationContext";
-import { ArrowLeft } from "lucide-react";
 import styles from "./remitos.module.css";
 import formStyles from "../../components/Form.module.css";
 
@@ -131,10 +130,6 @@ export default function NuevoRemito() {
 
   return (
     <div className={styles.container}>
-      <button className={styles.volverBtn} onClick={() => navigate(-1)}>
-        <ArrowLeft />
-        Volver
-      </button>
       <h1 className={styles.titulo}>Nuevo Remito</h1>
       
       <RemitoForm

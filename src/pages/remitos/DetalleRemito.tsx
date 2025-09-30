@@ -366,14 +366,6 @@ export default function DetalleRemito() {
   return (
     <div className={styles.container}>
       <div className={styles.wrapper}>
-        {/* Botón Volver separado */}
-        <div className={detalleStyles.volverContainer}>
-          <button className={styles.volverBtn} onClick={() => navigate('/remitos')}>
-            <ArrowLeft />
-            Volver
-          </button>
-        </div>
-        
         {/* Header principal */}
         <div className={`${styles.header} ${styles.detalleHeader}`}> 
           <div className={detalleStyles.headerContainer}>
