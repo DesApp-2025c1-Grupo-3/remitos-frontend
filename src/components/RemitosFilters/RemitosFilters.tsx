@@ -140,9 +140,10 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
   }, []);
 
   // Calcular el cliente seleccionado a partir de filters.clienteId y clientes
-  const clienteSeleccionado = filters.clienteId
-    ? clientes.find(c => c.id === filters.clienteId) || clienteExtra
-    : null;
+  const clienteSeleccionado = useMemo(() => {
+    if (!filters.clienteId) return null;
+    return clientes.find(c => c.id === filters.clienteId) || clienteExtra;
+  }, [filters.clienteId, clientes, clienteExtra]);
 
   // Guardar el estado de colapsado en localStorage cuando cambie
   useEffect(() => {
@@ -191,6 +192,7 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
     setNumeroAsignadoInput('');
     setSelectedCliente(null);
     setSelectedDestino(null);
+    setClienteExtra(null);
   };
 
   const toggleCollapse = () => {

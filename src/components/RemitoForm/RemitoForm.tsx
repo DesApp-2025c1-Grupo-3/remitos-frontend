@@ -174,8 +174,14 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
     }
   }, [busquedaDestino, campoDestino]);
 
-  const clienteSeleccionado = clientes?.find(c => c.id.toString() === formData.clienteId.toString());
-  const destinoSeleccionado = destinos?.find(d => d.id.toString() === formData.destinoId.toString());
+  const clienteSeleccionado = useMemo(() => {
+    if (!formData.clienteId || !clientes) return null;
+    return clientes.find(c => c.id.toString() === formData.clienteId.toString()) || null;
+  }, [formData.clienteId, clientes]);
+  const destinoSeleccionado = useMemo(() => {
+    if (!formData.destinoId || !destinos) return null;
+    return destinos.find(d => d.id.toString() === formData.destinoId.toString()) || null;
+  }, [formData.destinoId, destinos]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -261,10 +267,19 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
               <label className={styles.label} style={{ textAlign: 'left' }}>Cliente *</label>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: '100%' }}>
                 <input
-                  value={clienteSeleccionado ? clienteSeleccionado.razonSocial : ''}
+                  value={clienteSeleccionado ? clienteSeleccionado.razonSocial : (formData.clienteId ? 'Cargando...' : '')}
                   placeholder="Seleccionar cliente"
                   className={styles.input}
-                  style={{ flex: 1, cursor: 'pointer', background: '#e5e7eb', textAlign: 'left', width: '100%', fontSize: 18, padding: '0.7rem 1.2rem' }}
+                  style={{ 
+                    flex: 1, 
+                    cursor: 'pointer', 
+                    background: formData.clienteId && !clienteSeleccionado ? '#fef3c7' : '#e5e7eb', 
+                    textAlign: 'left', 
+                    width: '100%', 
+                    fontSize: 18, 
+                    padding: '0.7rem 1.2rem',
+                    color: formData.clienteId && !clienteSeleccionado ? '#92400e' : 'inherit'
+                  }}
                   readOnly
                   onClick={() => setModalCliente(true)}
                 />
@@ -278,10 +293,19 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
               <label className={styles.label} style={{ textAlign: 'left' }}>Destino *</label>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: '100%' }}>
                 <input
-                  value={destinoSeleccionado ? `${destinoSeleccionado.nombre}, ${destinoSeleccionado.provincia}` : ''}
+                  value={destinoSeleccionado ? `${destinoSeleccionado.nombre}, ${destinoSeleccionado.provincia}` : (formData.destinoId ? 'Cargando...' : '')}
                   placeholder="Seleccionar destino"
                   className={styles.input}
-                  style={{ flex: 1, cursor: 'pointer', background: '#e5e7eb', textAlign: 'left', width: '100%', fontSize: 18, padding: '0.7rem 1.2rem' }}
+                  style={{ 
+                    flex: 1, 
+                    cursor: 'pointer', 
+                    background: formData.destinoId && !destinoSeleccionado ? '#fef3c7' : '#e5e7eb', 
+                    textAlign: 'left', 
+                    width: '100%', 
+                    fontSize: 18, 
+                    padding: '0.7rem 1.2rem',
+                    color: formData.destinoId && !destinoSeleccionado ? '#92400e' : 'inherit'
+                  }}
                   readOnly
                   onClick={() => setModalDestino(true)}
                 />

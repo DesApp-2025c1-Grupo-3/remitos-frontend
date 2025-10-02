@@ -35,6 +35,18 @@ const ReporteValorPorTipo: React.FC = () => {
     loadData();
   }, []);
 
+  // Sincronizar clienteSeleccionado con filtros
+  useEffect(() => {
+    if (filtros.clienteId) {
+      const cliente = clientes.find(c => c.id.toString() === filtros.clienteId);
+      if (cliente && (!clienteSeleccionado || clienteSeleccionado.id !== cliente.id)) {
+        setClienteSeleccionado(cliente);
+      }
+    } else {
+      setClienteSeleccionado(null);
+    }
+  }, [filtros.clienteId, clientes, clienteSeleccionado]);
+
   // Eliminado: lógica de dropdown de cliente, ya no es necesaria
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -77,6 +89,7 @@ const ReporteValorPorTipo: React.FC = () => {
     setFiltros({ clienteId: '', fechaDesde: '', fechaHasta: '', tipos: [] });
     setData([]);
     setClienteSeleccionado(null);
+    setModalCliente(false);
   };
 
   // Eliminado: lógica de filtrado de clientes para el dropdown

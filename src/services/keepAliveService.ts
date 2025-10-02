@@ -98,3 +98,5 @@ export class KeepAliveService {
 
 // Exportar instancia singleton
 export const keepAliveService = KeepAliveService.getInstance();
+
+

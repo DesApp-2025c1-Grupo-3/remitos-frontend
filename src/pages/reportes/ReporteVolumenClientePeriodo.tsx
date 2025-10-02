@@ -40,6 +40,18 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Sincronizar clienteSeleccionado con filtros
+  useEffect(() => {
+    if (filtros.clienteId) {
+      const cliente = clientes.find(c => c.id.toString() === filtros.clienteId);
+      if (cliente && (!clienteSeleccionado || clienteSeleccionado.id !== cliente.id)) {
+        setClienteSeleccionado(cliente);
+      }
+    } else {
+      setClienteSeleccionado(null);
+    }
+  }, [filtros.clienteId, clientes, clienteSeleccionado]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFiltros({ ...filtros, [e.target.name]: e.target.value });
   };
@@ -69,7 +81,9 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
   const handleLimpiar = () => {
     setFiltros({ clienteId: '', fechaDesde: '', fechaHasta: '' });
     setClienteSearchTerm('');
+    setClienteSeleccionado(null);
     setData([]);
+    setModalCliente(false);
   };
 
   const filteredClientes = clientes.filter(cliente =>

@@ -33,3 +33,5 @@ export interface MercaderiaFormData {
   cantidadPallets: number | string;
   requisitosEspeciales: string;
 }
+
+
