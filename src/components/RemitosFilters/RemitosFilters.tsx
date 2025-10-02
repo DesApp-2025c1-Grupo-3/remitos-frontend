@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Search, X, ChevronDown, ChevronUp } from 'lucide-react';
 import styles from './RemitosFilters.module.css';
 import { clientesService } from '../../services/clientesService';
@@ -58,7 +58,10 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
           razonSocial: cliente.razonSocial || '',
           cuit_rut: cliente.cuit_rut || '',
           direccion: cliente.direccion || '',
-          tipoEmpresa: cliente.tipoEmpresa || '',
+          tipoEmpresa: typeof cliente.tipoEmpresa === 'string' 
+            ? { id: cliente.tipoEmpresaId || 0, nombre: cliente.tipoEmpresa }
+            : cliente.tipoEmpresa,
+          tipoEmpresaId: cliente.tipoEmpresaId || 0,
           activo: cliente.activo ?? true
         }));
         setClientes(clientesAdaptados);
