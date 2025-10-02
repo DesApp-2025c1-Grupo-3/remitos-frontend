@@ -8,6 +8,8 @@ import { DestinoSelectModal } from '../DestinoSelectModal';
 import { MercaderiasForm } from '../MercaderiasForm/MercaderiasForm';
 import { getApiUrl } from '../../config/api';
 import { Mercaderia } from '../../types/mercaderia';
+import { clientesService } from '../../services/clientesService';
+import { destinosService } from '../../services/destinosService';
 
 
 export interface RemitoFormData {
@@ -174,14 +176,78 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
     }
   }, [busquedaDestino, campoDestino]);
 
-  const clienteSeleccionado = useMemo(() => {
-    if (!formData.clienteId || !clientes) return null;
-    return clientes.find(c => c.id.toString() === formData.clienteId.toString()) || null;
-  }, [formData.clienteId, clientes]);
-  const destinoSeleccionado = useMemo(() => {
-    if (!formData.destinoId || !destinos) return null;
-    return destinos.find(d => d.id.toString() === formData.destinoId.toString()) || null;
-  }, [formData.destinoId, destinos]);
+  // Estado para el cliente seleccionado (puede venir de la lista local o de una búsqueda)
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<any>(null);
+  const [loadingCliente, setLoadingCliente] = useState(false);
+
+  // Buscar cliente en la lista local o cargarlo individualmente
+  useEffect(() => {
+    const buscarCliente = async () => {
+      if (!formData.clienteId) {
+        setClienteSeleccionado(null);
+        return;
+      }
+
+      // Primero buscar en la lista local
+      const clienteLocal = clientes?.find(c => c.id.toString() === formData.clienteId.toString());
+      if (clienteLocal) {
+        setClienteSeleccionado(clienteLocal);
+        return;
+      }
+
+      // Si no está en la lista local, cargarlo individualmente
+      if (!loadingCliente) {
+        setLoadingCliente(true);
+        try {
+          const cliente = await clientesService.getClienteById(formData.clienteId);
+          setClienteSeleccionado(cliente);
+        } catch (error) {
+          console.error('Error al cargar cliente:', error);
+          setClienteSeleccionado(null);
+        } finally {
+          setLoadingCliente(false);
+        }
+      }
+    };
+
+    buscarCliente();
+  }, [formData.clienteId, clientes, loadingCliente]);
+  // Estado para el destino seleccionado (puede venir de la lista local o de una búsqueda)
+  const [destinoSeleccionado, setDestinoSeleccionado] = useState<any>(null);
+  const [loadingDestino, setLoadingDestino] = useState(false);
+
+  // Buscar destino en la lista local o cargarlo individualmente
+  useEffect(() => {
+    const buscarDestino = async () => {
+      if (!formData.destinoId) {
+        setDestinoSeleccionado(null);
+        return;
+      }
+
+      // Primero buscar en la lista local
+      const destinoLocal = destinos?.find(d => d.id.toString() === formData.destinoId.toString());
+      if (destinoLocal) {
+        setDestinoSeleccionado(destinoLocal);
+        return;
+      }
+
+      // Si no está en la lista local, cargarlo individualmente
+      if (!loadingDestino) {
+        setLoadingDestino(true);
+        try {
+          const destino = await destinosService.getDestinoById(formData.destinoId);
+          setDestinoSeleccionado(destino);
+        } catch (error) {
+          console.error('Error al cargar destino:', error);
+          setDestinoSeleccionado(null);
+        } finally {
+          setLoadingDestino(false);
+        }
+      }
+    };
+
+    buscarDestino();
+  }, [formData.destinoId, destinos, loadingDestino]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -267,18 +333,30 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
               <label className={styles.label} style={{ textAlign: 'left' }}>Cliente *</label>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: '100%' }}>
                 <input
-                  value={clienteSeleccionado ? clienteSeleccionado.razonSocial : (formData.clienteId ? 'Cargando...' : '')}
+                  value={
+                    clienteSeleccionado 
+                      ? clienteSeleccionado.razonSocial 
+                      : formData.clienteId && loadingCliente 
+                        ? 'Cargando...' 
+                        : formData.clienteId && !loadingCliente
+                          ? 'Cliente no encontrado'
+                          : ''
+                  }
                   placeholder="Seleccionar cliente"
                   className={styles.input}
                   style={{ 
                     flex: 1, 
                     cursor: 'pointer', 
-                    background: formData.clienteId && !clienteSeleccionado ? '#fef3c7' : '#e5e7eb', 
+                    background: formData.clienteId && !clienteSeleccionado 
+                      ? (loadingCliente ? '#fef3c7' : '#fee2e2') 
+                      : '#e5e7eb', 
                     textAlign: 'left', 
                     width: '100%', 
                     fontSize: 18, 
                     padding: '0.7rem 1.2rem',
-                    color: formData.clienteId && !clienteSeleccionado ? '#92400e' : 'inherit'
+                    color: formData.clienteId && !clienteSeleccionado 
+                      ? (loadingCliente ? '#92400e' : '#dc2626') 
+                      : 'inherit'
                   }}
                   readOnly
                   onClick={() => setModalCliente(true)}
@@ -293,18 +371,30 @@ export const RemitoForm: React.FC<RemitoFormProps> = ({
               <label className={styles.label} style={{ textAlign: 'left' }}>Destino *</label>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: '100%' }}>
                 <input
-                  value={destinoSeleccionado ? `${destinoSeleccionado.nombre}, ${destinoSeleccionado.provincia}` : (formData.destinoId ? 'Cargando...' : '')}
+                  value={
+                    destinoSeleccionado 
+                      ? `${destinoSeleccionado.nombre}, ${destinoSeleccionado.provincia}` 
+                      : formData.destinoId && loadingDestino 
+                        ? 'Cargando...' 
+                        : formData.destinoId && !loadingDestino
+                          ? 'Destino no encontrado'
+                          : ''
+                  }
                   placeholder="Seleccionar destino"
                   className={styles.input}
                   style={{ 
                     flex: 1, 
                     cursor: 'pointer', 
-                    background: formData.destinoId && !destinoSeleccionado ? '#fef3c7' : '#e5e7eb', 
+                    background: formData.destinoId && !destinoSeleccionado 
+                      ? (loadingDestino ? '#fef3c7' : '#fee2e2') 
+                      : '#e5e7eb', 
                     textAlign: 'left', 
                     width: '100%', 
                     fontSize: 18, 
                     padding: '0.7rem 1.2rem',
-                    color: formData.destinoId && !destinoSeleccionado ? '#92400e' : 'inherit'
+                    color: formData.destinoId && !destinoSeleccionado 
+                      ? (loadingDestino ? '#92400e' : '#dc2626') 
+                      : 'inherit'
                   }}
                   readOnly
                   onClick={() => setModalDestino(true)}
