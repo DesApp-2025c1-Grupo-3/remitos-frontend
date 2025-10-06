@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import styles from '../../components/RemitosFilters/RemitosFilters.module.css';
 import { clientesService } from '../../services/clientesService';
 import { ClienteSelectModal } from '../../components/ClienteSelectModal';
+import { useDateValidation } from '../../hooks/useDateValidation';
 
 const ReporteVolumenClientePeriodo: React.FC = () => {
   const [filtros, setFiltros] = useState({ clienteId: '', fechaDesde: '', fechaHasta: '' });
@@ -17,6 +18,9 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
   const { showNotification } = useNotification();
   const [modalCliente, setModalCliente] = useState(false);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<any>(null);
+
+  // Validación de fechas
+  const dateValidation = useDateValidation(filtros.fechaDesde, filtros.fechaHasta);
 
   useEffect(() => {
     const loadClientes = async () => {
@@ -63,6 +67,12 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
   };
 
   const handleBuscar = async () => {
+    // Validar fechas antes de buscar
+    if (!dateValidation.isValid) {
+      showNotification(dateValidation.errorMessage || 'Fechas inválidas', 'error');
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await getVolumenPorClientePeriodo(filtros);
@@ -143,8 +153,38 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
             </div>
           </div>
         </div>
+        
+        {/* Mensaje de error de validación de fechas */}
+        {!dateValidation.isValid && (
+          <div style={{ 
+            marginTop: '1rem', 
+            padding: '0.75rem 1rem', 
+            backgroundColor: '#fee2e2', 
+            border: '1px solid #fecaca', 
+            borderRadius: '0.5rem',
+            color: '#dc2626',
+            fontSize: '0.875rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <span style={{ fontSize: '1rem' }}>⚠️</span>
+            {dateValidation.errorMessage}
+          </div>
+        )}
+        
         <div style={{ marginTop: 16 }}>
-          <button onClick={handleBuscar} disabled={loading} className={styles.clearFiltersBtn} style={{ background: '#FF6B35', color: '#fff', borderColor: '#FF6B35' }}>
+          <button 
+            onClick={handleBuscar} 
+            disabled={loading || !dateValidation.isValid} 
+            className={styles.clearFiltersBtn} 
+            style={{ 
+              background: !dateValidation.isValid ? '#9ca3af' : '#FF6B35', 
+              color: '#fff', 
+              borderColor: !dateValidation.isValid ? '#9ca3af' : '#FF6B35',
+              cursor: !dateValidation.isValid ? 'not-allowed' : 'pointer'
+            }}
+          >
             Buscar
           </button>
         </div>

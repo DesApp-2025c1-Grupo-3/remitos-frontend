@@ -5,6 +5,7 @@ import { tipoMercaderiaService, TipoMercaderia } from '../../services/tipoMercad
 import styles from '../../components/RemitosFilters/RemitosFilters.module.css';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ClienteSelectModal } from '../../components/ClienteSelectModal';
+import { useDateValidation } from '../../hooks/useDateValidation';
 
 const COLORS = [
   '#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#b6e880', '#00bcd4', '#ffb6b6', '#a4de6c',
@@ -18,6 +19,9 @@ const ReporteValorPorTipo: React.FC = () => {
   const [tiposMercaderia, setTiposMercaderia] = useState<TipoMercaderia[]>([]);
   const [modalCliente, setModalCliente] = useState(false);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<any>(null);
+
+  // Validación de fechas
+  const dateValidation = useDateValidation(filtros.fechaDesde, filtros.fechaHasta);
 
   useEffect(() => {
     const loadData = async () => {
@@ -58,6 +62,12 @@ const ReporteValorPorTipo: React.FC = () => {
   };
 
   const handleBuscar = async () => {
+    // Validar fechas antes de buscar
+    if (!dateValidation.isValid) {
+      alert(dateValidation.errorMessage || 'Fechas inválidas');
+      return;
+    }
+
     setLoading(true);
     try {
       const { tipos, ...otherParams } = filtros;
@@ -174,7 +184,43 @@ const ReporteValorPorTipo: React.FC = () => {
             ))}
           </div>
         </div>
-        <button onClick={handleBuscar} disabled={loading} style={{ marginTop: 16, width: 120, background: '#FF6B35', color: 'white', border: 'none', borderRadius: 6, padding: '8px 0', fontWeight: 600 }}>Buscar</button>
+        
+        {/* Mensaje de error de validación de fechas */}
+        {!dateValidation.isValid && (
+          <div style={{ 
+            marginTop: '1rem', 
+            padding: '0.75rem 1rem', 
+            backgroundColor: '#fee2e2', 
+            border: '1px solid #fecaca', 
+            borderRadius: '0.5rem',
+            color: '#dc2626',
+            fontSize: '0.875rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <span style={{ fontSize: '1rem' }}>⚠️</span>
+            {dateValidation.errorMessage}
+          </div>
+        )}
+        
+        <button 
+          onClick={handleBuscar} 
+          disabled={loading || !dateValidation.isValid} 
+          style={{ 
+            marginTop: 16, 
+            width: 120, 
+            background: !dateValidation.isValid ? '#9ca3af' : '#FF6B35', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: 6, 
+            padding: '8px 0', 
+            fontWeight: 600,
+            cursor: !dateValidation.isValid ? 'not-allowed' : 'pointer'
+          }}
+        >
+          Buscar
+        </button>
       </div>
       <div style={{ width: '100%', maxWidth: '100%', height: 400, marginTop: '1.5rem', padding: '0 2rem', boxSizing: 'border-box' }}>
         {data.length > 0 && (
