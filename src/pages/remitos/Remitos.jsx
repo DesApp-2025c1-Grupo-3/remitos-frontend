@@ -14,7 +14,9 @@ export default function Remitos() {
   const [remitos, setRemitos] = useState({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [filters, setFilters] = useState({});
+  const hoy = new Date().toISOString().slice(0,10);
+  const [filters, setFilters] = useState({ fechaDesde: hoy, fechaHasta: hoy });
+  const [filtrosAplicados, setFiltrosAplicados] = useState({ fechaDesde: hoy, fechaHasta: hoy });
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [remitoToDelete, setRemitoToDelete] = useState(null);
@@ -23,7 +25,7 @@ export default function Remitos() {
   const fetchRemitos = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await remitosService.getRemitos(page, itemsPerPage, filters);
+      const response = await remitosService.getRemitos(page, itemsPerPage, filtrosAplicados);
       if (response && response.data) {
         setRemitos(response);
         setCurrentPage(response.currentPage);
@@ -42,7 +44,7 @@ export default function Remitos() {
 
   useEffect(() => {
     fetchRemitos(currentPage);
-  }, [currentPage, filters]);
+  }, [currentPage, filtrosAplicados]);
 
   const handleFiltersChange = (newFilters) => {
     setFilters(newFilters);
@@ -50,7 +52,26 @@ export default function Remitos() {
   };
 
   const handleClearFilters = () => {
-    setFilters({});
+    setFilters({ fechaDesde: hoy, fechaHasta: hoy });
+    setFiltrosAplicados({ fechaDesde: hoy, fechaHasta: hoy });
+    setCurrentPage(1);
+  };
+
+  const hayAlgunFiltro = (f) => {
+    if (!f) return false;
+    const keys = ['numeroAsignado','clienteId','destinoId','estadoId','prioridad','fechaDesde','fechaHasta'];
+    return keys.some(k => {
+      const v = f[k];
+      return v !== undefined && v !== null && v !== '';
+    });
+  };
+
+  const handleSearch = async () => {
+    if (!hayAlgunFiltro(filters)) {
+      showNotification('Debe seleccionar al menos un filtro', 'info');
+      return;
+    }
+    setFiltrosAplicados(filters);
     setCurrentPage(1);
   };
 
@@ -100,6 +121,7 @@ export default function Remitos() {
           filters={filters}
           onFiltersChange={handleFiltersChange}
           onClearFilters={handleClearFilters}
+          onSearch={handleSearch}
         />
         
         <div className={tableStyles.tableContainer}>

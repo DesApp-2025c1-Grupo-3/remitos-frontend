@@ -12,7 +12,8 @@ const COLORS = [
 ];
 
 const ReporteValorPorTipo: React.FC = () => {
-  const [filtros, setFiltros] = useState({ clienteId: '', fechaDesde: '', fechaHasta: '', tipos: [] as number[] });
+  const hoy = new Date().toISOString().slice(0,10);
+  const [filtros, setFiltros] = useState({ clienteId: '', fechaDesde: hoy, fechaHasta: hoy, tipos: [] as number[] });
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [clientes, setClientes] = useState<{ id: number; razonSocial: string | null }[]>([]);
@@ -70,8 +71,8 @@ const ReporteValorPorTipo: React.FC = () => {
 
     setLoading(true);
     try {
-      const { tipos, ...otherParams } = filtros;
-      const params = { ...otherParams };
+  const { tipos, ...otherParams } = filtros;
+  const params: Record<string, any> = { ...otherParams };
       
       // Agregar cada tipo como un parámetro separado para que Express los procese correctamente
       if (tipos.length > 0) {
@@ -96,7 +97,7 @@ const ReporteValorPorTipo: React.FC = () => {
   };
 
   const handleLimpiar = () => {
-    setFiltros({ clienteId: '', fechaDesde: '', fechaHasta: '', tipos: [] });
+    setFiltros({ clienteId: '', fechaDesde: hoy, fechaHasta: hoy, tipos: [] });
     setData([]);
     setClienteSeleccionado(null);
     setModalCliente(false);

@@ -8,7 +8,8 @@ import { ClienteSelectModal } from '../../components/ClienteSelectModal';
 import { useDateValidation } from '../../hooks/useDateValidation';
 
 const ReporteVolumenClientePeriodo: React.FC = () => {
-  const [filtros, setFiltros] = useState({ clienteId: '', fechaDesde: '', fechaHasta: '' });
+  const hoy = new Date().toISOString().slice(0,10);
+  const [filtros, setFiltros] = useState({ clienteId: '', fechaDesde: hoy, fechaHasta: hoy });
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [clientes, setClientes] = useState<{ id: number; razonSocial: string | null }[]>([]);
@@ -89,7 +90,7 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
   };
 
   const handleLimpiar = () => {
-    setFiltros({ clienteId: '', fechaDesde: '', fechaHasta: '' });
+    setFiltros({ clienteId: '', fechaDesde: hoy, fechaHasta: hoy });
     setClienteSearchTerm('');
     setClienteSeleccionado(null);
     setData([]);

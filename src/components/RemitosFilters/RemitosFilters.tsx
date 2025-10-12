@@ -22,12 +22,14 @@ interface RemitosFiltersProps {
   filters: RemitosFiltersType;
   onFiltersChange: (filters: RemitosFiltersType) => void;
   onClearFilters: () => void;
+  onSearch?: () => void;
 }
 
 export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
   filters,
   onFiltersChange,
   onClearFilters
+  , onSearch
 }) => {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [destinos, setDestinos] = useState<Destino[]>([]);
@@ -230,6 +232,14 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
               <X size={16} />
               Limpiar
             </button>
+            <button
+              className={styles.clearFiltersBtn}
+              onClick={() => onSearch && onSearch()}
+              title="Buscar"
+              style={{ marginLeft: 8, background: '#FF6B35', color: '#fff', borderColor: '#FF6B35' }}
+            >
+              Buscar
+            </button>
           </div>
         )}
       </div>
@@ -327,13 +337,23 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
           </select>
         </div>
 
-        {/* Filtro por fecha */}
+        {/* Filtro por fecha: Desde / Hasta */}
         <div className={styles.filterField}>
-          <label className={styles.label}>Fecha</label>
+          <label className={styles.label}>Fecha desde</label>
           <input
             type="date"
-            value={String(filters.fechaEmision ?? '')}
-            onChange={(e) => handleInputChange('fechaEmision', e.target.value || undefined)}
+            value={String(filters.fechaDesde ?? '')}
+            onChange={(e) => handleInputChange('fechaDesde', e.target.value || undefined)}
+            className={styles.input}
+          />
+        </div>
+
+        <div className={styles.filterField}>
+          <label className={styles.label}>Fecha hasta</label>
+          <input
+            type="date"
+            value={String(filters.fechaHasta ?? '')}
+            onChange={(e) => handleInputChange('fechaHasta', e.target.value || undefined)}
             className={styles.input}
           />
         </div>

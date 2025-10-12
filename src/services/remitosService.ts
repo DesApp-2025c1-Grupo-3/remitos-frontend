@@ -94,7 +94,8 @@ export interface RemitosFilters {
   destinoId?: number;
   estadoId?: number;
   prioridad?: 'normal' | 'alta' | 'urgente';
-  fechaEmision?: string;
+  fechaDesde?: string;
+  fechaHasta?: string;
   fechaAgenda?: string;
 }
 
@@ -118,7 +119,8 @@ export const remitosService = {
         if (filters.destinoId) params.append('destinoId', filters.destinoId.toString());
         if (filters.estadoId) params.append('estadoId', filters.estadoId.toString());
         if (filters.prioridad) params.append('prioridad', filters.prioridad);
-        if (filters.fechaEmision) params.append('fechaEmision', filters.fechaEmision);
+        if (filters.fechaDesde) params.append('fechaDesde', filters.fechaDesde);
+        if (filters.fechaHasta) params.append('fechaHasta', filters.fechaHasta);
         if (filters.fechaAgenda) params.append('fechaAgenda', filters.fechaAgenda);
       }
       
@@ -194,7 +196,8 @@ export const remitosService = {
       console.log('🔍 DEBUG - updateRemito - Tipo de datos:', typeof remitoData);
       console.log('🔍 DEBUG - updateRemito - Campos individuales:');
       Object.keys(remitoData).forEach(key => {
-        console.log(`  ${key}:`, remitoData[key], `(tipo: ${typeof remitoData[key]})`);
+        const value = (remitoData as any)[key];
+        console.log(`  ${key}:`, value, `(tipo: ${typeof value})`);
       });
       
       // Si hay un archivo adjunto, usar FormData
