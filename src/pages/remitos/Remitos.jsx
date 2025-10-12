@@ -25,10 +25,43 @@ export default function Remitos() {
   const fetchRemitos = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await remitosService.getRemitos(page, itemsPerPage, filtrosAplicados);
+      // Si se están aplicando filtros de fecha, algunos despliegues del backend
+      // pueden no soportar fechaDesde/fechaHasta aún. Para asegurar que el
+      // usuario vea los resultados esperados, pedimos más resultados y
+      // filtramos en el cliente como fallback.
+      const useClientSideDateFilter = !!(filtrosAplicados && (filtrosAplicados.fechaDesde || filtrosAplicados.fechaHasta));
+      const requestLimit = useClientSideDateFilter ? 1000 : itemsPerPage;
+
+      const response = await remitosService.getRemitos(page, requestLimit, filtrosAplicados);
       if (response && response.data) {
-        setRemitos(response);
-        setCurrentPage(response.currentPage);
+        if (useClientSideDateFilter) {
+          // Filtrar por fechaEmision en el cliente (formato ISO)
+          const asIsoDay = (d) => (d ? new Date(d).toISOString().slice(0,10) : null);
+          const desde = filtrosAplicados.fechaDesde ? filtrosAplicados.fechaDesde : null;
+          const hasta = filtrosAplicados.fechaHasta ? filtrosAplicados.fechaHasta : null;
+
+          const filteredData = response.data.filter(r => {
+            const day = asIsoDay(r.fechaEmision);
+            if (!day) return false;
+            if (desde && hasta) return day >= desde && day <= hasta;
+            if (desde) return day >= desde;
+            if (hasta) return day <= hasta;
+            return true;
+          });
+
+          // Paginamos localmente
+          const totalItems = filteredData.length;
+          const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+          const currentPageSafe = Math.min(Math.max(1, page), totalPages);
+          const start = (currentPageSafe - 1) * itemsPerPage;
+          const pageData = filteredData.slice(start, start + itemsPerPage);
+
+          setRemitos({ data: pageData, totalItems, totalPages, currentPage: currentPageSafe });
+          setCurrentPage(currentPageSafe);
+        } else {
+          setRemitos(response);
+          setCurrentPage(response.currentPage);
+        }
       } else {
         // Si no hay respuesta o no tiene `data`, reseteamos al estado inicial.
         setRemitos({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
