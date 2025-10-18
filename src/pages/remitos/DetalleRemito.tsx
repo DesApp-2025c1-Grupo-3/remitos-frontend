@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, Pencil } from 'lucide-react';
+import { Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
 import { remitosService, Remito } from '../../services/remitosService';
 import { estadosService, Estado } from '../../services/estadosService';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -8,20 +8,27 @@ import styles from './remitos.module.css';
 import detalleStyles from './DetalleRemito.module.css';
 import { getApiUrl } from '../../config/api';
 
-// Interfaz para la mercadería con estado de preparación
-interface MercaderiaConEstado {
-  id: string; // Cambiado a string para usar 'bobinas', 'racks', etc.
+// Interfaz para la mercadería
+interface MercaderiaDisplay {
+  id: number;
   tipoMercaderia: string;
-  cantidad?: number;
-  preparada: boolean;
+  tipoMercaderiaId: number;
+  valorDeclarado: number;
+  volumenMetrosCubico: number;
+  pesoMercaderia: number;
+  cantidadBobinas?: number;
+  cantidadRacks?: number;
+  cantidadBultos?: number;
+  cantidadPallets?: number;
+  requisitosEspeciales?: string;
 }
 
 // Estados posibles del remito
-type EstadoRemito = 'Autorizado' | 'En preparación' | 'En carga' | 'En camino' | 'Entregado' | 'No entregado' | 'Retenido';
+type EstadoRemito = 'Autorizado' | 'En preparación' | 'En carga' | 'En camino' | 'Entregado' | 'No entregado' | 'Retenido' | 'Agendado';
 
 interface EstadoAnterior {
   estado: EstadoRemito;
-  mercaderia: MercaderiaConEstado[];
+  mercaderia: MercaderiaDisplay[];
 }
 
 function truncateNumber(num: number | string, maxDigits = 10): string {
@@ -52,10 +59,9 @@ export default function DetalleRemito() {
   const [loading, setLoading] = useState(true);
   const [estados, setEstados] = useState<Estado[]>([]);
   const [estadoActual, setEstadoActual] = useState<EstadoRemito>('Autorizado');
-  const [estadoAnterior, setEstadoAnterior] = useState<EstadoAnterior | null>(null);
-  const [mercaderiaConEstado, setMercaderiaConEstado] = useState<MercaderiaConEstado[]>([]);
-  const [showModal, setShowModal] = useState(false);
-  const [razonNoEntrega, setRazonNoEntrega] = useState('');
+  const [mercaderias, setMercaderias] = useState<MercaderiaDisplay[]>([]);
+  const [currentMercaderiaPage, setCurrentMercaderiaPage] = useState(1);
+  const mercaderiasPerPage = 3;
 
   useEffect(() => {
     fetchEstados();
@@ -98,25 +104,24 @@ export default function DetalleRemito() {
         setEstadoActual(estadoInicial);
       }
       
-      // Procesar mercaderías (tomar la primera si existe)
+      // Procesar TODAS las mercaderías
       if (data.mercaderias && data.mercaderias.length > 0) {
-        const mercaderiaItems: MercaderiaConEstado[] = [];
-        const m = data.mercaderias[0]; // Tomar la primera mercadería
+        const mercaderiaItems: MercaderiaDisplay[] = data.mercaderias.map(m => ({
+          id: m.id,
+          tipoMercaderia: m.tipoMercaderia?.nombre || 'Sin tipo',
+          tipoMercaderiaId: m.tipoMercaderiaId,
+          valorDeclarado: m.valorDeclarado,
+          volumenMetrosCubico: m.volumenMetrosCubico,
+          pesoMercaderia: m.pesoMercaderia,
+          cantidadBobinas: m.cantidadBobinas,
+          cantidadRacks: m.cantidadRacks,
+          cantidadBultos: m.cantidadBultos,
+          cantidadPallets: m.cantidadPallets,
+          requisitosEspeciales: m.requisitosEspeciales
+        }));
         
-        if (m.cantidadBobinas && m.cantidadBobinas > 0) {
-          mercaderiaItems.push({ id: 'bobinas', tipoMercaderia: 'Bobinas', cantidad: m.cantidadBobinas, preparada: false });
-        }
-        if (m.cantidadRacks && m.cantidadRacks > 0) {
-          mercaderiaItems.push({ id: 'racks', tipoMercaderia: 'Racks', cantidad: m.cantidadRacks, preparada: false });
-        }
-        if (m.cantidadBultos && m.cantidadBultos > 0) {
-          mercaderiaItems.push({ id: 'bultos', tipoMercaderia: 'Bultos', cantidad: m.cantidadBultos, preparada: false });
-        }
-        if (m.cantidadPallets && m.cantidadPallets > 0) {
-          mercaderiaItems.push({ id: 'pallets', tipoMercaderia: 'Pallets', cantidad: m.cantidadPallets, preparada: false });
-        }
-        
-        setMercaderiaConEstado(mercaderiaItems);
+        setMercaderias(mercaderiaItems);
+        setCurrentMercaderiaPage(1); // Resetear página al cargar nuevo remito
       }
     } catch (error) {
       console.error('Error al cargar el remito:', error);
@@ -124,16 +129,6 @@ export default function DetalleRemito() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleMercaderiaCheck = (id: string) => {
-    if (estadoActual !== 'En preparación') return;
-    
-    setMercaderiaConEstado(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, preparada: !item.preparada } : item
-      )
-    );
   };
 
   const getEstadoColor = (estado: EstadoRemito) => {
@@ -152,165 +147,104 @@ export default function DetalleRemito() {
         return '#dc2626';
       case 'Retenido':
         return '#dc2626';
+      case 'Agendado':
+        return '#3b82f6';
       default:
         return '#6b7280';
     }
   };
 
-    const cambiarEstadoRemito = async (nuevoEstadoNombre: EstadoRemito) => {
+  const handleComenzarPreparacion = async () => {
     if (!remito || !estados.length) {
       return;
     }
     
-    const nuevoEstado = estados.find(e => e.nombre === nuevoEstadoNombre);
+    const estadoEnPreparacion = estados.find(e => e.nombre === 'En preparación');
     
-    if (!nuevoEstado) {
-      showNotification(`Estado "${nuevoEstadoNombre}" no encontrado`, 'error');
+    if (!estadoEnPreparacion) {
+      showNotification('Estado "En preparación" no encontrado', 'error');
       return;
     }
     
     try {
-      const remitoActualizado = await remitosService.updateEstadoRemito(remito.id, nuevoEstado.id);
+      const remitoActualizado = await remitosService.updateEstadoRemito(remito.id, estadoEnPreparacion.id);
       
       setRemito(remitoActualizado);
       setEstadoActual(remitoActualizado.estado?.nombre as EstadoRemito);
-      showNotification(`Remito actualizado a "${nuevoEstadoNombre}"`, 'success');
-      return remitoActualizado;
+      showNotification('Preparación iniciada exitosamente', 'success');
     } catch (error) {
-      console.error('Error al cambiar el estado del remito:', error);
-      showNotification('Error al cambiar el estado del remito', 'error');
+      console.error('Error al comenzar preparación:', error);
+      showNotification('Error al comenzar la preparación del remito', 'error');
     }
   };
 
-  const handleCambiarEstado = async () => {
-    let nuevoEstado: EstadoRemito | null = null;
-    switch (estadoActual) {
-      case 'Autorizado':
-        nuevoEstado = 'En preparación';
-        break;
-      case 'En preparación':
-        nuevoEstado = 'En carga';
-        break;
-
-      case 'En carga':
-        nuevoEstado = 'En camino';
-        break;
-      default:
-        break;
-    }
-
-    if (nuevoEstado) {
-      await cambiarEstadoRemito(nuevoEstado);
-    }
-  };
-
-  const handleEntregado = async () => {
-    await cambiarEstadoRemito('Entregado');
-  };
-
-  const handleNoEntregado = () => {
-    setShowModal(true);
-  };
-
-  const handleConfirmarNoEntrega = async () => {
-    if (razonNoEntrega.trim() && remito) {
-      try {
-        // Cambiar estado y guardar razón de no entrega
-        const remitoActualizado = await remitosService.updateRemito(remito.id, {
-          razonNoEntrega: razonNoEntrega.trim(),
-          estadoId: estados.find(e => e.nombre === 'No entregado')?.id
-        });
-        setRemito(remitoActualizado);
-        setEstadoActual(remitoActualizado.estado?.nombre as EstadoRemito);
-        setShowModal(false);
-        setRazonNoEntrega('');
-        showNotification('Remito actualizado como No entregado', 'success');
-      } catch (error) {
-        showNotification('Error al actualizar la razón de no entrega', 'error');
-      }
-    }
-  };
-
-  const handleRetener = async () => {
-    setEstadoAnterior({
-      estado: estadoActual,
-      mercaderia: [...mercaderiaConEstado]
-    });
-    
-    await cambiarEstadoRemito('Retenido');
-  };
-
-  const handleLiberar = async () => {
+  const handleIniciarReentrega = async () => {
     if (!remito) {
-      showNotification('Error: No hay remito para liberar', 'error');
+      showNotification('Error: No hay remito para reentrega', 'error');
       return;
     }
 
     try {
-      const remitoActualizado = await remitosService.liberarRemito(remito.id);
+      const remitoActualizado = await remitosService.iniciarReentrega(remito.id);
       setRemito(remitoActualizado);
       setEstadoActual(remitoActualizado.estado?.nombre as EstadoRemito);
-      showNotification('Remito liberado exitosamente', 'success');
+      
+      // Actualizar mercaderías
+      if (remitoActualizado.mercaderias && remitoActualizado.mercaderias.length > 0) {
+        const mercaderiaItems: MercaderiaDisplay[] = remitoActualizado.mercaderias.map(m => ({
+          id: m.id,
+          tipoMercaderia: m.tipoMercaderia?.nombre || 'Sin tipo',
+          tipoMercaderiaId: m.tipoMercaderiaId,
+          valorDeclarado: m.valorDeclarado,
+          volumenMetrosCubico: m.volumenMetrosCubico,
+          pesoMercaderia: m.pesoMercaderia,
+          cantidadBobinas: m.cantidadBobinas,
+          cantidadRacks: m.cantidadRacks,
+          cantidadBultos: m.cantidadBultos,
+          cantidadPallets: m.cantidadPallets,
+          requisitosEspeciales: m.requisitosEspeciales
+        }));
+        setMercaderias(mercaderiaItems);
+        setCurrentMercaderiaPage(1); // Resetear página al iniciar reentrega
+      }
+      
+      showNotification('Reentrega iniciada exitosamente', 'success');
     } catch (error) {
-      console.error('Error al liberar remito:', error);
-      const errorMessage = error.response?.data?.message || 'Error al liberar el remito';
+      console.error('Error al iniciar reentrega:', error);
+      const errorMessage = error.response?.data?.message || 'Error al iniciar la reentrega';
       showNotification(errorMessage, 'error');
     }
   };
 
-  const todaMercaderiaPreparada = mercaderiaConEstado.every(item => item.preparada);
-
   const getBotonPrincipal = () => {
-    switch (estadoActual) {
-      case 'Autorizado':
+    // Solo permitir acciones en estados específicos
+    if (estadoActual === 'Autorizado') {
+      return (
+        <button className={styles.crearBtn} onClick={handleComenzarPreparacion}>
+          COMENZAR PREPARACIÓN
+        </button>
+      );
+    }
+    
+    if (estadoActual === 'No entregado') {
+      // Validar si puede hacer reentrega (solo si no es ya una reentrega)
+      if (remito && !remito.esReentrega) {
         return (
-          <button className={styles.crearBtn} onClick={handleCambiarEstado}>
-            PREPARAR
+          <button className={styles.crearBtn} onClick={handleIniciarReentrega}>
+            HABILITAR MREENTREGA
           </button>
         );
-      case 'En preparación':
+      } else {
         return (
-          <button 
-            className={styles.crearBtn} 
-            onClick={handleCambiarEstado}
-            disabled={!todaMercaderiaPreparada}
-            title={!todaMercaderiaPreparada ? 'Debes preparar toda la mercadería' : ''}
-          >
-            TERMINAR PREPARACIÓN
-          </button>
-        );
-      case 'En carga':
-        return (
-          <button className={styles.crearBtn} onClick={handleCambiarEstado}>
-            ASIGNAR VIAJE
-          </button>
-        );
-      case 'En camino':
-        return (
-          <div className={detalleStyles.botonesViaje}>
-            <button className={styles.crearBtn} onClick={handleEntregado}>
-              ENTREGADO
-            </button>
-            <button 
-              className={`${styles.crearBtn} ${detalleStyles.botonNoEntregado}`}
-              onClick={handleNoEntregado}
-            >
-              NO ENTREGADO
-            </button>
+          <div className={detalleStyles.mensajeReentrega}>
+            Reentrega no disponible (este remito ya fue reenviado una vez)
           </div>
         );
-      case 'Entregado':
-      case 'No entregado':
-        return null;
-      case 'Retenido':
-        return (
-          <button className={styles.crearBtn} onClick={handleLiberar}>
-            LIBERAR
-          </button>
-        );
-      default:
-        return null;
+      }
     }
+    
+    // Para otros estados, no mostrar botones
+    return null;
   };
 
   const formatDate = (dateString: string) => {
@@ -319,8 +253,14 @@ export default function DetalleRemito() {
     return date.toLocaleDateString('es-ES');
   };
 
-  const getCantidadText = (item: MercaderiaConEstado) => {
-    return `Cantidad: ${item.cantidad || 0}`;
+  // Lógica de paginación para mercaderías
+  const totalMercaderiaPages = Math.ceil(mercaderias.length / mercaderiasPerPage);
+  const startIndex = (currentMercaderiaPage - 1) * mercaderiasPerPage;
+  const endIndex = startIndex + mercaderiasPerPage;
+  const currentMercaderias = mercaderias.slice(startIndex, endIndex);
+
+  const handleMercaderiaPageChange = (page: number) => {
+    setCurrentMercaderiaPage(page);
   };
 
   function ArchivoAdjunto({ archivoAdjunto }: { archivoAdjunto?: string }) {
@@ -410,16 +350,28 @@ export default function DetalleRemito() {
               <span className={styles.infoValue}>{remito.destino?.direccion || 'Sin dirección'}</span>
             </div>
             <div className={styles.infoCard}>
-              <label className={styles.infoLabel}>Volumen:</label>
-              <span className={styles.infoValue}>{formatAndTruncateNumber(remito.mercaderias?.[0]?.volumenMetrosCubico || 0)} m³</span>
+              <label className={styles.infoLabel}>Volumen Total:</label>
+              <span className={styles.infoValue}>
+                {formatAndTruncateNumber(
+                  remito.mercaderias?.reduce((sum, m) => sum + (m.volumenMetrosCubico || 0), 0) || 0
+                )} m³
+              </span>
             </div>
             <div className={styles.infoCard}>
-              <label className={styles.infoLabel}>Valor:</label>
-              <span className={styles.infoValue}>${formatAndTruncateNumber(remito.mercaderias?.[0]?.valorDeclarado || 0)}</span>
+              <label className={styles.infoLabel}>Valor Total:</label>
+              <span className={styles.infoValue}>
+                ${formatAndTruncateNumber(
+                  remito.mercaderias?.reduce((sum, m) => sum + (m.valorDeclarado || 0), 0) || 0
+                )}
+              </span>
             </div>
             <div className={styles.infoCard}>
-              <label className={styles.infoLabel}>Peso:</label>
-              <span className={styles.infoValue}>{formatAndTruncateNumber(remito.mercaderias?.[0]?.pesoMercaderia || 0)} kg</span>
+              <label className={styles.infoLabel}>Peso Total:</label>
+              <span className={styles.infoValue}>
+                {formatAndTruncateNumber(
+                  remito.mercaderias?.reduce((sum, m) => sum + (m.pesoMercaderia || 0), 0) || 0
+                )} kg
+              </span>
             </div>
             <div className={styles.infoCard}>
               <label className={styles.infoLabel}>Prioridad:</label>
@@ -462,33 +414,77 @@ export default function DetalleRemito() {
         <div className={styles.tablaContenedor}>
           <div className={styles.mercaderiaContainer}>
             <h2 className={styles.mercaderiaTitle}>
-              Mercadería
-              {remito.mercaderias && remito.mercaderias.length > 0 && remito.mercaderias[0]?.tipoMercaderia && (
-                <span className={styles.badgeTipoMercaderia}>{remito.mercaderias[0].tipoMercaderia.nombre}</span>
-              )}
+              Mercadería ({mercaderias.length})
             </h2>
-            {mercaderiaConEstado.length > 0 ? (
-              <div className={styles.mercaderiaGrid}>
-                {mercaderiaConEstado.map(item => (
+            {mercaderias.length > 0 ? (
+              <>
+                <div className={styles.mercaderiaGrid}>
+                  {currentMercaderias.map(item => (
                   <div
                     key={item.id}
-                    onClick={() => estadoActual === 'En preparación' && handleMercaderiaCheck(item.id)}
-                    className={`
-                      ${styles.mercaderiaItem}
-                      ${estadoActual === 'En preparación' ? styles.mercaderiaItemPreparable : ''}
-                      ${item.preparada ? styles.mercaderiaItemPreparada : ''}
-                    `}
+                    className={styles.mercaderiaItem}
                   >
                     <div className={styles.mercaderiaItemContent}>
-                      <div>
-                        <div className={styles.infoValue}>{item.tipoMercaderia}</div>
-                        <div className={styles.mercaderiaItemCantidad}>{getCantidadText(item)}</div>
+                      <div style={{ width: '100%' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <span className={styles.badgeTipoMercaderia}>{item.tipoMercaderia}</span>
+                        </div>
+                        <div className={detalleStyles.mercaderiaDetalles}>
+                          <div><strong>Valor:</strong> ${formatAndTruncateNumber(item.valorDeclarado)}</div>
+                          <div><strong>Volumen:</strong> {formatAndTruncateNumber(item.volumenMetrosCubico)} m³</div>
+                          <div><strong>Peso:</strong> {formatAndTruncateNumber(item.pesoMercaderia)} kg</div>
+                          {item.cantidadBobinas && item.cantidadBobinas > 0 && (
+                            <div><strong>Bobinas:</strong> {item.cantidadBobinas}</div>
+                          )}
+                          {item.cantidadRacks && item.cantidadRacks > 0 && (
+                            <div><strong>Racks:</strong> {item.cantidadRacks}</div>
+                          )}
+                          {item.cantidadBultos && item.cantidadBultos > 0 && (
+                            <div><strong>Bultos:</strong> {item.cantidadBultos}</div>
+                          )}
+                          {item.cantidadPallets && item.cantidadPallets > 0 && (
+                            <div><strong>Pallets:</strong> {item.cantidadPallets}</div>
+                          )}
+                        </div>
+                        {item.requisitosEspeciales && (
+                          <div className={detalleStyles.mercaderiaDetalles}>
+                            <div><strong>Requisitos:</strong> {item.requisitosEspeciales}</div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                    {item.preparada && <CheckCircle className={styles.checkIcon} />}
                   </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+                
+                {/* Paginación para mercaderías */}
+                {totalMercaderiaPages > 1 && (
+                  <div className={detalleStyles.mercaderiaPagination}>
+                    <div className={detalleStyles.paginationInfo}>
+                      Mostrando {startIndex + 1}-{Math.min(endIndex, mercaderias.length)} de {mercaderias.length} mercaderías
+                    </div>
+                    <div className={detalleStyles.paginationControls}>
+                      <button
+                        onClick={() => handleMercaderiaPageChange(currentMercaderiaPage - 1)}
+                        disabled={currentMercaderiaPage === 1}
+                        className={detalleStyles.paginationBtn}
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      <span className={detalleStyles.paginationPage}>
+                        {currentMercaderiaPage} de {totalMercaderiaPages}
+                      </span>
+                      <button
+                        onClick={() => handleMercaderiaPageChange(currentMercaderiaPage + 1)}
+                        disabled={currentMercaderiaPage === totalMercaderiaPages}
+                        className={detalleStyles.paginationBtn}
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div style={{
                 display: 'flex',
@@ -502,49 +498,18 @@ export default function DetalleRemito() {
                 fontSize: '1.1rem',
                 fontWeight: '500'
               }}>
-                📦 No hay mercadería para preparar
+                📦 No hay mercadería registrada
               </div>
             )}
           </div>
           {/* Botones de acción */}
           <div className={styles.accionesContainer}>
-            {estadoActual === 'En preparación' && !todaMercaderiaPreparada && (
-              <div className={styles.mensajePreparacion}>Prepara toda la mercadería para continuar</div>
-            )}
             <div className={styles.botonesGrupo}>
               {getBotonPrincipal()}
-              {estadoActual !== 'Retenido' && estadoActual !== 'Entregado' && estadoActual !== 'No entregado' && (
-                <button className={`${styles.crearBtn} ${styles.retenerBtn}`} onClick={handleRetener}>RETENER</button>
-              )}
             </div>
           </div>
         </div>
       </div>
-
-      {/* Modal para razón de no entrega */}
-      {showModal && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <h3 className={styles.modalTitle}>Razón de no entrega</h3>
-            <textarea
-              value={razonNoEntrega}
-              onChange={(e) => setRazonNoEntrega(e.target.value)}
-              placeholder="Ingrese la razón por la que no se pudo entregar el remito"
-              className={styles.modalTextarea}
-            />
-            <div className={styles.modalBotones}>
-              <button onClick={() => setShowModal(false)} className={styles.cancelBtn}>Cancelar</button>
-              <button
-                onClick={handleConfirmarNoEntrega}
-                className={styles.crearBtn}
-                disabled={!razonNoEntrega.trim()}
-              >
-                Confirmar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 } 

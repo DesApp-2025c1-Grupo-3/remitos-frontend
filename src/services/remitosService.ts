@@ -67,6 +67,7 @@ export interface Remito {
   createdAt: string;
   updatedAt: string;
   razonNoEntrega?: string;
+  esReentrega?: boolean;
 }
 
 export interface RemitoFormData {
@@ -279,6 +280,16 @@ export const remitosService = {
     try {
       await axios.delete(`${API_URL}/remito/${id}`);
     } catch (error) {
+      throw error;
+    }
+  },
+
+  async iniciarReentrega(id: number): Promise<Remito> {
+    try {
+      const response = await axios.post(`${API_URL}/remito/${id}/iniciar-reentrega`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error al iniciar reentrega del remito ${id}:`, error);
       throw error;
     }
   },
