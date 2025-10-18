@@ -187,10 +187,8 @@ export default function EditarRemito() {
   if (loading) return <div className={styles.container}>Cargando...</div>;
 
   return (
-    <div className={formStyles.formContainer}>
-      <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '0 1rem' }}>
-        <h1 className={styles.titulo}>Editar Remito</h1>
-      </div>
+    <div className={styles.container}>
+      <h1 className={styles.titulo}>EDITAR REMITO</h1>
       <RemitoForm
         formData={formData}
         onSubmit={handleSubmit}

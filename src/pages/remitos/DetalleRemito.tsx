@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Pencil, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { remitosService, Remito } from '../../services/remitosService';
 import { estadosService, Estado } from '../../services/estadosService';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -306,6 +306,16 @@ export default function DetalleRemito() {
   return (
     <div className={styles.container}>
       <div className={styles.wrapper}>
+        {/* Botón Volver */}
+        <button 
+          onClick={() => navigate('/remitos')} 
+          className={detalleStyles.volverBtn}
+          title="Volver al listado"
+        >
+          <ArrowLeft size={20} />
+          Volver al listado
+        </button>
+
         {/* Header principal */}
         <div className={`${styles.header} ${styles.detalleHeader}`}> 
           <div className={detalleStyles.headerContainer}>

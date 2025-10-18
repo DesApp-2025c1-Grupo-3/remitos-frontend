@@ -1,5 +1,31 @@
 /* Estilos para el componente DetalleRemito */
 
+.volverBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 1rem 2rem 1rem 2rem;
+}
+
+.volverBtn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+  color: #1f2937;
+}
+
+.volverBtn:active {
+  transform: scale(0.98);
+}
+
 .volverContainer {
   padding: 1rem 2rem 0 2rem; /* Padding reducido para ocupar menos espacio */
 }

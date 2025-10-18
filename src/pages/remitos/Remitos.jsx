@@ -13,10 +13,36 @@ import { RemitosFilters } from "../../components/RemitosFilters/RemitosFilters";
 export default function Remitos() {
   const [remitos, setRemitos] = useState({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
   const hoy = new Date().toISOString().slice(0,10);
-  const [filters, setFilters] = useState({ fechaDesde: hoy, fechaHasta: hoy });
-  const [filtrosAplicados, setFiltrosAplicados] = useState({ fechaDesde: hoy, fechaHasta: hoy });
+  
+  // Restaurar filtros y página desde sessionStorage si existen
+  const getInitialFilters = () => {
+    try {
+      const savedFilters = sessionStorage.getItem('remitosFilters');
+      if (savedFilters) {
+        return JSON.parse(savedFilters);
+      }
+    } catch (error) {
+      console.error('Error al restaurar filtros:', error);
+    }
+    return { fechaDesde: hoy, fechaHasta: hoy };
+  };
+
+  const getInitialPage = () => {
+    try {
+      const savedPage = sessionStorage.getItem('remitosCurrentPage');
+      if (savedPage) {
+        return parseInt(savedPage, 10);
+      }
+    } catch (error) {
+      console.error('Error al restaurar página:', error);
+    }
+    return 1;
+  };
+
+  const [currentPage, setCurrentPage] = useState(getInitialPage);
+  const [filters, setFilters] = useState(getInitialFilters);
+  const [filtrosAplicados, setFiltrosAplicados] = useState(getInitialFilters);
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [remitoToDelete, setRemitoToDelete] = useState(null);
@@ -75,6 +101,15 @@ export default function Remitos() {
     }
   };
 
+  // Guardar filtros y página en sessionStorage cuando cambien
+  useEffect(() => {
+    sessionStorage.setItem('remitosFilters', JSON.stringify(filtrosAplicados));
+  }, [filtrosAplicados]);
+
+  useEffect(() => {
+    sessionStorage.setItem('remitosCurrentPage', currentPage.toString());
+  }, [currentPage]);
+
   useEffect(() => {
     fetchRemitos(currentPage);
   }, [currentPage, filtrosAplicados]);
@@ -85,9 +120,13 @@ export default function Remitos() {
   };
 
   const handleClearFilters = () => {
-    setFilters({ fechaDesde: hoy, fechaHasta: hoy });
-    setFiltrosAplicados({ fechaDesde: hoy, fechaHasta: hoy });
+    const defaultFilters = { fechaDesde: hoy, fechaHasta: hoy };
+    setFilters(defaultFilters);
+    setFiltrosAplicados(defaultFilters);
     setCurrentPage(1);
+    // Limpiar sessionStorage al resetear filtros
+    sessionStorage.setItem('remitosFilters', JSON.stringify(defaultFilters));
+    sessionStorage.setItem('remitosCurrentPage', '1');
   };
 
   const hayAlgunFiltro = (f) => {
