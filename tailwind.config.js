@@ -12,6 +12,7 @@ module.exports = {
           DEFAULT: '#FF6B35', // Naranja principal
           light: '#FF8A65',
           dark: '#E64A19',
+          orange: '#E65F2B', // Naranja específico para sidebar
           50: '#FFF3E0',
           100: '#FFE0B2',
           200: '#FFCC80',
@@ -23,6 +24,7 @@ module.exports = {
           800: '#D84315',
           900: '#BF360C',
         },
+        'menu-hover': '#FFF3E0',
         secondary: {
           DEFAULT: '#343A40', // Gris oscuro para sidebar
           light: '#6C757D',
@@ -70,7 +72,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Poppins', 'system-ui', 'sans-serif'],
       },
     },
   },

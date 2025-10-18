@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -84,3 +86,160 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+
+/* Clases adicionales para la nueva sidebar */
+.bg-menu-hover {
+  background-color: #FFF3E0; /* primary-50 */
+}
+
+.text-primary-orange {
+  color: #E65F2B;
+}
+
+/* Ajustes para sidebar items */
+
+/* Estilos específicos para la nueva sidebar con dropdowns */
+.sidebar-dropdown {
+  width: 100%;
+}
+
+/* Restaurar estilos básicos para botones */
+
+.sidebar-main-item {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 16px;
+  border-radius: 8px;
+  margin: 3px 2px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: #5A5A65;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Poppins', sans-serif;
+  background-color: white;
+}
+
+.sidebar-main-item:hover {
+  background-color: #FFF3E0;
+  color: #E65F2B;
+}
+
+.sidebar-main-item:hover .sidebar-icon,
+.sidebar-main-item:hover .sidebar-text {
+  color: #E65F2B;
+}
+
+.sidebar-main-item.active {
+  background-color: #FFF3E0;
+  color: #E65F2B;
+}
+
+.sidebar-main-item.active .sidebar-icon,
+.sidebar-main-item.active .sidebar-text {
+  color: #E65F2B;
+}
+
+.sidebar-sub-item {
+  display: flex !important;
+  align-items: center !important;
+  height: 56px !important; /* Misma altura que los items principales */
+  max-width: 230px !important;
+  padding: 0 16px 0 40px !important; /* Padding horizontal con indentación */
+  margin: 2px 5px !important; /* Espaciado moderado entre sub-items con margen lateral */
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  color: #5A5A65 !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  font-family: 'Poppins', sans-serif !important;
+  background-color: white !important;
+  box-sizing: border-box !important;
+}
+
+.sidebar-sub-item:hover {
+  background-color: #FFF3E0 !important;
+  color: #E65F2B !important;
+}
+
+.sidebar-sub-item:hover .sidebar-sub-icon,
+.sidebar-sub-item:hover .sidebar-text {
+  color: #E65F2B !important;
+}
+
+.sidebar-sub-item.active {
+  background-color: #FFF3E0 !important;
+  color: #E65F2B !important;
+}
+
+.sidebar-sub-item.active .sidebar-sub-icon,
+.sidebar-sub-item.active .sidebar-text {
+  color: #E65F2B !important;
+}
+
+
+.sidebar-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  color: #5A5A65;
+}
+
+.sidebar-sub-icon {
+  width: 20px !important;
+  height: 20px !important;
+  margin-right: 12px !important;
+  flex-shrink: 0 !important;
+  color: #5A5A65 !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+.sidebar-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  color: inherit;
+}
+
+/* Animación para dropdown */
+.sidebar-dropdown-content {
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.sidebar-dropdown-content.collapsed {
+  max-height: 0;
+}
+
+.sidebar-dropdown-content.expanded {
+  max-height: 500px;
+}
+
+/* Estilos específicos para sidebar colapsada */
+.sidebar.collapsed .sidebar-main-item {
+  justify-content: center;
+  padding: 0 8px;
+}
+
+.sidebar.collapsed .sidebar-icon {
+  width: 28px;
+  height: 28px;
+  margin-right: 0;
+}
+
+.sidebar.collapsed .sidebar-sub-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 0;
+}
+
+.sidebar.collapsed .sidebar-text {
+  display: none;
+}
+

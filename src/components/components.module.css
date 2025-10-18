@@ -204,15 +204,15 @@
   position: relative;
 }
 
-/* Estilos para modo colapsado */
-.sidebar.collapsed .navButton {
+/* Estilos para modo colapsado - DESHABILITADO PARA NUEVA SIDEBAR */
+/* .sidebar.collapsed .navButton {
   justify-content: center;
-  padding: 12px 8px; /* Reducido para mantener consistencia */
+  padding: 12px 8px;
 }
 
 .sidebar.collapsed .navButton span {
   display: none;
-}
+} */
 
 /* En móvil, siempre mostrar el texto incluso si está colapsado */
 .sidebar.mobile .navButton span {
@@ -245,8 +245,8 @@
   border-left: 3px solid var(--primary);
 }
 
-/* Tooltip para modo colapsado */
-.sidebar.collapsed .navButton {
+/* Tooltip para modo colapsado - DESHABILITADO PARA NUEVA SIDEBAR */
+/* .sidebar.collapsed .navButton {
   position: relative;
 }
 
@@ -271,7 +271,7 @@
 
 .sidebar.collapsed .navButton:hover::after {
   opacity: 1;
-}
+} */
 
 .navButton svg {
   flex-shrink: 0; /* Evita que el icono se comprima */

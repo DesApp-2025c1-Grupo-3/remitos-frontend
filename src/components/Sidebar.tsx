@@ -1,20 +1,28 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Link, useLocation } from "react-router-dom"
-import { FileText, Users, MapPin, BarChart3, CalendarDays, Truck, DollarSign, ChevronLeft, ChevronRight, Menu } from "lucide-react"
-import styles from "./components.module.css";
+import { Link } from "react-router-dom"
+import { Home, Route, ClipboardList, Coins, ChevronLeft, ChevronRight, Menu } from "lucide-react"
+import styles from "./components.module.css"
+import DropdownMenu from "./DropdownMenu"
+import { sidebarMenus } from "../lib/sidebarMenus"
 
 export default function Sidebar() {
-  const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false); // Cambiado a false para que esté expandido por defecto
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [openSection, setOpenSection] = useState<string | null>(null); // null = todos colapsados por defecto
   
   // Detectar si estamos en móvil
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1000);
+      const mobile = window.innerWidth < 1000;
+      setIsMobile(mobile);
+      
+      // Si pasamos a móvil, expandir el sidebar
+      if (mobile) {
+        setIsCollapsed(false);
+      }
     };
     
     checkMobile();
@@ -22,13 +30,6 @@ export default function Sidebar() {
     
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-  
-  const isActive = (path: string) => {
-    if (path === "/") {
-      return location.pathname === "/";
-    }
-    return location.pathname.startsWith(path);
-  };
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
@@ -40,6 +41,20 @@ export default function Sidebar() {
 
   const closeMobile = () => {
     setIsMobileOpen(false);
+  };
+
+  // Definición de items del menú principal
+  const menuItems = [
+    { key: "inicio", src: Home, title: "Inicio" },
+    { key: "remitos", src: ClipboardList, title: "Gestión de Remitos" },
+    { key: "viajes", src: Route, title: "Gestión de Viajes" },
+    { key: "costos", src: Coins, title: "Gestión de Costos" },
+  ];
+
+  type SidebarMenuKey = keyof typeof sidebarMenus;
+
+  const getItems = (key: SidebarMenuKey) => {
+    return sidebarMenus[key] || [];
   };
 
   return (
@@ -64,7 +79,13 @@ export default function Sidebar() {
       )}
 
       {/* Sidebar */}
-      <div className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''} ${isMobile ? styles.mobile : ''} ${isMobile && isMobileOpen ? styles.mobileOpen : ''}`}>
+      <aside className={`
+        ${styles.sidebar} 
+        ${isCollapsed ? styles.collapsed : ''} 
+        ${isMobile ? styles.mobile : ''} 
+        ${isMobile && isMobileOpen ? styles.mobileOpen : ''}
+      `}>
+        {/* Header con logo */}
         <div className={styles.sidebarHeader}>
           <Link to="/" className={styles.logoLink} onClick={isMobile ? closeMobile : undefined}>
             <div className={styles.logoWrapper}>
@@ -86,81 +107,26 @@ export default function Sidebar() {
               {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
             </button>
           )}
-
         </div>
 
-        <div className={styles.navLinks}>
-          <Link to="/remitos" onClick={isMobile ? closeMobile : undefined}>
-            <button 
-              className={`${styles.navButton} ${isActive('/remitos') ? styles.active : ''}`}
-              data-tooltip="Remitos"
-            >
-              <FileText size={24} />
-              {(isMobile || !isCollapsed) ? <span>Remitos</span> : null}
-            </button>
-          </Link>
-
-          <Link to="/clientes" onClick={isMobile ? closeMobile : undefined}>
-            <button 
-              className={`${styles.navButton} ${isActive('/clientes') ? styles.active : ''}`}
-              data-tooltip="Clientes"
-            >
-              <Users size={24} />
-              {(isMobile || !isCollapsed) ? <span>Clientes</span> : null}
-            </button>
-          </Link>
-
-          <Link to="/destinos" onClick={isMobile ? closeMobile : undefined}>
-            <button 
-              className={`${styles.navButton} ${isActive('/destinos') ? styles.active : ''}`}
-              data-tooltip="Destinos"
-            >
-              <MapPin size={24} />
-              {(isMobile || !isCollapsed) ? <span>Destinos</span> : null}
-            </button>
-          </Link>
-
-          <Link to="/reportes" onClick={isMobile ? closeMobile : undefined}>
-            <button 
-              className={`${styles.navButton} ${isActive('/reportes') ? styles.active : ''}`}
-              data-tooltip="Reportes"
-            >
-              <BarChart3 size={24} />
-              {(isMobile || !isCollapsed) ? <span>Reportes</span> : null}
-            </button>
-          </Link>
-
-          <Link to="/agenda" onClick={isMobile ? closeMobile : undefined}>
-            <button 
-              className={`${styles.navButton} ${isActive('/agenda') ? styles.active : ''}`}
-              data-tooltip="Agenda"
-            >
-              <CalendarDays size={24} />
-              {(isMobile || !isCollapsed) ? <span>Agenda</span> : null}
-            </button>
-          </Link>
-
-          <a href="https://gestion-de-viajes.vercel.app/" target="_blank" rel="noopener noreferrer" onClick={isMobile ? closeMobile : undefined}>
-            <button 
-              className={styles.navButton}
-              data-tooltip="Viajes"
-            >
-              <Truck size={24} />
-              {(isMobile || !isCollapsed) ? <span>Viajes</span> : null}
-            </button>
-          </a>
-
-          <a href="https://68d73033f00e1875e53568ce--tarifas-de-costo.netlify.app/" target="_blank" rel="noopener noreferrer" onClick={isMobile ? closeMobile : undefined}>
-            <button 
-              className={styles.navButton}
-              data-tooltip="Costos"
-            >
-              <DollarSign size={24} />
-              {(isMobile || !isCollapsed) ? <span>Costos</span> : null}
-            </button>
-          </a>
-        </div>
-      </div>
+        {/* Menú de navegación con dropdowns */}
+        <nav className={styles.navLinks}>
+          <div className="flex flex-col gap-1 p-2">
+            {menuItems.map((item, index) => (
+              <DropdownMenu
+                key={index}
+                IconComponent={item.src}
+                isCollapsed={isCollapsed}
+                title={item.title}
+                items={getItems(item.key as SidebarMenuKey)}
+                onClick={isMobile ? closeMobile : () => {}}
+                isOpen={openSection === item.title}
+                onToggle={() => setOpenSection(prev => prev === item.title ? null : item.title)}
+              />
+            ))}
+          </div>
+        </nav>
+      </aside>
     </>
   );
 }
