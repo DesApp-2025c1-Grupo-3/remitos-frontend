@@ -66,7 +66,7 @@ export interface Remito {
   mercaderias?: Mercaderia[]; // Nueva estructura: array de mercaderías
   createdAt: string;
   updatedAt: string;
-  razonNoEntrega?: string;
+  razonesNoEntrega?: string[];
   esReentrega?: boolean;
 }
 
@@ -102,6 +102,7 @@ export interface RemitosFilters {
 
 export interface RemitoUpdateData extends Partial<RemitoFormData> {
   razonNoEntrega?: string;
+  razonesNoEntrega?: string[];
   estadoId?: number;
   fechaEmision?: string | null;
   fechaAgenda?: string | null;

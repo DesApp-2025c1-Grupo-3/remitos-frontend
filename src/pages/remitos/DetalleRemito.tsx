@@ -231,7 +231,7 @@ export default function DetalleRemito() {
       if (remito && !remito.esReentrega) {
         return (
           <button className={styles.crearBtn} onClick={handleIniciarReentrega}>
-            HABILITAR MREENTREGA
+            HABILITAR REENTREGA
           </button>
         );
       } else {
@@ -401,10 +401,21 @@ export default function DetalleRemito() {
               <label className={styles.infoLabel}>Archivo Adjunto:</label>
               <ArchivoAdjunto archivoAdjunto={remito.archivoAdjunto} />
             </div>
-            {remito.razonNoEntrega && (
+            {remito.razonesNoEntrega && remito.razonesNoEntrega.length > 0 && (
               <div className={styles.infoCard}>
-                <label className={styles.infoLabel}>Razón de no entrega:</label>
-                <span className={styles.infoValue}>{remito.razonNoEntrega}</span>
+                <label className={styles.infoLabel}>
+                  Razón{remito.razonesNoEntrega.length > 1 ? 'es' : ''} de no entrega:
+                </label>
+                <div className={detalleStyles.razonesContainer}>
+                  {remito.razonesNoEntrega.map((razon, index) => (
+                    <div key={index} className={detalleStyles.razonItem}>
+                      <span className={detalleStyles.razonNumero}>
+                        {remito.razonesNoEntrega!.length > 1 ? `${index + 1}.` : ''}
+                      </span>
+                      <span className={styles.infoValue}>{razon}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
