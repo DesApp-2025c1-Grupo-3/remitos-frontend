@@ -9,10 +9,10 @@ import { Settings } from "lucide-react"
 // Utilidades de fecha
 const pad2 = (n) => `${n}`.padStart(2, "0")
 const toIsoDate = (d) => {
-  // Usar UTC para consistencia con el backend
-  const year = d.getUTCFullYear()
-  const month = d.getUTCMonth() + 1
-  const day = d.getUTCDate()
+  // Usar getters locales para que la UI muestre el día seleccionado correctamente
+  const year = d.getFullYear()
+  const month = d.getMonth() + 1
+  const day = d.getDate()
   return `${year}-${pad2(month)}-${pad2(day)}`
 }
 
@@ -325,9 +325,9 @@ export default function Agenda() {
         <div className={styles.panel}>
           <div className={styles.panelTitle}>
             {(() => {
-              // Parsear la fecha usando UTC para consistencia
+              // Parsear la fecha como fecha LOCAL (evitar desplazamientos por zona horaria)
               const [year, month, day] = selectedDate.split('-').map(Number)
-              const date = new Date(Date.UTC(year, month - 1, day))
+              const date = new Date(year, month - 1, day)
               return date.toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" })
             })()}
             {loading && <span style={{ color: '#ef4444', fontSize: '0.8em', marginLeft: '10px' }}>🔄 Cargando...</span>}
