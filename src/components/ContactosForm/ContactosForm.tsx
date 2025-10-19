@@ -157,6 +157,15 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
     }
   }, [contactos.length, currentPage]);
 
+  // Limpiar el error de email en cuanto el usuario escribe un correo válido
+  useEffect(() => {
+    const valor = nuevoContacto.correoElectronico?.trim();
+    if (!valor) return;
+    if (validateEmail(valor)) {
+      setEmailError(null);
+    }
+  }, [nuevoContacto.correoElectronico]);
+
   return (
     <div className={styles.seccionContactos}>
       <div className={styles.header}>
@@ -164,7 +173,14 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
         <button 
           type="button" 
           className={styles.btnNuevoContacto}
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            // Limpiar estado antes de abrir modal para un nuevo contacto
+            setEmailError(null);
+            setTelefonoError(null);
+            setNuevoContacto({ personaAutorizada: '', correoElectronico: '', telefono: '' });
+            setEditingIndex(null);
+            setShowModal(true);
+          }}
         >
           + Nuevo contacto
         </button>
