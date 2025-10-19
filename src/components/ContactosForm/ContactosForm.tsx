@@ -50,6 +50,10 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
         ...prev,
         [name]: value
       }));
+      // Limpiar error de email tan pronto el usuario modifique el campo
+      if (name === 'correoElectronico') {
+        setEmailError(null);
+      }
     }
   };
 
@@ -118,6 +122,9 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
       correoElectronico: '',
       telefono: '',
     });
+    // Limpiar errores al cerrar el modal
+    setEmailError(null);
+    setTelefonoError(null);
   };
 
   // Lógica de paginación
@@ -136,6 +143,9 @@ export const ContactosForm: React.FC<ContactosFormProps> = ({
     const contacto = contactos[realIndex];
     setNuevoContacto(contacto);
     setEditingIndex(realIndex);
+    // Limpiar errores previos al abrir la edición
+    setEmailError(null);
+    setTelefonoError(null);
     setShowModal(true);
   };
 
