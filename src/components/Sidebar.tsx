@@ -46,8 +46,8 @@ export default function Sidebar() {
   // Definición de items del menú principal
   const menuItems = [
     { key: "inicio", src: Home, title: "Inicio" },
-    { key: "remitos", src: ClipboardList, title: "Gestión de Remitos" },
     { key: "viajes", src: Route, title: "Gestión de Viajes" },
+    { key: "remitos", src: ClipboardList, title: "Gestión de Remitos" },
     { key: "costos", src: Coins, title: "Gestión de Costos" },
   ];
 
