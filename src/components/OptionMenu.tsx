@@ -57,15 +57,16 @@ export default function OptionMenu({
   if (isExternal) {
     return (
       <Tooltip title={isCollapsed ? title : ""} placement="right" arrow>
-        <a
-          href={link}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => { onClick(); }}
-          className={`sidebar-sub-item ${isActive ? 'active' : ''}`}
-        >
-          {content}
-        </a>
+        <span
+        onClick={() => {
+          onClick();
+          window.location.href = link; // 🔹 Redirige al microservicio en la misma pestaña
+        }}
+        className={`sidebar-sub-item ${isActive ? 'active' : ''}`}
+        role="button"
+      >
+        {content}
+      </span>
       </Tooltip>
     );
   }
