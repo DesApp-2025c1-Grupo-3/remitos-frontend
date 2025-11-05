@@ -9,18 +9,18 @@ module.exports = {
       colors: {
         // Nuevo sistema de colores basado en las imágenes de referencia
         primary: {
-          DEFAULT: '#FF6B35', // Naranja principal
+          DEFAULT: '#E65F2B', // Naranja principal actualizado
           light: '#FF8A65',
-          dark: '#E64A19',
+          dark: '#C94715',
           orange: '#E65F2B', // Naranja específico para sidebar
           50: '#FFF3E0',
           100: '#FFE0B2',
           200: '#FFCC80',
           300: '#FFB74D',
           400: '#FFA726',
-          500: '#FF6B35',
+          500: '#E65F2B',
           600: '#FF5722',
-          700: '#E64A19',
+          700: '#C94715',
           800: '#D84315',
           900: '#BF360C',
         },

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, X, ChevronDown, ChevronUp, ListFilter, Filter } from 'lucide-react';
+import { Button, Collapse, Box, Paper } from '@mui/material';
 import styles from './RemitosFilters.module.css';
 import { clientesService } from '../../services/clientesService';
 import { destinosService } from '../../services/destinosService';
@@ -208,43 +209,36 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
   const selectedEstado = estados.find(e => e.id === filters.estadoId);
 
   return (
-    <div className={isCollapsed ? `${styles.filtersContainer} ${styles.collapsed}` : styles.filtersContainer}>
-      <div className={styles.filtersHeader}>
-        <div className={styles.filtersTitle}>
-          <Search size={20} />
-          {isCollapsed ? <span style={{marginLeft: 6, fontWeight: 500, fontSize: '1rem'}}>Filtros</span> : <span>Filtros de búsqueda</span>}
-          <button 
-            className={styles.toggleBtn}
-            onClick={toggleCollapse}
-            title={isCollapsed ? "Expandir filtros" : "Colapsar filtros"}
-            style={{marginLeft: 8}}
-          >
-            {isCollapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
-          </button>
-        </div>
-        {!isCollapsed && (
-          <div className={styles.headerActions}>
-            <button 
-              className={styles.clearFiltersBtn}
-              onClick={handleClearFilters}
-              title="Limpiar filtros"
-            >
-              <X size={16} />
-              Limpiar
-            </button>
-            <button
-              className={styles.clearFiltersBtn}
-              onClick={() => onSearch && onSearch()}
-              title="Buscar"
-              style={{ marginLeft: 8, background: '#FF6B35', color: '#fff', borderColor: '#FF6B35' }}
-            >
-              Buscar
-            </button>
-          </div>
-        )}
-      </div>
+    <Box sx={{ mb: 2, mx: 2 }}>
+      {/* Botón de Filtros */}
+      <Button
+        variant="contained"
+        onClick={toggleCollapse}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          backgroundColor: "white",
+          color: "#5A5A65",
+          boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.1)",
+          borderRadius: "8px",
+          border: "0.5px solid #C7C7C7",
+          "&:hover": {
+            backgroundColor: "#f5f5f5",
+            boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)"
+          },
+          padding: "8px 20px",
+          mb: 0
+        }}
+        startIcon={<ListFilter className={`size-5 ${isCollapsed ? "" : "rotate-180"} transition-all duration-200 ease-in`} />}
+      >
+        Filtros
+      </Button>
 
-      <div className={`${styles.filtersGrid} ${isCollapsed ? styles.collapsed : ''}`}>
+      {/* Panel de Filtros Expandible */}
+      <Collapse in={!isCollapsed} timeout="auto" unmountOnExit>
+        <Box sx={{ mt: 2 }}>
+          <Paper elevation={3} sx={{ p: 2.5, backgroundColor: "white", borderRadius: 2, boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.1)", border: "1px solid #c7c7c7" }}>
+            <div className={styles.filtersGrid}>
         {/* Filtro por número de remito */}
         <div className={styles.filterField}>
           <label className={styles.label}>Número de remito</label>
@@ -268,7 +262,7 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
               onClick={() => setModalCliente(true)}
               placeholder="Seleccionar cliente..."
               className={styles.input}
-              style={{ cursor: 'pointer', background: '#e5e7eb' }}
+              style={{ cursor: 'pointer' }}
             />
             <ClienteSelectModal
               open={modalCliente}
@@ -290,7 +284,7 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
               onClick={() => setModalDestino(true)}
               placeholder="Seleccionar destino..."
               className={styles.input}
-              style={{ cursor: 'pointer', background: '#e5e7eb' }}
+              style={{ cursor: 'pointer' }}
             />
             <DestinoSelectModal
               open={modalDestino}
@@ -357,7 +351,69 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
             className={styles.input}
           />
         </div>
-      </div>
-    </div>
+            </div>
+
+            {/* Botones de acción */}
+            <Box 
+              display="flex" 
+              mt={2} 
+              sx={{ 
+                flexDirection: { xs: "column", sm: "row" }, 
+                justifyContent: { xs: "flex-start", md: "flex-end" }, 
+                gap: 1, 
+                borderTop: "1px solid #EAEAEA", 
+                pt: 2 
+              }}
+            >
+              <Button 
+                variant="outlined" 
+                color="primary" 
+                startIcon={<X size={16} />}
+                sx={{ 
+                  borderRadius: "8px",
+                  padding: "10px 20px",
+                  textTransform: "none",
+                  borderColor: "#D0D0D5",
+                  color: "#5A5A65",
+                  fontWeight: 600,
+                  fontSize: "0.9rem",
+                  "&:hover": {
+                    backgroundColor: "#F6F6F8",
+                    borderColor: "#B0B0B0",
+                  },
+                  width: { xs: "100%", md: "auto"}
+                }}
+                onClick={handleClearFilters}
+              >
+                Limpiar filtros
+              </Button>
+              <Button 
+                variant="text" 
+                color="primary" 
+                startIcon={<Filter size={16} />}
+                sx={{
+                  borderRadius: "8px",
+                  padding: "10px 20px",
+                  textTransform: "none",
+                  backgroundColor: "#E65F2B",
+                  color: "#fff",
+                  fontWeight: 600,
+                  fontSize: "0.9rem",
+                  boxShadow: "none",
+                  "&:hover": {
+                    backgroundColor: "#C94715",
+                    boxShadow: "none",
+                  },
+                  width: { xs: "100%", md: "auto"}
+                }}
+                onClick={() => onSearch && onSearch()}
+              >
+                Aplicar filtros
+              </Button>
+            </Box>
+          </Paper>
+        </Box>
+      </Collapse>
+    </Box>
   );
 };

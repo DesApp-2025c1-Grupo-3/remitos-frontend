@@ -12,14 +12,14 @@
   /* Nuevo sistema de colores - Variables CSS globales */
   
   /* Colores primarios - ajustados para coincidir con la referencia */
-  --primary: #FF7043; /* Naranja más suave y cálido */
+  --primary: #E65F2B; /* Naranja principal actualizado */
   --primary-light: #FF8A65;
-  --primary-dark: #F4511E;
+  --primary-dark: #C94715;
   --primary-50: #FFF3E0;
   --primary-100: #FFE0B2;
-  --primary-500: #FF7043;
+  --primary-500: #E65F2B;
   --primary-600: #FF5722;
-  --primary-700: #F4511E;
+  --primary-700: #C94715;
   
   /* Colores secundarios (grises) */
   --secondary: #343A40;

@@ -2,18 +2,26 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { remitosService } from "../../services/remitosService";
 import styles from "./remitos.module.css";
-import tableStyles from "../../styles/table.module.css";
 import { useNotification } from "../../contexts/NotificationContext";
-import { ConfirmModal } from '../../components/ConfirmModal/ConfirmModal';
-import { Pencil, Trash2, ArrowLeft } from "lucide-react";
+import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
+import { FileText } from "lucide-react";
 import { formatDate, getPrioridadClass } from "../../utils/remitosUtils";
-import { Pagination } from "../../components/Pagination/Pagination";
 import { RemitosFilters } from "../../components/RemitosFilters/RemitosFilters";
+import { SectionHeader } from "../../components/SectionHeader/SectionHeader";
+import EntityCard from "../../components/EntityCard/EntityCard";
+import PaginationEntity from "../../components/PaginationEntity/PaginationEntity";
+import MenuItem from "../../components/MenuItem/MenuItem";
+import LoadingState from "../../components/LoadingState/LoadingState";
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, useMediaQuery, useTheme } from "@mui/material";
 
 export default function Remitos() {
   const [remitos, setRemitos] = useState({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
   const [loading, setLoading] = useState(true);
   const hoy = new Date().toISOString().slice(0,10);
+  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
   
   // Restaurar filtros y página desde sessionStorage si existen
   const getInitialFilters = () => {
@@ -47,21 +55,18 @@ export default function Remitos() {
   const { showNotification } = useNotification();
   const [remitoToDelete, setRemitoToDelete] = useState(null);
   const itemsPerPage = 10;
+  const defaultRows = 10;
+  const [rowsPerPage, setRowsPerPage] = useState(defaultRows);
 
   const fetchRemitos = async (page = 1) => {
     try {
       setLoading(true);
-      // Si se están aplicando filtros de fecha, algunos despliegues del backend
-      // pueden no soportar fechaDesde/fechaHasta aún. Para asegurar que el
-      // usuario vea los resultados esperados, pedimos más resultados y
-      // filtramos en el cliente como fallback.
       const useClientSideDateFilter = !!(filtrosAplicados && (filtrosAplicados.fechaDesde || filtrosAplicados.fechaHasta));
-      const requestLimit = useClientSideDateFilter ? 1000 : itemsPerPage;
+      const requestLimit = useClientSideDateFilter ? 1000 : rowsPerPage;
 
       const response = await remitosService.getRemitos(page, requestLimit, filtrosAplicados);
       if (response && response.data) {
         if (useClientSideDateFilter) {
-          // Filtrar por fechaEmision en el cliente (formato ISO)
           const asIsoDay = (d) => (d ? new Date(d).toISOString().slice(0,10) : null);
           const desde = filtrosAplicados.fechaDesde ? filtrosAplicados.fechaDesde : null;
           const hasta = filtrosAplicados.fechaHasta ? filtrosAplicados.fechaHasta : null;
@@ -75,12 +80,11 @@ export default function Remitos() {
             return true;
           });
 
-          // Paginamos localmente
           const totalItems = filteredData.length;
-          const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+          const totalPages = Math.max(1, Math.ceil(totalItems / rowsPerPage));
           const currentPageSafe = Math.min(Math.max(1, page), totalPages);
-          const start = (currentPageSafe - 1) * itemsPerPage;
-          const pageData = filteredData.slice(start, start + itemsPerPage);
+          const start = (currentPageSafe - 1) * rowsPerPage;
+          const pageData = filteredData.slice(start, start + rowsPerPage);
 
           setRemitos({ data: pageData, totalItems, totalPages, currentPage: currentPageSafe });
           setCurrentPage(currentPageSafe);
@@ -89,7 +93,6 @@ export default function Remitos() {
           setCurrentPage(response.currentPage);
         }
       } else {
-        // Si no hay respuesta o no tiene `data`, reseteamos al estado inicial.
         setRemitos({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
         setCurrentPage(1);
       }
@@ -101,7 +104,6 @@ export default function Remitos() {
     }
   };
 
-  // Guardar filtros y página en sessionStorage cuando cambien
   useEffect(() => {
     sessionStorage.setItem('remitosFilters', JSON.stringify(filtrosAplicados));
   }, [filtrosAplicados]);
@@ -112,11 +114,11 @@ export default function Remitos() {
 
   useEffect(() => {
     fetchRemitos(currentPage);
-  }, [currentPage, filtrosAplicados]);
+  }, [currentPage, filtrosAplicados, rowsPerPage]);
 
   const handleFiltersChange = (newFilters) => {
     setFilters(newFilters);
-    setCurrentPage(1); // Resetear a la primera página cuando cambian los filtros
+    setCurrentPage(1);
   };
 
   const handleClearFilters = () => {
@@ -124,7 +126,6 @@ export default function Remitos() {
     setFilters(defaultFilters);
     setFiltrosAplicados(defaultFilters);
     setCurrentPage(1);
-    // Limpiar sessionStorage al resetear filtros
     sessionStorage.setItem('remitosFilters', JSON.stringify(defaultFilters));
     sessionStorage.setItem('remitosCurrentPage', '1');
   };
@@ -155,7 +156,6 @@ export default function Remitos() {
     try {
       await remitosService.deleteRemito(remitoToDelete.id);
       showNotification('Remito eliminado exitosamente', 'success');
-      // Recargar la página actual
       await fetchRemitos(currentPage);
     } catch (err) {
       console.error(err);
@@ -169,25 +169,24 @@ export default function Remitos() {
     setRemitoToDelete(null);
   };
 
+  const handleChangePage = (event, value) => {
+    setCurrentPage(value);
+  };
 
-
-
-
-  if (loading) return <div className={styles.container}>Cargando...</div>;
+  if (loading) return (
+    <div className={styles.container}>
+      <LoadingState title="remitos" />
+    </div>
+  );
 
   return (
     <div className={styles.container}>
       <div className={styles.wrapper}>
-        <div className={styles.pageHeader}>
-          <div className={styles.headerContent}>
-            <h1 className={styles.pageTitle}>Remitos</h1>
-          </div>
-          <div className={styles.headerActions}>
-            <Link to="/remitos/nuevo" className={styles.crearBtn}>
-              + Nuevo Remito
-            </Link>
-          </div>
-        </div>
+        <SectionHeader
+          title="Remitos"
+          buttonText="Nuevo Remito"
+          onAdd={() => navigate("/remitos/nuevo")}
+        />
         
         <RemitosFilters
           filters={filters}
@@ -196,92 +195,134 @@ export default function Remitos() {
           onSearch={handleSearch}
         />
         
-        <div className={tableStyles.tableContainer}>
-          <table className={tableStyles.table}>
-            <thead>
-              <tr>
-                <th>Número</th>
-                <th>Cliente</th>
-                <th>Destino</th>
-                <th>Estado</th>
-                <th>Prioridad</th>
-                <th className={tableStyles.actionsCenterAlign}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {remitos.data.length === 0 ? (
-                <tr>
-                  <td colSpan="6" className={tableStyles.emptyTableMessage}>
-                    Aún no hay remitos registrados
-                  </td>
-                </tr>
-              ) : (
-                remitos.data.map(remito => (
-                  <tr 
-                    key={remito.id}
-                    onClick={() => navigate(`/remitos/detalle/${remito.id}`)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <td data-label="Número">{remito.numeroAsignado}</td>
-                    <td data-label="Cliente">{remito.cliente?.razonSocial || 'Sin cliente'}</td>
-                    <td data-label="Destino">
-                      {remito.destino 
-                        ? `${remito.destino.nombre}, ${remito.destino.provincia}` 
-                        : 'Sin destino'
-                      }
-                    </td>
-                    <td data-label="Estado">{remito.estado?.nombre || 'Sin estado'}</td>
-                    <td data-label="Prioridad">
-                      <span className={getPrioridadClass(remito.prioridad, styles)}>
-                        {remito.prioridad}
-                      </span>
-                    </td>
-                    <td>
-                      <div className={tableStyles.actions}>
-                        <Link 
-                          to={`/remitos/editar/${remito.id}`}
-                          className={tableStyles.actionBtn}
-                          title="Editar"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Pencil />
-                        </Link>
-                        <button 
-                          className={`${styles.accionesBtn} ${styles.delete}`} 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteClick(remito);
-                          }}
-                          title="Eliminar"
-                        >
-                          <Trash2 />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        {/* Vista Mobile/Tablet - Cards */}
+        {(isMobile || isTablet) ? (
+          <Box sx={{ 
+            display: 'grid', 
+            gap: 2, 
+            gridTemplateColumns: { xs: '1fr', lg: 'repeat(2, 1fr)' },
+            mx: 2,
+            mb: 2
+          }}>
+            {remitos.data.length > 0 ? remitos.data.map(remito => (
+              <EntityCard
+                key={remito.id}
+                title={`Remito ${remito.numeroAsignado}`}
+                subtitle={remito.cliente?.razonSocial || 'Sin cliente'}
+                icon={<FileText size={24}/>}
+                fields={[
+                  { 
+                    label: "Destino", 
+                    value: remito.destino 
+                      ? `${remito.destino.nombre}, ${remito.destino.provincia}` 
+                      : 'Sin destino'
+                  },
+                  { label: "Estado", value: remito.estado?.nombre || 'Sin estado' },
+                  { label: "Prioridad", value: remito.prioridad },
+                ]}
+                onDelete={() => handleDeleteClick(remito)}
+                onEdit={() => navigate(`/remitos/editar/${remito.id}`)}
+                onView={() => navigate(`/remitos/detalle/${remito.id}`)}
+              />
+            )) : (
+              <Box sx={{ 
+                textAlign: 'center', 
+                color: '#6B7280', 
+                py: 10, 
+                gridColumn: '1 / -1' 
+              }}>
+                Aún no hay remitos registrados
+              </Box>
+            )}
+          </Box>
+        ) : (
+          /* Vista Desktop - Tabla MUI */
+          <Box sx={{ mx: 2 }}>
+            <TableContainer component={Paper}>
+              <Table aria-label="tabla de remitos">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Número</TableCell>
+                    <TableCell>Cliente</TableCell>
+                    <TableCell>Destino</TableCell>
+                    <TableCell>Estado</TableCell>
+                    <TableCell>Prioridad</TableCell>
+                    <TableCell sx={{ width: 72 }}>Acciones</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {remitos.data.length === 0 ? (
+                    <TableRow>
+                      <TableCell 
+                        colSpan={6} 
+                        sx={{textAlign: "center", paddingY: "26px"}}
+                      >
+                        Aún no hay remitos registrados
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    remitos.data.map((remito) => (
+                      <TableRow 
+                        key={remito.id} 
+                        hover 
+                        onClick={() => navigate(`/remitos/detalle/${remito.id}`)}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        <TableCell sx={{fontWeight: "bold"}}>{remito.numeroAsignado}</TableCell>
+                        <TableCell>{remito.cliente?.razonSocial || 'Sin cliente'}</TableCell>
+                        <TableCell>
+                          {remito.destino 
+                            ? `${remito.destino.nombre}, ${remito.destino.provincia}` 
+                            : 'Sin destino'
+                          }
+                        </TableCell>
+                        <TableCell>{remito.estado?.nombre || 'Sin estado'}</TableCell>
+                        <TableCell>
+                          <span className={getPrioridadClass(remito.prioridad, styles)}>
+                            {remito.prioridad}
+                          </span>
+                        </TableCell>
+                        <TableCell sx={{ verticalAlign: "middle" }} onClick={(e) => e.stopPropagation()}>
+                          <MenuItem
+                            handleOpenDialog={() => handleDeleteClick(remito)}
+                            handleOpenDetails={() => navigate(`/remitos/detalle/${remito.id}`)}
+                            id={remito.id}
+                            module="remitos"
+                          >
+                            <FileText className="text-gray-500 hover:text-gray-700 size-4" />
+                          </MenuItem>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        )}
         
-        <Pagination 
-          currentPage={remitos.currentPage}
+        {/* Paginación */}
+        <PaginationEntity
+          entity="remitos"
+          page={currentPage}
           totalPages={remitos.totalPages}
-          onPageChange={setCurrentPage}
+          rowsPerPage={rowsPerPage}
+          filtered={remitos.data}
+          handleChangePage={handleChangePage}
+          setRowsPerPage={setRowsPerPage}
+          setPage={setCurrentPage}
           totalItems={remitos.totalItems}
-          itemsPerPage={itemsPerPage}
         />
       </div>
 
       {remitoToDelete && (
-        <ConfirmModal
-          isOpen={!!remitoToDelete}
+        <ConfirmDialog
+          open={!!remitoToDelete}
           title="Confirmar eliminación"
           message={
-            <div className={styles.modalMessage}>
+            <div>
               <div>¿Estás seguro que deseas eliminar el remito número "{remitoToDelete.numeroAsignado}"?</div>
-              <div className={styles.modalSubMessage}>
+              <div style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#6b7280' }}>
                 Esta acción no se puede deshacer
               </div>
             </div>

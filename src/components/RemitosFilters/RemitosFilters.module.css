@@ -118,27 +118,31 @@
 
 .label {
   font-weight: 600;
-  color: #374151;
-  font-size: 0.82rem;
+  color: #6B7280;
+  font-size: 0.875rem;
 }
 
 .input {
   width: 100%;
-  background: #e5e7eb;
-  border: none;
-  border-radius: 0.35rem;
-  padding: 0.35rem 0.7rem;
-  font-size: 0.82rem;
-  color: #374151;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #5a5a65;
   transition: border 0.2s, box-shadow 0.2s;
   outline: none;
   box-sizing: border-box;
-  height: 34px;
+  height: 42px;
+}
+
+.input::placeholder {
+  color: #9CA3AF;
 }
 
 .input:focus {
-  border: 1.5px solid #FF6B35;
-  box-shadow: 0 0 0 2px #FF6B3522;
+  border: 1px solid #E65F2B;
+  box-shadow: 0 0 0 3px rgba(230, 95, 43, 0.1);
   background: #fff;
 }
 

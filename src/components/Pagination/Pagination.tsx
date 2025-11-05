@@ -111,4 +111,5 @@ export const Pagination: React.FC<PaginationProps> = ({
       </div>
     </div>
   );
-}; 
+};
+
