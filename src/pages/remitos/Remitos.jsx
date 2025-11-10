@@ -17,7 +17,11 @@ import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, Tab
 export default function Remitos() {
   const [remitos, setRemitos] = useState({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
   const [loading, setLoading] = useState(true);
-  const hoy = new Date().toISOString().slice(0,10);
+  const pad2 = (n) => `${n}`.padStart(2, '0');
+  const hoy = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  })();
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -67,7 +71,15 @@ export default function Remitos() {
       const response = await remitosService.getRemitos(page, requestLimit, filtrosAplicados);
       if (response && response.data) {
         if (useClientSideDateFilter) {
-          const asIsoDay = (d) => (d ? new Date(d).toISOString().slice(0,10) : null);
+          const asIsoDay = (d) => {
+            if (!d) return null;
+            try {
+              const dt = new Date(d);
+              return `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}`;
+            } catch {
+              return null;
+            }
+          };
           const desde = filtrosAplicados.fechaDesde ? filtrosAplicados.fechaDesde : null;
           const hasta = filtrosAplicados.fechaHasta ? filtrosAplicados.fechaHasta : null;
 
