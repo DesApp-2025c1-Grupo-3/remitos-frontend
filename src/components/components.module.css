@@ -3,11 +3,12 @@
 .sidebar {
   background-color: white;
   min-height: 100vh;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
   position: relative;
-  width: 240px; /* Más ancho como en el sistema de viajes */
-  overflow: visible; /* Cambiado para que el botón pueda sobresalir */
+  width: 240px;
+  overflow: visible; /* Permitir que el botón sobresalga */
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   border-right: 1px solid var(--secondary-200);
   transition: width 0.3s ease, transform 0.3s ease;
@@ -85,14 +86,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem; /* Padding mínimo para que el logo aproveche todo el espacio */
-  border-bottom: none; /* Sin línea divisoria */
+  padding: 12px 8px;
+  margin-top: 0;
+  border-bottom: 1px solid rgb(243, 244, 246);
   position: relative;
-}
-
-/* Reducir altura del header y tamaño del logo cuando está colapsado para que no sobresalga */
-.sidebar.collapsed .sidebarHeader {
-  padding: 0.5rem 0.75rem;
+  min-height: 65px;
+  overflow: visible; /* Permitir que el botón sobresalga */
 }
 
 .logoLink {
@@ -103,17 +102,23 @@
 }
 
 .logoWrapper {
-  width: 220px; /* Aprovecha casi todo el ancho del sidebar (280px) */
-  height: 160px; /* Altura generosa */
-  padding: 0; /* Sin padding para aprovechar todo el espacio */
-  margin: 0; /* Sin margen */
+  width: 200px; /* 2px menos de ancho */
+  height: 120px; /* Altura como en referencia cuando está expandida */
+  padding: 0px 0px 6px 0px;
+  margin: 0;
 }
 
-/* Tamaño seguro cuando está colapsado (no sobresale del ancho 80px) */
+/* Tamaño cuando está colapsado */
 .sidebar.collapsed .logoWrapper {
   width: 56px;
   height: 56px;
-  padding: 4px;
+  padding: 0;
+}
+
+.sidebar.collapsed .sidebarHeader {
+  min-height: auto;
+  height: 72px;
+  padding: 8px 0;
 }
 
 .logoImage {
@@ -121,13 +126,16 @@
   height: 100%;
   object-fit: contain;
   display: block;
-  max-width: none; /* Sin límite de ancho */
-  max-height: none; /* Sin límite de alto */
+  max-width: none;
+  max-height: none;
   opacity: 1;
-  filter: none;
   background: transparent;
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
+  border-bottom: 1px solid rgb(243, 244, 246);
+  /* Hacer el logo más "bold" - simular líneas más gruesas */
+  filter: contrast(1.1) saturate(1.1);
+  transform: scale(1.05); /* Ligeramente más grande */
 }
 
 .sidebar.collapsed .logoImage {
@@ -137,22 +145,22 @@
 
 .collapseButton {
   position: absolute;
-  right: -20px; /* Más hacia afuera para que sobresalga completamente */
-  top: 50%;
+  right: -15px;
+  top: calc(50% - 35px);
   transform: translateY(-50%);
-  background: white; /* Fondo blanco suave */
-  border: 1px solid var(--secondary-200); /* Borde sutil */
+  background: white;
+  border: 1px solid var(--secondary-200);
   border-radius: 50%;
-  width: 36px; /* Ligeramente más grande */
-  height: 36px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: var(--secondary-600); /* Color más suave */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra más suave */
-  z-index: 1000; /* Mayor z-index para asegurar que esté encima */
+  color: var(--secondary-600);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
 }
 
 .collapseButton:hover {
@@ -162,16 +170,23 @@
 }
 
 .sidebar.collapsed .collapseButton {
-  right: -20px; /* Mantiene la misma posición */
+  right: -15px;
 }
 
 .navLinks {
   display: flex;
   flex-direction: column;
-  gap: 0; /* Sin espacio entre botones para que se vean como filas */
+  gap: 0;
   width: 100%;
-  padding: 0; /* Sin padding para que ocupen todo el ancho */
+  padding: 24px 0 0 0; /* Padding cuando está colapsada */
   flex: 1;
+  overflow-y: auto; /* Scroll cuando hay overflow */
+  overflow-x: hidden; /* Sin scroll horizontal */
+}
+
+/* Cuando la sidebar está expandida */
+.sidebar:not(.collapsed) .navLinks {
+  padding: 30px 0 0 0; /* Más padding cuando está expandida */
 }
 
 .navLink {
@@ -284,11 +299,7 @@
 }
 
 /* Estilos para enlaces externos */
-.navLinks a {
-  text-decoration: none;
-  display: block;
-  width: 100%;
-}
+
 
 /* Media queries para responsive */
 @media (max-width: 1000px) {

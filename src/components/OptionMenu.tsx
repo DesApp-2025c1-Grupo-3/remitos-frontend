@@ -41,6 +41,11 @@ export default function OptionMenu({
     }
   }, [location, link, isExternal]);
 
+  // Construir clases dinámicamente como en el ejemplo
+  const itemClasses = isSubmenu 
+    ? `sidebar-sub-item ${isActive ? 'active' : ''} ${isSubmenu && !isCollapsed ? 'submenu-expanded' : ''}`
+    : `sidebar-main-item ${isActive ? 'active' : ''}`;
+
   const content = (
     <>
       <IconComponent 
@@ -62,7 +67,7 @@ export default function OptionMenu({
           onClick();
           window.location.href = link; // 🔹 Redirige al microservicio en la misma pestaña
         }}
-        className={`sidebar-sub-item ${isActive ? 'active' : ''}`}
+        className={itemClasses}
         role="button"
       >
         {content}
@@ -77,7 +82,7 @@ export default function OptionMenu({
       <Link 
         to={`/${link || ""}`} 
         onClick={onClick} 
-        className={`sidebar-sub-item ${isActive ? 'active' : ''}`}
+        className={itemClasses}
       >
         {content}
       </Link>

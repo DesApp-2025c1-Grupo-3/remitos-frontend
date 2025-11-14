@@ -87,15 +87,19 @@ export default function Sidebar() {
       `}>
         {/* Header con logo */}
         <div className={styles.sidebarHeader}>
-          <Link to="/" className={styles.logoLink} onClick={isMobile ? closeMobile : undefined}>
+          <a 
+            href="https://gestion-de-viajes.vercel.app/" 
+            className={styles.logoLink} 
+            onClick={isMobile ? closeMobile : undefined}
+          >
             <div className={styles.logoWrapper}>
               <img 
-                src="/logo.png" 
+                src={isCollapsed ? "/logo_chico.png" : "/logo.jpg"}
                 alt="Logística ACME" 
                 className={styles.logoImage}
               />
             </div>
-          </Link>
+          </a>
           
           {/* Botón de colapso solo en desktop */}
           {!isMobile && (
@@ -111,7 +115,7 @@ export default function Sidebar() {
 
         {/* Menú de navegación con dropdowns */}
         <nav className={styles.navLinks}>
-          <div className="flex flex-col gap-1 p-2">
+          <div className="flex flex-col">
             {menuItems.map((item, index) => (
               <DropdownMenu
                 key={index}

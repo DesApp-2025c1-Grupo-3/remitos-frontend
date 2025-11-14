@@ -39,7 +39,8 @@ export default function DropdownMenu({
     return (
       <div className="sidebar-dropdown">
         <Tooltip title={isCollapsed ? title : ""} placement="right" arrow>
-          <div 
+          <a 
+            href="https://gestion-de-viajes.vercel.app/"
             className={`sidebar-main-item ${isLocationSection ? 'active' : ''}`}
             onClick={onClick}
           >
@@ -50,7 +51,7 @@ export default function DropdownMenu({
             {!isCollapsed && (
               <span className="sidebar-text">{title}</span>
             )}
-          </div>
+          </a>
         </Tooltip>
       </div>
     );

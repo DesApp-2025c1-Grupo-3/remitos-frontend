@@ -96,23 +96,43 @@ body {
   color: #E65F2B;
 }
 
-/* Ajustes para sidebar items */
+/* ============================================
+   SIDEBAR STYLES - BASADO EN EJEMPLO
+   ============================================ */
 
-/* Estilos específicos para la nueva sidebar con dropdowns */
+/* Contenedor dropdown */
 .sidebar-dropdown {
   width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Restaurar estilos básicos para botones */
+.sidebar-dropdown-content {
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
+.sidebar-dropdown-content.collapsed {
+  max-height: 0;
+}
+
+.sidebar-dropdown-content.expanded {
+  max-height: 500px;
+}
+
+/* ============================================
+   ITEMS PRINCIPALES - ESTADO BASE
+   ============================================ */
 .sidebar-main-item {
   display: flex;
   align-items: center;
   height: 56px;
-  padding: 0 16px;
+  padding: 0 19px; /* Por defecto sin tabulación */
+  margin: 0px 10px;
   border-radius: 8px;
-  margin: 3px 2px;
-  transition: all 0.2s ease;
   cursor: pointer;
   text-decoration: none;
   color: #5A5A65;
@@ -120,16 +140,15 @@ body {
   font-weight: 400;
   font-family: 'Poppins', sans-serif;
   background-color: white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  margin-top: 4px;
+  margin-bottom: 4px;
 }
 
 .sidebar-main-item:hover {
   background-color: #FFF3E0;
-  color: #E65F2B;
-}
-
-.sidebar-main-item:hover .sidebar-icon,
-.sidebar-main-item:hover .sidebar-text {
-  color: #E65F2B;
+  color: #5A5A65; /* Mantener color gris en hover */
 }
 
 .sidebar-main-item.active {
@@ -142,104 +161,133 @@ body {
   color: #E65F2B;
 }
 
+/* ============================================
+   SUB-ITEMS
+   ============================================ */
 .sidebar-sub-item {
-  display: flex !important;
-  align-items: center !important;
-  height: 56px !important; /* Misma altura que los items principales */
-  max-width: 230px !important;
-  padding: 0 16px 0 40px !important; /* Padding horizontal con indentación */
-  margin: 2px 5px !important; /* Espaciado moderado entre sub-items con margen lateral */
-  border-radius: 6px !important;
-  transition: all 0.2s ease !important;
-  cursor: pointer !important;
-  text-decoration: none !important;
-  color: #5A5A65 !important;
-  font-size: 14px !important;
-  font-weight: 400 !important;
-  font-family: 'Poppins', sans-serif !important;
-  background-color: white !important;
-  box-sizing: border-box !important;
+  display: flex;
+  align-items: center;
+  height: 56px;
+  width: 20px;
+  padding: 0 20px; /* Por defecto sin tabulación */
+  margin: 2px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  color: #5A5A65;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Poppins', sans-serif;
+  background-color: white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+/* Clase que se aplica SOLO cuando es submenu Y sidebar está expandida */
+.sidebar-sub-item.submenu-expanded {
+  padding-left: 40px;
+  margin-right: 10px; 
+  text-decoration: none;
+  display: block;
+  width: 100%;
+  width: 160px;
+  height: 30px;
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
 
 .sidebar-sub-item:hover {
-  background-color: #FFF3E0 !important;
-  color: #E65F2B !important;
-}
-
-.sidebar-sub-item:hover .sidebar-sub-icon,
-.sidebar-sub-item:hover .sidebar-text {
-  color: #E65F2B !important;
+  background-color: #FFF3E0;
+  color: #5A5A65; /* Mantener color gris en hover */
 }
 
 .sidebar-sub-item.active {
-  background-color: #FFF3E0 !important;
-  color: #E65F2B !important;
+  background-color: #FFF3E0;
+  color: #E65F2B;
 }
 
 .sidebar-sub-item.active .sidebar-sub-icon,
 .sidebar-sub-item.active .sidebar-text {
-  color: #E65F2B !important;
+  color: #E65F2B;
 }
 
-
+/* ============================================
+   ICONOS - ESTADO BASE
+   ============================================ */
 .sidebar-icon {
-  width: 24px;
-  height: 24px;
+  width: 23px;
+  height: 25px;
   margin-right: 12px;
   flex-shrink: 0;
   color: #5A5A65;
+  vertical-align: middle;
 }
 
 .sidebar-sub-icon {
-  width: 20px !important;
-  height: 20px !important;
-  margin-right: 12px !important;
-  flex-shrink: 0 !important;
-  color: #5A5A65 !important;
-  display: inline-block !important;
-  vertical-align: middle !important;
+  width: 23px;
+  height: 25px;
+  min-width: 20px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  color: #5A5A65;
+  vertical-align: middle;
 }
 
+
 .sidebar-text {
-  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   color: inherit;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 1.5;
+  display: inline-block;
+  vertical-align: middle;
 }
 
-/* Animación para dropdown */
-.sidebar-dropdown-content {
-  overflow: hidden;
-  transition: max-height 0.3s ease-out;
+/* ============================================
+   SIDEBAR COLAPSADA
+   ============================================ */
+
+/* Contenedor flex-col - centrar items como en el ejemplo */
+.sidebar.collapsed .flex.flex-col {
+  align-items: center;
 }
 
-.sidebar-dropdown-content.collapsed {
-  max-height: 0;
+/* Contenedor dropdown centrado */
+.sidebar.collapsed .sidebar-dropdown {
+  align-items: center;
+  width: 100%;
 }
 
-.sidebar-dropdown-content.expanded {
-  max-height: 500px;
-}
-
-/* Estilos específicos para sidebar colapsada */
+/* Items principales en modo colapsado */
 .sidebar.collapsed .sidebar-main-item {
   justify-content: center;
-  padding: 0 8px;
+  align-items: center;
+  padding: 0;
+  margin: 0;
 }
 
-.sidebar.collapsed .sidebar-icon {
-  width: 28px;
-  height: 28px;
-  margin-right: 0;
+/* Sub-items en modo colapsado - centrados */
+.sidebar.collapsed .sidebar-sub-item {
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  margin: 0;
 }
 
+/* Iconos centrados - ELIMINAR todos los márgenes */
+.sidebar.collapsed .sidebar-icon,
 .sidebar.collapsed .sidebar-sub-icon {
   width: 24px;
   height: 24px;
-  margin-right: 0;
+  min-width: 24px;
+  margin: 0;
 }
 
+/* Ocultar texto */
 .sidebar.collapsed .sidebar-text {
+  opacity: 0;
+  width: 0;
   display: none;
 }
 
