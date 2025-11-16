@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { remitosService } from "../../services/remitosService";
 import styles from "./remitos.module.css";
 import { useNotification } from "../../contexts/NotificationContext";
@@ -26,29 +26,22 @@ export default function Remitos() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
-  
-  // Restaurar filtros y página desde sessionStorage si existen
+  const location = useLocation();
+
+  // Restaurar filtros
   const getInitialFilters = () => {
     try {
       const savedFilters = sessionStorage.getItem('remitosFilters');
-      if (savedFilters) {
-        return JSON.parse(savedFilters);
-      }
-    } catch (error) {
-      console.error('Error al restaurar filtros:', error);
-    }
+      if (savedFilters) return JSON.parse(savedFilters);
+    } catch {}
     return { fechaDesde: hoy, fechaHasta: hoy };
   };
 
   const getInitialPage = () => {
     try {
       const savedPage = sessionStorage.getItem('remitosCurrentPage');
-      if (savedPage) {
-        return parseInt(savedPage, 10);
-      }
-    } catch (error) {
-      console.error('Error al restaurar página:', error);
-    }
+      if (savedPage) return parseInt(savedPage, 10);
+    } catch {}
     return 1;
   };
 
@@ -62,13 +55,45 @@ export default function Remitos() {
   const defaultRows = 10;
   const [rowsPerPage, setRowsPerPage] = useState(defaultRows);
 
-  const fetchRemitos = async (page = 1) => {
+  // ====================================================================
+  // 🔍 APLICAR FILTROS DESDE LA URL (CLIENTE → REMITOS?clienteId=2...)
+  // ====================================================================
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+
+    if ([...params.keys()].length > 0) {
+      const urlFilters = {
+        numeroAsignado: params.get("numeroAsignado") || "",
+        clienteId: params.get("clienteId") || "",
+        destinoId: params.get("destinoId") || "",
+        estadoId: params.get("estadoId") || "",
+        prioridad: params.get("prioridad") || "",
+        fechaDesde: params.get("fechaDesde") || hoy,
+        fechaHasta: params.get("fechaHasta") || hoy,
+      };
+
+      setFilters(urlFilters);
+      setFiltrosAplicados(urlFilters);
+      setCurrentPage(1);
+
+      // se hace la búsqueda inicial automáticamente
+      fetchRemitos(1, urlFilters);
+    }
+  }, []);
+  // ====================================================================
+
+
+  const fetchRemitos = async (page = 1, filtrosForzados = null) => {
     try {
       setLoading(true);
-      const useClientSideDateFilter = !!(filtrosAplicados && (filtrosAplicados.fechaDesde || filtrosAplicados.fechaHasta));
+
+      const appliedFilters = filtrosForzados || filtrosAplicados;
+
+      const useClientSideDateFilter = !!(appliedFilters && (appliedFilters.fechaDesde || appliedFilters.fechaHasta));
       const requestLimit = useClientSideDateFilter ? 1000 : rowsPerPage;
 
-      const response = await remitosService.getRemitos(page, requestLimit, filtrosAplicados);
+      const response = await remitosService.getRemitos(page, requestLimit, appliedFilters);
+
       if (response && response.data) {
         if (useClientSideDateFilter) {
           const asIsoDay = (d) => {
@@ -80,8 +105,9 @@ export default function Remitos() {
               return null;
             }
           };
-          const desde = filtrosAplicados.fechaDesde ? filtrosAplicados.fechaDesde : null;
-          const hasta = filtrosAplicados.fechaHasta ? filtrosAplicados.fechaHasta : null;
+
+          const desde = appliedFilters.fechaDesde || null;
+          const hasta = appliedFilters.fechaHasta || null;
 
           const filteredData = response.data.filter(r => {
             const day = asIsoDay(r.fechaEmision);
@@ -207,7 +233,6 @@ export default function Remitos() {
           onSearch={handleSearch}
         />
         
-        {/* Vista Mobile/Tablet - Cards */}
         {(isMobile || isTablet) ? (
           <Box sx={{ 
             display: 'grid', 
@@ -248,7 +273,6 @@ export default function Remitos() {
             )}
           </Box>
         ) : (
-          /* Vista Desktop - Tabla MUI */
           <Box sx={{ mx: 2 }}>
             <TableContainer component={Paper}>
               <Table aria-label="tabla de remitos">
@@ -313,7 +337,6 @@ export default function Remitos() {
           </Box>
         )}
         
-        {/* Paginación */}
         <PaginationEntity
           entity="remitos"
           page={currentPage}
