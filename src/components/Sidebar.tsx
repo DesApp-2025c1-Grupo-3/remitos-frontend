@@ -94,7 +94,7 @@ export default function Sidebar() {
           >
             <div className={styles.logoWrapper}>
               <img 
-                src={isCollapsed ? "/logo_chico.png" : "/logo.jpg"}
+                src={isCollapsed ? "logo-actual.png" : "logo-actual.png"}
                 alt="Logística ACME" 
                 className={styles.logoImage}
               />
