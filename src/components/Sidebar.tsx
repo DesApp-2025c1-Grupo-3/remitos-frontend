@@ -94,9 +94,16 @@ export default function Sidebar() {
           >
             <div className={styles.logoWrapper}>
               <img 
-                src={isCollapsed ? "logo-actual.png" : "logo-actual.png"}
+                src={isCollapsed ? "/sidebarC.jpg" : "/sidebarG.jpg"}
                 alt="Logística ACME" 
                 className={styles.logoImage}
+                style={{
+                minHeight: "48px",
+                margin: "12px auto",
+                width: isCollapsed ? "48px" : "90%",
+                transition: "all 0.3s ease-in-out",
+                maxHeight: "140px"
+}}
               />
             </div>
           </a>
