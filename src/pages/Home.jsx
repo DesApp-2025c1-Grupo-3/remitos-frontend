@@ -4,7 +4,7 @@ export default function Home() {
       className="w-[calc(100%)] h-[calc(100vh)] bg-cover bg-center bg-no-repeat pt-5"
       style={{ 
         backgroundImage: 'url("/fondo-actual.png")',
-        backgroundColor: '#ffffffff',
+        //backgroundColor: '#ffffffff',
         backgroundSize: '70%'
       }}
     />
