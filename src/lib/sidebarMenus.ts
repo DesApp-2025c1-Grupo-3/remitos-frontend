@@ -1,4 +1,4 @@
-import { Building2, CalendarDays, ChartColumn, DollarSign, FileText, Fuel, Layers, Map, MapPin, Navigation, Package, Truck, User, Users, Warehouse,  } from "lucide-react";
+import { Building2, CalendarDays, ChartColumn, DollarSign, FileText, Fuel, Layers, Map, MapPin, Navigation, Package, Truck, User, Users, Warehouse } from "lucide-react";
 
 // Configuración de menús para la sidebar unificada
 // Cada sistema (Viajes, Remitos, Costos) tiene sus propios items
@@ -10,7 +10,7 @@ export const sidebarMenus = {
     { src: Warehouse, title: "Depósitos", link: "https://gestion-de-viajes.vercel.app/depots" },
     { src: Building2, title: "Empresas", link: "https://gestion-de-viajes.vercel.app/companies" },
     { src: Truck, title: "Vehículos", link: "https://gestion-de-viajes.vercel.app/vehicles" },
-    { src: Truck, title: "Tipo de Vehículos", link: "https://gestion-de-viajes.vercel.app/vehicles" },
+    { src: Layers, title: "Tipo de Vehículos", link: "https://gestion-de-viajes.vercel.app/vehicles" },
     { src: Navigation, title: "Viajes", link: "https://gestion-de-viajes.vercel.app/trips/distribution" },
   ],
   
