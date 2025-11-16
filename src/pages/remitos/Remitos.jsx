@@ -232,7 +232,7 @@ export default function Remitos() {
           onClearFilters={handleClearFilters}
           onSearch={handleSearch}
         />
-        
+        {/* Vista Mobile/Tablet - Cards */}
         {(isMobile || isTablet) ? (
           <Box sx={{ 
             display: 'grid', 
@@ -272,7 +272,7 @@ export default function Remitos() {
               </Box>
             )}
           </Box>
-        ) : (
+        ) : (/* Vista Desktop - Tabla MUI */
           <Box sx={{ mx: 2 }}>
             <TableContainer component={Paper}>
               <Table aria-label="tabla de remitos">
@@ -336,7 +336,7 @@ export default function Remitos() {
             </TableContainer>
           </Box>
         )}
-        
+        {/* Paginación */}
         <PaginationEntity
           entity="remitos"
           page={currentPage}
