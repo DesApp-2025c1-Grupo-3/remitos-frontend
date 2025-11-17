@@ -23,6 +23,15 @@ export default function Remitos() {
     const d = new Date();
     return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
   })();
+  const haceSieteDias = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  })();
+  const getDefaultFilters = () => ({
+    fechaDesde: haceSieteDias,
+    fechaHasta: hoy,
+  });
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -42,7 +51,7 @@ export default function Remitos() {
       sessionStorage.removeItem('remitosFilters');
       sessionStorage.removeItem('remitosCurrentPage');
     }
-    return { fechaDesde: hoy, fechaHasta: hoy };
+    return getDefaultFilters();
   };
 
   const getInitialPage = () => {
@@ -76,7 +85,7 @@ export default function Remitos() {
       setFiltrosAplicadosManualmente(true);
     } else if (!location.search) {
       // Si no viene del formulario y no hay parámetros en la URL, limpiar filtros
-      const defaultFilters = { fechaDesde: hoy, fechaHasta: hoy };
+      const defaultFilters = getDefaultFilters();
       setFilters(defaultFilters);
       setFiltrosAplicados(defaultFilters);
       setCurrentPage(1);
@@ -239,7 +248,7 @@ export default function Remitos() {
   };
 
   const handleClearFilters = () => {
-    const defaultFilters = { fechaDesde: hoy, fechaHasta: hoy };
+    const defaultFilters = getDefaultFilters();
     setFilters(defaultFilters);
     setFiltrosAplicados(defaultFilters);
     setFiltrosAplicadosManualmente(false);
