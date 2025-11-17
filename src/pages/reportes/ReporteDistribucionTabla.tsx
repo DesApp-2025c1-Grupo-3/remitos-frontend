@@ -9,6 +9,7 @@ const ReporteDistribucionTabla: React.FC = () => {
   const [filtros, setFiltros] = useState({ pais: '', provincia: '', localidad: '' });
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [filtrosAplicados, setFiltrosAplicados] = useState(false);
   
   // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,6 +50,7 @@ const ReporteDistribucionTabla: React.FC = () => {
 
   const handleBuscar = async () => {
     setLoading(true);
+    setFiltrosAplicados(true);
     try {
       const res = await getDistribucionGeografica(filtros);
       setData(res.data);
@@ -62,6 +64,7 @@ const ReporteDistribucionTabla: React.FC = () => {
   const handleLimpiar = () => {
     setFiltros({ pais: '', provincia: '', localidad: '' });
     setData([]);
+    setFiltrosAplicados(false);
     setProvincias([]);
     setLocalidades([]);
     setCurrentPage(1); // Resetear a la primera página
@@ -151,7 +154,13 @@ const ReporteDistribucionTabla: React.FC = () => {
           </thead>
           <tbody>
             {data.length === 0 && (
-              <tr><td colSpan={5} className={tableStyles.emptyTableMessage}>Sin datos</td></tr>
+              <tr>
+                <td colSpan={5} className={tableStyles.emptyTableMessage}>
+                  {filtrosAplicados 
+                    ? 'No hay resultados' 
+                    : 'Aplica al menos un filtro para buscar reportes'}
+                </td>
+              </tr>
             )}
             {currentData.map((row, i) => (
               <tr key={startIndex + i}>

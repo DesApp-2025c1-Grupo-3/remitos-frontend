@@ -137,14 +137,14 @@ export const remitosService = {
         currentPage: responseData.currentPage || 1
       };
       
-      const finalResult = {
+      // No corregir los datos de paginación del backend, confiar en su cálculo
+      // El backend ya calcula correctamente totalPages y currentPage
+      return {
         data: result.data,
-        totalItems: Math.max(0, result.totalItems),
-        totalPages: Math.max(1, result.totalPages),
-        currentPage: Math.min(Math.max(1, result.currentPage), Math.max(1, result.totalPages))
+        totalItems: result.totalItems,
+        totalPages: result.totalPages,
+        currentPage: result.currentPage
       };
-      
-      return finalResult;
     } catch (error) {
       console.error('Error al obtener remitos:', error);
       throw error;

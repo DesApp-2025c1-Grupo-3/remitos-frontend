@@ -406,7 +406,13 @@ export const RemitosFilters: React.FC<RemitosFiltersProps> = ({
                   },
                   width: { xs: "100%", md: "auto"}
                 }}
-                onClick={() => onSearch && onSearch()}
+                onClick={() => {
+                  if (onSearch) {
+                    onSearch();
+                  }
+                  // Cerrar el panel de filtros después de aplicar
+                  setIsCollapsed(true);
+                }}
               >
                 Aplicar filtros
               </Button>

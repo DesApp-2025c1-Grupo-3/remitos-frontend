@@ -12,6 +12,7 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
   const [filtros, setFiltros] = useState({ clienteId: '', fechaDesde: hoy, fechaHasta: hoy });
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [filtrosAplicados, setFiltrosAplicados] = useState(false);
   const [clientes, setClientes] = useState<{ id: number; razonSocial: string | null }[]>([]);
   const [clienteSearchTerm, setClienteSearchTerm] = useState('');
   const [showClienteDropdown, setShowClienteDropdown] = useState(false);
@@ -75,12 +76,10 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
     }
 
     setLoading(true);
+    setFiltrosAplicados(true);
     try {
       const res = await getVolumenPorClientePeriodo(filtros);
       setData(res.data);
-      if (Array.isArray(res.data) && res.data.length === 0) {
-        showNotification('No hay datos para los filtros seleccionados.', 'info');
-      }
     } catch (err) {
       showNotification('Error al obtener el reporte de volumen.', 'error');
       setData([]);
@@ -94,6 +93,7 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
     setClienteSearchTerm('');
     setClienteSeleccionado(null);
     setData([]);
+    setFiltrosAplicados(false);
     setModalCliente(false);
   };
 
@@ -191,7 +191,7 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
         </div>
       </div>
       <div style={{ width: '100%', maxWidth: '100%', height: 400, marginTop: '1.5rem', padding: '0 2rem', boxSizing: 'border-box' }}>
-        {data.length > 0 && (
+        {data.length > 0 ? (
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -202,6 +202,24 @@ const ReporteVolumenClientePeriodo: React.FC = () => {
               <Bar dataKey="volumenTotal" fill="#8884d8" name="Volumen Total" />
             </BarChart>
           </ResponsiveContainer>
+        ) : filtrosAplicados ? (
+          <div style={{ 
+            textAlign: 'center', 
+            color: '#6B7280', 
+            paddingTop: '100px',
+            fontSize: '1rem'
+          }}>
+            No hay resultados
+          </div>
+        ) : (
+          <div style={{ 
+            textAlign: 'center', 
+            color: '#6B7280', 
+            paddingTop: '100px',
+            fontSize: '1rem'
+          }}>
+            Aplica al menos un filtro para buscar reportes
+          </div>
         )}
       </div>
     </div>

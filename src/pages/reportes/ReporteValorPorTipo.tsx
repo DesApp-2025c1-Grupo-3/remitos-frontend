@@ -16,6 +16,7 @@ const ReporteValorPorTipo: React.FC = () => {
   const [filtros, setFiltros] = useState({ clienteId: '', fechaDesde: hoy, fechaHasta: hoy, tipos: [] as number[] });
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [filtrosAplicados, setFiltrosAplicados] = useState(false);
   const [clientes, setClientes] = useState<{ id: number; razonSocial: string | null }[]>([]);
   const [tiposMercaderia, setTiposMercaderia] = useState<TipoMercaderia[]>([]);
   const [modalCliente, setModalCliente] = useState(false);
@@ -70,6 +71,7 @@ const ReporteValorPorTipo: React.FC = () => {
     }
 
     setLoading(true);
+    setFiltrosAplicados(true);
     try {
   const { tipos, ...otherParams } = filtros;
   const params: Record<string, any> = { ...otherParams };
@@ -99,6 +101,7 @@ const ReporteValorPorTipo: React.FC = () => {
   const handleLimpiar = () => {
     setFiltros({ clienteId: '', fechaDesde: hoy, fechaHasta: hoy, tipos: [] });
     setData([]);
+    setFiltrosAplicados(false);
     setClienteSeleccionado(null);
     setModalCliente(false);
   };
@@ -224,7 +227,7 @@ const ReporteValorPorTipo: React.FC = () => {
         </button>
       </div>
       <div style={{ width: '100%', maxWidth: '100%', height: 400, marginTop: '1.5rem', padding: '0 2rem', boxSizing: 'border-box' }}>
-        {data.length > 0 && (
+        {data.length > 0 ? (
           <ResponsiveContainer width="100%" height={400}>
             <PieChart>
               <Pie
@@ -244,6 +247,24 @@ const ReporteValorPorTipo: React.FC = () => {
               <Legend verticalAlign="bottom" height={36} />
             </PieChart>
           </ResponsiveContainer>
+        ) : filtrosAplicados ? (
+          <div style={{ 
+            textAlign: 'center', 
+            color: '#6B7280', 
+            paddingTop: '100px',
+            fontSize: '1rem'
+          }}>
+            No hay resultados
+          </div>
+        ) : (
+          <div style={{ 
+            textAlign: 'center', 
+            color: '#6B7280', 
+            paddingTop: '100px',
+            fontSize: '1rem'
+          }}>
+            Aplica al menos un filtro para buscar reportes
+          </div>
         )}
       </div>
     </div>

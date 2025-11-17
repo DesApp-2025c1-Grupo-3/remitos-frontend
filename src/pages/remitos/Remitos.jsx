@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { remitosService } from "../../services/remitosService";
 import styles from "./remitos.module.css";
@@ -16,7 +16,8 @@ import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, Tab
 
 export default function Remitos() {
   const [remitos, setRemitos] = useState({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [filtrosAplicadosManualmente, setFiltrosAplicadosManualmente] = useState(false);
   const pad2 = (n) => `${n}`.padStart(2, '0');
   const hoy = (() => {
     const d = new Date();
@@ -28,20 +29,30 @@ export default function Remitos() {
   const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
   const location = useLocation();
 
-  // Restaurar filtros
+  // Restaurar filtros solo si se viene del formulario
   const getInitialFilters = () => {
-    try {
-      const savedFilters = sessionStorage.getItem('remitosFilters');
-      if (savedFilters) return JSON.parse(savedFilters);
-    } catch {}
+    // Si viene del formulario, restaurar filtros guardados
+    if (location.state?.preserveFilters) {
+      try {
+        const savedFilters = sessionStorage.getItem('remitosFilters');
+        if (savedFilters) return JSON.parse(savedFilters);
+      } catch {}
+    } else {
+      // Si no viene del formulario, limpiar filtros guardados
+      sessionStorage.removeItem('remitosFilters');
+      sessionStorage.removeItem('remitosCurrentPage');
+    }
     return { fechaDesde: hoy, fechaHasta: hoy };
   };
 
   const getInitialPage = () => {
-    try {
-      const savedPage = sessionStorage.getItem('remitosCurrentPage');
-      if (savedPage) return parseInt(savedPage, 10);
-    } catch {}
+    // Si viene del formulario, restaurar página guardada
+    if (location.state?.preserveFilters) {
+      try {
+        const savedPage = sessionStorage.getItem('remitosCurrentPage');
+        if (savedPage) return parseInt(savedPage, 10);
+      } catch {}
+    }
     return 1;
   };
 
@@ -54,6 +65,27 @@ export default function Remitos() {
   const itemsPerPage = 10;
   const defaultRows = 10;
   const [rowsPerPage, setRowsPerPage] = useState(defaultRows);
+  const isUpdatingPageRef = useRef(false);
+
+  // ====================================================================
+  // 🔍 CONFIGURAR ESTADO INICIAL DE FILTROS
+  // ====================================================================
+  useEffect(() => {
+    // Si viene del formulario, marcar que los filtros fueron aplicados para que se ejecute la búsqueda
+    if (location.state?.preserveFilters) {
+      setFiltrosAplicadosManualmente(true);
+    } else if (!location.search) {
+      // Si no viene del formulario y no hay parámetros en la URL, limpiar filtros
+      const defaultFilters = { fechaDesde: hoy, fechaHasta: hoy };
+      setFilters(defaultFilters);
+      setFiltrosAplicados(defaultFilters);
+      setCurrentPage(1);
+      setFiltrosAplicadosManualmente(false);
+      sessionStorage.removeItem('remitosFilters');
+      sessionStorage.removeItem('remitosCurrentPage');
+    }
+  }, [location.pathname, location.state, location.search]);
+  // ====================================================================
 
   // ====================================================================
   // 🔍 APLICAR FILTROS DESDE LA URL (CLIENTE → REMITOS?clienteId=2...)
@@ -75,11 +107,12 @@ export default function Remitos() {
       setFilters(urlFilters);
       setFiltrosAplicados(urlFilters);
       setCurrentPage(1);
+      setFiltrosAplicadosManualmente(true);
 
       // se hace la búsqueda inicial automáticamente
       fetchRemitos(1, urlFilters);
     }
-  }, []);
+  }, [location.search]);
   // ====================================================================
 
 
@@ -90,9 +123,20 @@ export default function Remitos() {
       const appliedFilters = filtrosForzados || filtrosAplicados;
 
       const useClientSideDateFilter = !!(appliedFilters && (appliedFilters.fechaDesde || appliedFilters.fechaHasta));
-      const requestLimit = useClientSideDateFilter ? 1000 : rowsPerPage;
-
-      const response = await remitosService.getRemitos(page, requestLimit, appliedFilters);
+      
+      // Guardar la página solicitada para comparar después
+      const requestedPage = page;
+      
+      let response;
+      if (useClientSideDateFilter) {
+        // Cuando hay filtros de fecha, SIEMPRE pedir página 1 con limit 1000 al backend
+        // La paginación se hace en el cliente después de filtrar por fecha
+        // Esto es necesario porque el filtro de fecha se aplica en el cliente, no en el backend
+        response = await remitosService.getRemitos(1, 1000, appliedFilters);
+      } else {
+        // Cuando no hay filtros de fecha, usar la paginación del backend normalmente
+        response = await remitosService.getRemitos(page, rowsPerPage, appliedFilters);
+      }
 
       if (response && response.data) {
         if (useClientSideDateFilter) {
@@ -120,15 +164,38 @@ export default function Remitos() {
 
           const totalItems = filteredData.length;
           const totalPages = Math.max(1, Math.ceil(totalItems / rowsPerPage));
-          const currentPageSafe = Math.min(Math.max(1, page), totalPages);
+          // Si la página solicitada es mayor que el total de páginas, usar la última página disponible
+          // Si la página solicitada es menor a 1, usar 1
+          const currentPageSafe = page > totalPages ? totalPages : (page < 1 ? 1 : page);
           const start = (currentPageSafe - 1) * rowsPerPage;
           const pageData = filteredData.slice(start, start + rowsPerPage);
 
           setRemitos({ data: pageData, totalItems, totalPages, currentPage: currentPageSafe });
-          setCurrentPage(currentPageSafe);
+          // Solo actualizar currentPage si la página calculada es diferente de la solicitada
+          // Esto solo ocurre si la página solicitada está fuera de rango (mayor que totalPages o menor que 1)
+          // No actualizar si la página solicitada es válida para evitar loops infinitos
+          if (currentPageSafe !== requestedPage) {
+            isUpdatingPageRef.current = true;
+            setCurrentPage(currentPageSafe);
+            // Resetear el flag después de que React procese la actualización
+            setTimeout(() => {
+              isUpdatingPageRef.current = false;
+            }, 100);
+          }
         } else {
+          // Cuando no hay filtros de fecha del lado del cliente, usar directamente la respuesta del backend
+          // El backend ya maneja la paginación correctamente
           setRemitos(response);
-          setCurrentPage(response.currentPage);
+          // Solo actualizar currentPage si el backend devuelve una página diferente de la solicitada
+          // Esto solo ocurre si la página solicitada está fuera de rango
+          if (response.currentPage !== requestedPage) {
+            isUpdatingPageRef.current = true;
+            setCurrentPage(response.currentPage);
+            // Resetear el flag después de que React procese la actualización
+            setTimeout(() => {
+              isUpdatingPageRef.current = false;
+            }, 100);
+          }
         }
       } else {
         setRemitos({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
@@ -150,9 +217,21 @@ export default function Remitos() {
     sessionStorage.setItem('remitosCurrentPage', currentPage.toString());
   }, [currentPage]);
 
+  // Solo buscar remitos si los filtros han sido aplicados manualmente o si se viene del formulario
   useEffect(() => {
-    fetchRemitos(currentPage);
-  }, [currentPage, filtrosAplicados, rowsPerPage]);
+    // Solo ejecutar si:
+    // 1. Los filtros fueron aplicados manualmente, O
+    // 2. Se viene del formulario (preserveFilters), O
+    // 3. Hay parámetros en la URL (ya manejado en otro useEffect)
+    // Y no estamos actualizando la página desde fetchRemitos (para evitar loops)
+    if (filtrosAplicadosManualmente || location.state?.preserveFilters) {
+      // Si estamos actualizando la página desde fetchRemitos, no ejecutar
+      if (isUpdatingPageRef.current) {
+        return;
+      }
+      fetchRemitos(currentPage);
+    }
+  }, [currentPage, filtrosAplicados, rowsPerPage, filtrosAplicadosManualmente, location.state?.preserveFilters]);
 
   const handleFiltersChange = (newFilters) => {
     setFilters(newFilters);
@@ -163,7 +242,9 @@ export default function Remitos() {
     const defaultFilters = { fechaDesde: hoy, fechaHasta: hoy };
     setFilters(defaultFilters);
     setFiltrosAplicados(defaultFilters);
+    setFiltrosAplicadosManualmente(false);
     setCurrentPage(1);
+    setRemitos({ data: [], totalItems: 0, totalPages: 1, currentPage: 1 });
     sessionStorage.setItem('remitosFilters', JSON.stringify(defaultFilters));
     sessionStorage.setItem('remitosCurrentPage', '1');
   };
@@ -183,6 +264,7 @@ export default function Remitos() {
       return;
     }
     setFiltrosAplicados(filters);
+    setFiltrosAplicadosManualmente(true);
     setCurrentPage(1);
   };
 
@@ -194,7 +276,10 @@ export default function Remitos() {
     try {
       await remitosService.deleteRemito(remitoToDelete.id);
       showNotification('Remito eliminado exitosamente', 'success');
-      await fetchRemitos(currentPage);
+      // Solo refrescar si hay filtros aplicados
+      if (filtrosAplicadosManualmente || location.state?.preserveFilters) {
+        await fetchRemitos(currentPage);
+      }
     } catch (err) {
       console.error(err);
       showNotification('Error al eliminar el remito', 'error');
@@ -268,7 +353,9 @@ export default function Remitos() {
                 py: 10, 
                 gridColumn: '1 / -1' 
               }}>
-                Aún no hay remitos registrados
+                {filtrosAplicadosManualmente || location.state?.preserveFilters 
+                  ? 'No hay resultados' 
+                  : 'Aplica al menos un filtro para buscar remitos'}
               </Box>
             )}
           </Box>
@@ -293,7 +380,9 @@ export default function Remitos() {
                         colSpan={6} 
                         sx={{textAlign: "center", paddingY: "26px"}}
                       >
-                        Aún no hay remitos registrados
+                        {filtrosAplicadosManualmente || location.state?.preserveFilters 
+                          ? 'No hay resultados' 
+                          : 'Aplica al menos un filtro para buscar remitos'}
                       </TableCell>
                     </TableRow>
                   ) : (

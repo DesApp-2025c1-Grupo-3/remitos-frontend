@@ -175,7 +175,7 @@ export default function EditarRemito() {
       await remitosService.updateRemito(Number(id), updateData);
 
       showNotification('Remito actualizado exitosamente', 'success');
-      navigate("/remitos");
+      navigate("/remitos", { state: { preserveFilters: true } });
     } catch (err) {
       console.error('Error al actualizar remito:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Error al actualizar el remito. Por favor, intente nuevamente.';

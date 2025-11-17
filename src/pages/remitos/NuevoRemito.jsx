@@ -119,7 +119,7 @@ export default function NuevoRemito() {
 
       await remitosService.createRemito(remitoData);
       showNotification('Remito creado exitosamente', 'success');
-      navigate("/remitos");
+      navigate("/remitos", { state: { preserveFilters: true } });
     } catch (err) {
       console.error('Error al crear remito:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Error al crear el remito. Por favor, intente nuevamente.';

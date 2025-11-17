@@ -19,9 +19,9 @@ export default function Layout() {
   }, []);
 
   return (
-    <div className={`flex min-h-screen ${isMobile ? styles.mobileLayout : ''}`} style={{ backgroundColor: 'var(--secondary-50)' }}>
+    <div className={`flex ${isMobile ? styles.mobileLayout : ''}`} style={{ backgroundColor: 'var(--secondary-50)', minHeight: '100vh' }}>
       <Sidebar />
-      <main className={`flex-1 ${isMobile ? 'p-0' : 'p-6'}`} style={{ backgroundColor: 'var(--secondary-50)' }}>
+      <main className={`flex-1 ${isMobile ? 'p-0' : 'p-6'}`} style={{ backgroundColor: 'var(--secondary-50)', minHeight: '100vh' }}>
         <NotificationProvider>
           <Outlet />
         </NotificationProvider>

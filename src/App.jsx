@@ -11,7 +11,7 @@ import Remitos from "./pages/remitos/Remitos"
 import NuevoRemito from "./pages/remitos/NuevoRemito"
 import EditarRemito from "./pages/remitos/EditarRemito"
 import DetalleRemito from "./pages/remitos/DetalleRemito"
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, Navigate } from "react-router-dom"
 import Reportes from "./pages/reportes/Reportes"
 import Agenda from "./pages/agenda/Agenda"
 import { KeepAliveProvider } from "./components/KeepAliveProvider/KeepAliveProvider"
@@ -22,7 +22,7 @@ export function App() {
     <KeepAliveProvider>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
+          <Route index element={<Navigate to="/remitos" replace />} />
           <Route path="clientes" element={<Clientes />} />
           <Route path="clientes/nuevo" element={<NuevoCliente />} />
           <Route path="clientes/editar/:id" element={<EditarCliente />} />

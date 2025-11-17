@@ -2,17 +2,19 @@
 
 .sidebar {
   background-color: white;
-  min-height: 100vh;
+  height: 100vh;
   max-height: 100vh;
   display: flex;
   flex-direction: column;
-  position: relative;
+  position: sticky;
+  top: 0;
   width: 240px;
-  overflow: visible; /* Permitir que el botón sobresalga */
+  overflow: visible; /* Permitir que el botón de colapso sobresalga */
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   border-right: 1px solid var(--secondary-200);
   transition: width 0.3s ease, transform 0.3s ease;
   z-index: 1000;
+  flex-shrink: 0; /* Evitar que la sidebar se encoja */
 }
 
 .sidebar.collapsed {
@@ -24,6 +26,8 @@
   position: fixed;
   top: 0;
   left: 0;
+  height: 100vh;
+  max-height: 100vh;
   transform: translateX(-100%);
   z-index: 1001;
   width: 280px; /* Ancho completo en móvil */
@@ -91,6 +95,7 @@
   border-bottom: 1px solid rgb(243, 244, 246);
   position: relative;
   min-height: 65px;
+  flex-shrink: 0; /* Evitar que el header se encoja */
   overflow: visible; /* Permitir que el botón sobresalga */
 }
 
@@ -180,8 +185,29 @@
   width: 100%;
   padding: 24px 0 0 0; /* Padding cuando está colapsada */
   flex: 1;
+  min-height: 0; /* Importante para que el scroll funcione en flexbox */
   overflow-y: auto; /* Scroll cuando hay overflow */
   overflow-x: hidden; /* Sin scroll horizontal */
+  /* Estilos del scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--secondary-200) transparent;
+}
+
+.navLinks::-webkit-scrollbar {
+  width: 6px;
+}
+
+.navLinks::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.navLinks::-webkit-scrollbar-thumb {
+  background-color: var(--secondary-200);
+  border-radius: 3px;
+}
+
+.navLinks::-webkit-scrollbar-thumb:hover {
+  background-color: var(--secondary-300);
 }
 
 /* Cuando la sidebar está expandida */
