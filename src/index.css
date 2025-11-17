@@ -150,9 +150,20 @@ body {
   margin-bottom: 4px;
 }
 
+.sidebar-main-item:visited,
+.sidebar-main-item:focus,
+.sidebar-main-item:active {
+  color: #5A5A65;
+}
+
 .sidebar-main-item:hover {
   background-color: #FFF3E0;
   color: #5A5A65; /* Mantener color gris en hover */
+}
+
+.sidebar-main-item:hover .sidebar-text,
+.sidebar-main-item:hover .sidebar-icon {
+  color: #5A5A65;
 }
 
 .sidebar-main-item.active {

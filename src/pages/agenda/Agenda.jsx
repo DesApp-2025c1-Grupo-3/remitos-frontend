@@ -5,6 +5,8 @@ import { useNotification } from "../../contexts/NotificationContext"
 import { RemitoSelectModal } from "../../components/RemitoSelectModal"
 import { CronConfigModal } from "../../components/CronConfigModal/CronConfigModal"
 import { Settings } from "lucide-react"
+import remitosStyles from "../remitos/remitos.module.css"
+import { getPrioridadClass } from "../../utils/remitosUtils"
 
 // Utilidades de fecha
 const pad2 = (n) => `${n}`.padStart(2, "0")
@@ -349,7 +351,11 @@ export default function Agenda() {
                     <td>{r.numeroAsignado}</td>
                     <td>{r.cliente?.razonSocial || "-"}</td>
                     <td>{r.destino?.nombre || "-"}</td>
-                    <td>{r.prioridad}</td>
+                  <td>
+                    <span className={getPrioridadClass(r.prioridad, remitosStyles)}>
+                      {r.prioridad || '-'}
+                    </span>
+                  </td>
                   </tr>
                 ))}
                 {selectedRemitos.length === 0 && (

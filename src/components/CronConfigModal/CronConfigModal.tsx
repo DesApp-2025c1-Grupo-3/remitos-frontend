@@ -72,7 +72,7 @@ export const CronConfigModal: React.FC<CronConfigModalProps> = ({ open, onClose 
         activo: true
       });
       
-      showNotification('Configuración del cron guardada exitosamente', 'success');
+      showNotification('Configuración de recordatorios guardada exitosamente', 'success');
       onClose();
     } catch (error) {
       console.error('Error guardando configuración:', error);
@@ -146,7 +146,7 @@ export const CronConfigModal: React.FC<CronConfigModalProps> = ({ open, onClose 
                   disabled={saving}
                 />
                 <small className={styles.helpText}>
-                  El cron se ejecutará diariamente a esta hora para enviar las notificaciones
+                  Las notificaciones se enviarán automáticamente todos los días a este horario
                 </small>
               </div>
 

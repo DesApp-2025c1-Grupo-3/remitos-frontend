@@ -90,7 +90,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 8px;
+  padding: 0px 8px 14px 8px ;
   margin-top: 0;
   border-bottom: 1px solid rgb(243, 244, 246);
   position: relative;
@@ -107,10 +107,10 @@
 }
 
 .logoWrapper {
-  width: 200px; /* 2px menos de ancho */
-  height: 120px; /* Altura como en referencia cuando está expandida */
-  padding: 0px 0px 6px 0px;
-  margin: 0;
+  width: 230px; /* Logo un poco más grande al estar expandida */
+  height: 136px;
+  padding: 0 0 6px 3px;
+  margin: 2px 0;
 }
 
 /* Tamaño cuando está colapsado */
@@ -123,7 +123,7 @@
 .sidebar.collapsed .sidebarHeader {
   min-height: auto;
   height: 72px;
-  padding: 8px 0;
+  padding: 0px 8px;
 }
 
 .logoImage {
@@ -176,6 +176,7 @@
 
 .sidebar.collapsed .collapseButton {
   right: -15px;
+  top: calc(50%);
 }
 
 .navLinks {

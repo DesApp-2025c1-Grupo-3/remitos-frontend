@@ -3,7 +3,7 @@ import { getDistribucionGeografica } from '../../services/reportesService';
 import { georefService } from '../../services/destinosService';
 import styles from '../../components/RemitosFilters/RemitosFilters.module.css';
 import tableStyles from '../../styles/table.module.css';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import PaginationEntity from '../../components/PaginationEntity/PaginationEntity';
 
 const ReporteDistribucionTabla: React.FC = () => {
   const [filtros, setFiltros] = useState({ pais: '', provincia: '', localidad: '' });
@@ -13,7 +13,8 @@ const ReporteDistribucionTabla: React.FC = () => {
   
   // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Mostrar 10 items por página
+  const defaultRows = 10;
+  const [rowsPerPage, setRowsPerPage] = useState(defaultRows);
   const [paises] = useState([
     { id: 'Argentina', nombre: 'Argentina' },
     { id: 'Brasil', nombre: 'Brasil' },
@@ -71,13 +72,13 @@ const ReporteDistribucionTabla: React.FC = () => {
   };
 
   // Lógica de paginación
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
+  const totalPages = Math.max(1, Math.ceil(data.length / rowsPerPage) || 1);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
   const currentData = data.slice(startIndex, endIndex);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+  const handleChangePage = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setCurrentPage(value);
   };
 
   // Resetear a la primera página cuando cambien los datos
@@ -141,7 +142,16 @@ const ReporteDistribucionTabla: React.FC = () => {
         </div>
         <button onClick={handleBuscar} disabled={loading} style={{ marginTop: 16, width: 120, background: '#FF6B35', color: 'white', border: 'none', borderRadius: 6, padding: '8px 0', fontWeight: 600 }}>Buscar</button>
       </div>
-      <div className={tableStyles.tableContainer} style={{ width: '100%', maxWidth: '100%', padding: '0 2rem', boxSizing: 'border-box' }}>
+      <div
+        className={tableStyles.tableContainer}
+        style={{
+          width: 'calc(100% - 4rem)',
+          maxWidth: 'calc(100% - 4rem)',
+          padding: '0 0 2rem',
+          boxSizing: 'border-box',
+          margin: '0 2rem 2rem',
+        }}
+      >
         <table className={tableStyles.table}>
           <thead>
             <tr>
@@ -174,109 +184,17 @@ const ReporteDistribucionTabla: React.FC = () => {
           </tbody>
         </table>
         
-        {/* Controles de paginación */}
-        {totalPages > 1 && (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.75rem',
-            marginTop: '1rem',
-            padding: '1rem',
-            background: '#f9fafb',
-            borderRadius: '8px',
-            border: '1px solid #e5e7eb'
-          }}>
-            <div style={{
-              textAlign: 'center',
-              fontSize: '0.875rem',
-              color: '#6b7280',
-              fontWeight: '500'
-            }}>
-              Mostrando {startIndex + 1} - {Math.min(endIndex, data.length)} de {data.length} registros
-            </div>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '0.5rem',
-              flexWrap: 'wrap'
-            }}>
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                style={{
-                  background: currentPage === 1 ? '#f3f4f6' : 'white',
-                  border: '1px solid #d1d5db',
-                  color: currentPage === 1 ? '#9ca3af' : '#374151',
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: '6px',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minWidth: '40px',
-                  height: '40px',
-                  opacity: currentPage === 1 ? 0.5 : 1
-                }}
-              >
-                <ChevronLeft size={16} />
-              </button>
-              
-              {/* Números de página */}
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => handlePageChange(page)}
-                  style={{
-                    background: currentPage === page ? '#FF6B35' : 'white',
-                    border: `1px solid ${currentPage === page ? '#FF6B35' : '#d1d5db'}`,
-                    color: currentPage === page ? 'white' : '#374151',
-                    padding: '0.5rem 0.75rem',
-                    borderRadius: '6px',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    minWidth: '40px',
-                    height: '40px'
-                  }}
-                >
-                  {page}
-                </button>
-              ))}
-              
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                style={{
-                  background: currentPage === totalPages ? '#f3f4f6' : 'white',
-                  border: '1px solid #d1d5db',
-                  color: currentPage === totalPages ? '#9ca3af' : '#374151',
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: '6px',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minWidth: '40px',
-                  height: '40px',
-                  opacity: currentPage === totalPages ? 0.5 : 1
-                }}
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
-        )}
+        <PaginationEntity
+          entity="registros"
+          page={currentPage}
+          totalPages={totalPages}
+          rowsPerPage={rowsPerPage}
+          filtered={data}
+          handleChangePage={handleChangePage}
+          setRowsPerPage={setRowsPerPage}
+          setPage={setCurrentPage}
+          totalItems={data.length}
+        />
       </div>
     </div>
   );

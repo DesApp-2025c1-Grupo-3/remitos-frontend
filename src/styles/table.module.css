@@ -27,8 +27,8 @@
 .table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 0.5rem;
-  table-layout: fixed;
+
+  margin-bottom: 2.25rem;
 }
 
 /* Ancho específico para columna de Acciones */
@@ -55,27 +55,25 @@
 /* Celdas de tabla */
 .table td {
   background: white;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.875rem;
+  padding: 0.95rem 1.5rem;
+  font-size: 0.9rem;
   color: var(--secondary-700);
   vertical-align: middle;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border: 1px solid var(--secondary-100);
+  border-bottom: 1px solid #f0f0f0;
 }
 
-/* Bordes redondeados para las celdas */
-.table td:first-child {
+/* Bordes redondeados */
+.table tr td:first-child {
   border-top-left-radius: 0.5rem;
   border-bottom-left-radius: 0.5rem;
-  border-left: 1px solid var(--secondary-100);
 }
 
-.table td:last-child {
+.table tr td:last-child {
   border-top-right-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
-  border-right: 1px solid var(--secondary-100);
 }
 
 /* Filas clickeables */
