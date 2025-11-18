@@ -142,16 +142,7 @@ const ReporteDistribucionTabla: React.FC = () => {
         </div>
         <button onClick={handleBuscar} disabled={loading} style={{ marginTop: 16, width: 120, background: '#FF6B35', color: 'white', border: 'none', borderRadius: 6, padding: '8px 0', fontWeight: 600 }}>Buscar</button>
       </div>
-      <div
-        className={tableStyles.tableContainer}
-        style={{
-          width: 'calc(100% - 4rem)',
-          maxWidth: 'calc(100% - 4rem)',
-          padding: '0 0 2rem',
-          boxSizing: 'border-box',
-          margin: '0 2rem 2rem',
-        }}
-      >
+      <div className={tableStyles.tableContainer}>
         <table className={tableStyles.table}>
           <thead>
             <tr>

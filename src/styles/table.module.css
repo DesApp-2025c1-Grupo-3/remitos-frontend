@@ -4,14 +4,16 @@
 .tableContainer {
   background: white;
   border-radius: 0.75rem; /* 12px equivalent */
-  padding: 1.5rem;
+  padding: 1.5rem 1.5rem 2rem 1.5rem; /* Padding inferior aumentado */
   max-width: 100rem; /* 1600px equivalent in rem */
-  margin: 0 2rem;
+  margin: 0 2rem 2rem 2rem; /* Margin inferior para alineación */
   box-shadow: var(--shadow-sm);
+  width: calc(100% - 4rem);
+  box-sizing: border-box;
 }
 
-/* Responsive: Ajustar padding en móvil */
-@media (max-width: 767px) {
+/* Responsive: Ajustar padding en móvil y tablets - pasar a formato cards */
+@media (max-width: 1024px) {
   .tableContainer {
     padding: 0;
     margin: 0;
@@ -142,6 +144,7 @@
 /* Clase delete para compatibilidad */
 .delete {
   /* Esta clase se mantiene para compatibilidad con estilos existentes */
+  display: inherit;
 }
 
 /* Estado activo */
@@ -163,10 +166,10 @@
 }
 
 /* ========================================
-   RESPONSIVE: Modo Card para Móvil
+   RESPONSIVE: Modo Card para Móvil y Tablets
    ======================================== */
 
-@media (max-width: 767px) {
+@media (max-width: 1024px) {
   /* Ocultar thead en móvil */
   .table thead {
     display: none;
